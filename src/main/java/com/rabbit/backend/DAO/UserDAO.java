@@ -9,13 +9,13 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 public interface UserDAO {
-    @Select("SELECT * FROM user WHERE #{key} = #{value};")
+    @Select("SELECT * FROM user WHERE ${key} = #{value};")
     @Results({
             @Result(property = "usergroup", column = "gid", one = @One(select = "com.rabbit.backend.DAO.GroupDAO.findByGid"))
     })
     User find(@Param("key") String key, @Param("value") String value);
 
-    @Select("SELECT username, uid, gid FROM user WHERE #{key} = #{value};")
+    @Select("SELECT username, uid, gid FROM user WHERE ${key} = #{value};")
     @Results({
             @Result(property = "usergroup", column = "gid", one = @One(select = "com.rabbit.backend.DAO.GroupDAO.findByGid"))
     })

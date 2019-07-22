@@ -11,8 +11,11 @@ import com.rabbit.backend.Utilities.ResponseGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +31,7 @@ public class UserController {
 
     @GetMapping("/info/{uid}")
     @ResponseStatus(HttpStatus.OK)
+    @PermitAll()
     public OtherUser info(@PathVariable("uid") String uid) {
         OtherUser user = service.selectOtherUserByUid(uid);
         if (user == null) {
@@ -38,6 +42,7 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.OK)
+    @PermitAll()
     public Map<String, Object> register(@RequestBody RegisterForm form) {
         Boolean existenceCheck = service.usernameExist(form.getUsername());
         if (existenceCheck) {
@@ -51,19 +56,26 @@ public class UserController {
     @PostMapping("/info/password")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> updatePassword(@RequestBody RegisterForm form) {
-        String uid = "1";
+    public Map<String, Object> updatePassword(Authentication authentication, @RequestBody RegisterForm form) {
+        String uid = (String) authentication.getPrincipal();
 
         return ResponseGenerator.generator(1);
     }
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("NOT hasAuthority('User')")
+    @PermitAll()
     public Map<String, Object> login(@RequestBody LoginForm loginForm) {
-        Boolean loginResult = service.login(loginForm.getUsername(), loginForm.getPassword());
+        User user = service.selectUser("username", loginForm.getUsername());
+        if (user == null) {
+            return ResponseGenerator.generator(-1, "Username or Password invalid.");
+        }
+
+        boolean loginResult = DigestUtils.md5DigestAsHex((loginForm.getPassword() + user.getSalt()).getBytes()).equals(
+                user.getPassword()
+        );
+
         if (loginResult) {
-            User user = service.selectUser("username", loginForm.getUsername());
             String token = JWTUtils.sign(user.getUid().toString(), user.getUsername(), user.getUsergroup().getIsAdmin());
             Map<String, Object> response = new HashMap<>();
 

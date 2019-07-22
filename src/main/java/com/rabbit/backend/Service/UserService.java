@@ -19,7 +19,7 @@ public class UserService {
     }
 
     public User selectUser(String key, String value) {
-        return DAO.find("key", value);
+        return DAO.find(key, value);
     }
 
     public OtherUser selectOtherUserByUid(String uid) {
@@ -43,16 +43,5 @@ public class UserService {
 
         String salt = saltBuilder.toString();
         DAO.insert(username, email, DigestUtils.md5DigestAsHex((password + salt).getBytes()), salt);
-    }
-
-    public Boolean login(String username, String password) {
-        User user = DAO.find("username", username);
-        if (user == null) {
-            return false;
-        }
-
-        return DigestUtils.md5DigestAsHex((password + user.getSalt()).getBytes()).equals(
-                DigestUtils.md5DigestAsHex((user.getPassword() + user.getSalt()).getBytes())
-        );
     }
 }
