@@ -36,9 +36,16 @@ public class UserService {
         return val != null;
     }
 
-    public void register(String username, String password, String email) {
+    public String register(String username, String password, String email) {
         String salt = PasswordUtils.generateSalt();
-        DAO.insert(username, email, PasswordUtils.generatePassword(password, salt), salt);
+        User newUser = new User();
+        newUser.setUsername(username);
+        newUser.setPassword(PasswordUtils.generatePassword(password, salt));
+        newUser.setSalt(salt);
+        newUser.setEmail(email);
+        DAO.insert(newUser);
+
+        return newUser.getUid();
     }
 
     public void updatePassword(String uid, String password) {

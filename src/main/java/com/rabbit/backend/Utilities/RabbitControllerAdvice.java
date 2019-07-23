@@ -17,7 +17,7 @@ public class RabbitControllerAdvice {
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, Object> exception(HttpServletRequest request, NotFoundException ex) {
-        return ResponseGenerator.generator(ex.getCode(), ex.getErrMessage());
+        return GeneralResponse.generator(ex.getCode(), ex.getErrMessage());
     }
 
 }

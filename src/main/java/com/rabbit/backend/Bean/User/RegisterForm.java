@@ -13,6 +13,7 @@ public class RegisterForm {
     @NotBlank
     private String password;
 
+    @NotBlank
     @Email(message = "Email format invalid.")
     private String email;
 }

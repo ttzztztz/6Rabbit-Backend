@@ -3,7 +3,7 @@ package com.rabbit.backend.Utilities;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResponseGenerator {
+public class GeneralResponse {
 
     public static Map<String, Object> generator(Integer code, Object message) {
         Map<String, Object> result = new HashMap<String, Object>();
