@@ -16,7 +16,7 @@ public class JWTUtils {
                 .setSubject(uid)
                 .claim("username", username)
                 .claim("permission", isAdmin ? "Admin,User" : "User")
-                .setExpiration(new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
                 .signWith(SignatureAlgorithm.HS512, System.getenv("SECRET"))
                 .compact();
     }
