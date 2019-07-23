@@ -34,7 +34,7 @@ public interface UserDAO {
     })
     MyUser findMy(@Param("key") String key, @Param("value") String value);
 
-    @Insert("INSERT INTO user (username, email, password, salt) VALUES (#{username}, #{email}, #{password}, #{salt});")
+    @Insert("INSERT INTO user (username, email, password, salt) VALUES (#{username}, #{email}, #{password}, #{salt})")
     void insert(@Param("username") String username, @Param("email") String email, @Param("password") String password, @Param("salt") String salt);
 
     @Select("SELECT 1 FROM user WHERE ${key} = #{value}")

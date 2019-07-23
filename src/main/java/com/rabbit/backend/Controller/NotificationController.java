@@ -21,15 +21,6 @@ public class NotificationController {
         this.service = notificationService;
     }
 
-    @GetMapping("/item/{page}")
-    public Map<String, Object> list(@PathVariable("page") Integer page, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        NotificationListResponse response = new NotificationListResponse();
-        response.setCount(service.count(uid));
-        response.setList(service.list(uid, page));
-        return ResponseGenerator.generator(1, response);
-    }
-
     @DeleteMapping("/item/{nid}")
     public Map<String, Object> deleteOne(@PathVariable("nid") String nid, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
@@ -48,6 +39,15 @@ public class NotificationController {
         } else {
             return ResponseGenerator.generator(-1, "Permission denied.");
         }
+    }
+
+    @GetMapping("/all/{page}")
+    public Map<String, Object> list(@PathVariable("page") Integer page, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        NotificationListResponse response = new NotificationListResponse();
+        response.setCount(service.count(uid));
+        response.setList(service.list(uid, page));
+        return ResponseGenerator.generator(1, response);
     }
 
     @PostMapping("/all")

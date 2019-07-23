@@ -9,7 +9,7 @@ import java.util.Date;
 @Component("notification")
 @Data
 public class Notification {
-    private Integer id;
+    private String nid;
     private OtherUser fromUser;
     private OtherUser toUser;
     private String content;

@@ -3,13 +3,16 @@ package com.rabbit.backend.Controller;
 import com.rabbit.backend.Bean.User.*;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Security.PasswordUtils;
+import com.rabbit.backend.Service.CreditsLogService;
 import com.rabbit.backend.Service.UserService;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
+import com.rabbit.backend.Utilities.FieldErrorResponse;
 import com.rabbit.backend.Utilities.ResponseGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.DigestUtils;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,14 +23,16 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
     private UserService service;
+    private CreditsLogService creditsLogService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, CreditsLogService creditsLogService) {
         this.service = userService;
+        this.creditsLogService = creditsLogService;
     }
 
     @GetMapping("/info/{uid}")
-    public OtherUser info(Authentication authentication, @PathVariable("uid") String uid) {
+    public OtherUser info(@PathVariable("uid") String uid) {
         OtherUser user = service.selectOtherUserByUid(uid);
         if (user == null) {
             throw new NotFoundException(1, "user doesn't Exist");
@@ -36,7 +41,11 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Map<String, Object> register(@Valid @RequestBody RegisterForm form) {
+    public Map<String, Object> register(@Valid @RequestBody RegisterForm form, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseGenerator.generator(-1, FieldErrorResponse.generator(errors));
+        }
+
         Boolean usernameExistenceCheck = service.exist("username", form.getUsername());
         Boolean emailExistenceCheck = service.exist("email", form.getEmail());
         if (usernameExistenceCheck || emailExistenceCheck) {
@@ -50,8 +59,12 @@ public class UserController {
     @PostMapping("/info/password")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> updatePassword(Authentication authentication,
-                                              @Valid @RequestBody UpdatePasswordForm form
+                                              @Valid @RequestBody UpdatePasswordForm form, Errors errors
     ) {
+        if (errors.hasErrors()) {
+            return ResponseGenerator.generator(-1, FieldErrorResponse.generator(errors));
+        }
+
         String uid = (String) authentication.getPrincipal();
 
         User user = service.selectUser("uid", uid);
@@ -72,7 +85,10 @@ public class UserController {
     @PostMapping("/info/profile")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> updateProfile(Authentication authentication,
-                                             @Valid @RequestBody UpdateProfileForm form) {
+                                             @Valid @RequestBody UpdateProfileForm form, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseGenerator.generator(-1, FieldErrorResponse.generator(errors));
+        }
         String uid = (String) authentication.getPrincipal();
 
         service.updateProfile(uid, form);
@@ -89,7 +105,11 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody LoginForm form) {
+    public Map<String, Object> login(@RequestBody LoginForm form, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseGenerator.generator(-1, FieldErrorResponse.generator(errors));
+        }
+
         User user = service.selectUser("username", form.getUsername());
         if (user == null) {
             return ResponseGenerator.generator(-1, "Username or Password invalid.");
@@ -107,5 +127,17 @@ public class UserController {
         } else {
             return ResponseGenerator.generator(-1, "Username or Password invalid.");
         }
+    }
+
+    @GetMapping("/credits/log/{page}")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> creditsLog(Authentication authentication, @PathVariable("page") Integer page) {
+        String uid = (String) authentication.getPrincipal();
+        CreditsLogListResponse response = new CreditsLogListResponse();
+
+        response.setCount(creditsLogService.count(uid));
+        response.setList(creditsLogService.list(uid, page));
+
+        return ResponseGenerator.generator(1, response);
     }
 }

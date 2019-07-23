@@ -3,6 +3,7 @@ package com.rabbit.backend.Service;
 import com.rabbit.backend.Bean.Notification.Notification;
 import com.rabbit.backend.DAO.NotificationDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -12,7 +13,9 @@ import java.util.Map;
 @Service
 public class NotificationService {
     private NotificationDAO DAO;
-    private static final int PAGESIZE = 20;
+
+    @Value("${rabbit.pagesize}")
+    private Integer PAGESIZE;
 
     @Autowired
     public NotificationService(NotificationDAO notificationDAO) {
@@ -53,11 +56,15 @@ public class NotificationService {
     }
 
     public Map<String, Integer> count(String toUid) {
-        Map<String ,Integer> result = new HashMap<>();
+        Map<String, Integer> result = new HashMap<>();
 
         result.put("total", DAO.totalCount(toUid));
         result.put("unread", DAO.unreadCount(toUid));
 
         return result;
+    }
+
+    public void insert(String fromUid, String toUid, String content, String link) {
+        DAO.insert(fromUid, toUid, content, link);
     }
 }

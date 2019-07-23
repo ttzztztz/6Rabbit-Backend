@@ -21,7 +21,7 @@ public class JWTUtils {
                 .compact();
     }
 
-    public static UsernamePasswordAuthenticationToken verify(String token) {
+    static UsernamePasswordAuthenticationToken verify(String token) {
         if (token != null) {
             Claims claims = Jwts.parser()
                     .setSigningKey(System.getenv("SECRET"))

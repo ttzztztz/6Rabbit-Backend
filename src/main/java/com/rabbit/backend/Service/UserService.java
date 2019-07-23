@@ -8,6 +8,7 @@ import com.rabbit.backend.DAO.UserDAO;
 import com.rabbit.backend.Security.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -45,6 +46,7 @@ public class UserService {
         DAO.updatePassword(uid, PasswordUtils.generatePassword(password, salt), salt);
     }
 
+    @Transactional
     public void updateProfile(String uid, UpdateProfileForm form) {
         DAO.updateFields(uid, form);
     }

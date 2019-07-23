@@ -9,10 +9,10 @@ import java.util.List;
 @Mapper
 @Repository
 public interface NotificationDAO {
-    @Select("SELECT * FROM notification WHERE toUid = #{toUid} LIMIT ${from},${to}")
+    @Select("SELECT * FROM notification WHERE toUid = #{toUid} LIMIT ${from},${to} ORDER BY nid DESC")
     @Results({
-            @Result(property = "fromUser", column = "fromUid", one = @One(select = "com.rabbit.backend.DAO.findOtherByUid")),
-            @Result(property = "toUser", column = "toUid", one = @One(select = "com.rabbit.backend.DAO.findOtherByUid"))
+            @Result(property = "fromUser", column = "fromUid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "toUser", column = "toUid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<Notification> list(@Param("toUid") String toUid, @Param("from") Integer from, @Param("to") Integer to);
 
@@ -36,11 +36,14 @@ public interface NotificationDAO {
 
     @Select("SELECT * FROM notification WHERE nid = #{nid} LIMIT 1")
     @Results({
-            @Result(property = "fromUser", column = "fromUid", one = @One(select = "com.rabbit.backend.DAO.findOtherByUid")),
-            @Result(property = "toUser", column = "toUid", one = @One(select = "com.rabbit.backend.DAO.findOtherByUid"))
+            @Result(property = "fromUser", column = "fromUid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "toUser", column = "toUid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     Notification read(@Param("nid") String nid);
 
     @Select("SELECT toUid FROM notification WHERE nid = #{nid} LIMIT 1")
     String toUid(@Param("nid") String nid);
+
+    @Insert("INSERT INTO notification (fromUid, toUid, content, link) VALUES (#{fromUid}, #{toUid}, #{content}, #{link})")
+    void insert(@Param("fromUid") String fromUid, @Param("toUid") String toUid, @Param("content") String content, @Param("link") String link);
 }

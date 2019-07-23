@@ -9,7 +9,7 @@ import java.util.Date;
 @Component("user")
 @Data
 public class User {
-    private Integer uid;
+    private String uid;
     private Group usergroup;
     private String username;
     private String password;

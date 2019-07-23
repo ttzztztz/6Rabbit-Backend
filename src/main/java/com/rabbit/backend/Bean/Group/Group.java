@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component("group")
 @Data
 public class Group {
-    private Integer gid;
+    private String gid;
     private String name;
     private Boolean isAdmin;
 }
