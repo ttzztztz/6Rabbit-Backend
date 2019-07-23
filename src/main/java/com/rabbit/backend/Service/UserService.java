@@ -9,8 +9,6 @@ import com.rabbit.backend.Security.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.rabbit.backend.Security.PasswordUtils.generatePassword;
-
 @Service
 public class UserService {
     private UserDAO DAO;
@@ -39,15 +37,15 @@ public class UserService {
 
     public void register(String username, String password, String email) {
         String salt = PasswordUtils.generateSalt();
-        DAO.insert(username, email, generatePassword(password, salt), salt);
+        DAO.insert(username, email, PasswordUtils.generatePassword(password, salt), salt);
     }
 
     public void updatePassword(String uid, String password) {
         String salt = PasswordUtils.generateSalt();
-        DAO.updatePassword(uid, generatePassword(password, salt), salt);
+        DAO.updatePassword(uid, PasswordUtils.generatePassword(password, salt), salt);
     }
 
-    public void updateProfile(String uid, String[] fields, String[] values) {
-        DAO.updateFields(fields, values, uid);
+    public void updateProfile(String uid, UpdateProfileForm form) {
+        DAO.updateFields(uid, form);
     }
 }

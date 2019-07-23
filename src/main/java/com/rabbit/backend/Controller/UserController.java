@@ -7,7 +7,6 @@ import com.rabbit.backend.Service.UserService;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import com.rabbit.backend.Utilities.ResponseGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.DigestUtils;
@@ -28,7 +27,6 @@ public class UserController {
     }
 
     @GetMapping("/info/{uid}")
-    @ResponseStatus(HttpStatus.OK)
     public OtherUser info(Authentication authentication, @PathVariable("uid") String uid) {
         OtherUser user = service.selectOtherUserByUid(uid);
         if (user == null) {
@@ -38,7 +36,6 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.OK)
     public Map<String, Object> register(@Valid @RequestBody RegisterForm form) {
         Boolean usernameExistenceCheck = service.exist("username", form.getUsername());
         Boolean emailExistenceCheck = service.exist("email", form.getEmail());
@@ -51,7 +48,6 @@ public class UserController {
     }
 
     @PostMapping("/info/password")
-    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> updatePassword(Authentication authentication,
                                               @Valid @RequestBody UpdatePasswordForm form
@@ -74,21 +70,16 @@ public class UserController {
     }
 
     @PostMapping("/info/profile")
-    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> updateProfile(Authentication authentication,
                                              @Valid @RequestBody UpdateProfileForm form) {
         String uid = (String) authentication.getPrincipal();
 
-        final String[] keys = {"realname", "gender", "email", "qq", "mobile", "wechat", "signature"};
-        String[] values = {form.getRealname(), form.getGender(), form.getQq(), form.getMobile(), form.getWechat(), form.getSignature()};
-
-        service.updateProfile(uid, keys, values);
+        service.updateProfile(uid, form);
         return ResponseGenerator.generator(1);
     }
 
     @GetMapping("/info/my")
-    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> myProfile(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
@@ -98,7 +89,6 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    @ResponseStatus(HttpStatus.OK)
     public Map<String, Object> login(@RequestBody LoginForm form) {
         User user = service.selectUser("username", form.getUsername());
         if (user == null) {

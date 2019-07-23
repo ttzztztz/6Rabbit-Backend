@@ -4,6 +4,8 @@ import com.rabbit.backend.Bean.Group.Group;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component("user")
 @Data
 public class User {
@@ -21,4 +23,6 @@ public class User {
     private Integer credits;
     private Integer golds;
     private Integer rmbs;
+    private Date createDate;
+    private Date loginDate;
 }
