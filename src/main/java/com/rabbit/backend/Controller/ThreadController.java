@@ -1,6 +1,7 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Thread.*;
+import com.rabbit.backend.Service.NotificationService;
 import com.rabbit.backend.Service.PostService;
 import com.rabbit.backend.Service.ThreadService;
 import com.rabbit.backend.Utilities.FieldErrorResponse;
@@ -19,11 +20,13 @@ import java.util.Map;
 public class ThreadController {
     private ThreadService threadService;
     private PostService postService;
+    private NotificationService notificationService;
 
     @Autowired
-    public ThreadController(ThreadService threadService, PostService postService) {
+    public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService) {
         this.threadService = threadService;
         this.postService = postService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/list/{fid}/{page}")
@@ -31,40 +34,40 @@ public class ThreadController {
         ThreadListResponse threadListResponse = new ThreadListResponse();
         threadListResponse.setForum(threadService.forum(fid));
         threadListResponse.setList(threadService.list(fid, page));
-        return GeneralResponse.generator(1, threadListResponse);
+        return GeneralResponse.generator(200, threadListResponse);
     }
 
     @PostMapping("/digest")
     @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> setDigest(@Valid @RequestBody ThreadDigestForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
 
         threadService.modify(form.getTid(), "digest", form.getDigest().toString());
-        return GeneralResponse.generator(1);
+        return GeneralResponse.generator(200);
     }
 
     @PostMapping("/top")
     @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> setTop(@Valid @RequestBody ThreadTopForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
 
         threadService.modify(form.getTid(), "isTop", form.getTop().toString());
-        return GeneralResponse.generator(1);
+        return GeneralResponse.generator(200);
     }
 
     @PostMapping("/close")
     @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> setClosed(@Valid @RequestBody ThreadCloseForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
 
         threadService.modify(form.getTid(), "isClosed", form.getClose().toString());
-        return GeneralResponse.generator(1);
+        return GeneralResponse.generator(200);
     }
 
     @GetMapping("/{tid}/{page}")
@@ -75,7 +78,7 @@ public class ThreadController {
         response.setPostList(postService.list(tid, page));
         response.setFirstPost(postService.firstPost(tid));
 
-        return GeneralResponse.generator(1, response);
+        return GeneralResponse.generator(200, response);
     }
 
     @DeleteMapping("/{tid}")
@@ -85,16 +88,16 @@ public class ThreadController {
         ThreadItem threadItem = threadService.info(tid);
 
         if (threadItem == null) {
-            return GeneralResponse.generator(-1, "Thread doesn't exist.");
+            return GeneralResponse.generator(404, "Thread doesn't exist.");
         }
 
         if (!threadItem.getUser().getUid().equals(uid)
                 && !authentication.getAuthorities().contains("Admin")
         ) {
-            return GeneralResponse.generator(-1, "Permission denied.");
+            return GeneralResponse.generator(403, "Permission denied.");
         }
         threadService.delete(tid);
-        return GeneralResponse.generator(1);
+        return GeneralResponse.generator(200);
     }
 
     @PostMapping("/create")
@@ -102,12 +105,12 @@ public class ThreadController {
     public Map<String, Object> create(@Valid @RequestBody ThreadEditorForm form, Errors errors,
                                       Authentication authentication) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
 
         String uid = (String) authentication.getPrincipal();
         String tid = threadService.insert(uid, form);
-        return GeneralResponse.generator(1, tid);
+        return GeneralResponse.generator(200, tid);
     }
 
     @PostMapping("/reply/{tid}")
@@ -115,18 +118,20 @@ public class ThreadController {
     public Map<String, Object> create(@PathVariable("tid") String tid, @Valid @RequestBody PostEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
         ThreadItem threadItem = threadService.info(tid);
         if (threadItem.getIsClosed()
                 && !authentication.getAuthorities().contains("Admin")
         ) {
-            return GeneralResponse.generator(-1, "Thread already closed.");
+            return GeneralResponse.generator(400, "Thread already closed.");
         }
 
         threadService.reply(tid, form, uid);
-        return GeneralResponse.generator(1);
+        notificationService.push(uid, threadItem.getUser().getUid(),
+                "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/info/" + tid + "/1");
+        return GeneralResponse.generator(200);
     }
 
     @PutMapping("/{tid}")
@@ -134,17 +139,17 @@ public class ThreadController {
     public Map<String, Object> update(@PathVariable("tid") String tid, @Valid @RequestBody ThreadEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
         ThreadItem threadItem = threadService.info(tid);
         if (!threadItem.getUser().getUid().equals(uid)
                 && !authentication.getAuthorities().contains("Admin")
         ) {
-            return GeneralResponse.generator(-1, "Permission denied.");
+            return GeneralResponse.generator(403, "Permission denied.");
         }
 
         threadService.update(tid, form.getFid(), form.getSubject(), form.getMessage());
-        return GeneralResponse.generator(1);
+        return GeneralResponse.generator(200);
     }
 }

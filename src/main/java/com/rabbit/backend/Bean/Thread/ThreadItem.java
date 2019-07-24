@@ -5,9 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
+@Component("thread_item")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Component("thread_item")
 public class ThreadItem extends Thread {
     private Forum forum;
 }

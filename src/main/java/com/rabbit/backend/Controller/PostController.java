@@ -33,10 +33,10 @@ public class PostController {
         if (!post.getUser().getUid().equals(uid)
                 && !authentication.getAuthorities().contains("Admin")
         ) {
-            return GeneralResponse.generator(-1, "Permission denied.");
+            return GeneralResponse.generator(403, "Permission denied.");
         }
         postService.delete(pid);
-        return GeneralResponse.generator(1);
+        return GeneralResponse.generator(200);
     }
 
     @PutMapping("/{pid}")
@@ -44,7 +44,7 @@ public class PostController {
     public Map<String, Object> update(@PathVariable("pid") String pid, @Valid @RequestBody PostEditorForm form, Errors errors,
                                       Authentication authentication) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
 
         String uid = (String) authentication.getPrincipal();
@@ -53,10 +53,10 @@ public class PostController {
         if (!post.getUser().getUid().equals(uid)
                 && !authentication.getAuthorities().contains("Admin")
         ) {
-            return GeneralResponse.generator(-1, "Permission denied.");
+            return GeneralResponse.generator(403, "Permission denied.");
         }
 
         postService.update(pid, form.getMessage());
-        return GeneralResponse.generator(1);
+        return GeneralResponse.generator(200);
     }
 }

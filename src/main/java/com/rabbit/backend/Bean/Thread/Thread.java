@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Data
 @Component("thread")
+@Data
 public abstract class Thread {
     private String tid;
     private OtherUser user;

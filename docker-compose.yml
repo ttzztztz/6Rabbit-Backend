@@ -1,0 +1,14 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: P@ssw0rd
+    stdin_open: true
+    tty: true
+    volumes:
+      - mysql:/var/lib/mysql
+  redis:
+    image: redis
+    stdin_open: true
+    tty: true
