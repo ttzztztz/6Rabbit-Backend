@@ -41,18 +41,15 @@ public class PostController {
 
     @PutMapping("/{pid}")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> update(@PathVariable("pid") String pid, @Valid @RequestBody PostEditorForm form, Errors errors,
-                                      Authentication authentication) {
+    public Map<String, Object> update(@PathVariable("pid") String pid, @Valid @RequestBody PostEditorForm form,
+                                      Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
-
         String uid = (String) authentication.getPrincipal();
-        Post post = postService.find(pid);
+        String postUid = postService.uid(pid);
 
-        if (!post.getUser().getUid().equals(uid)
-                && !authentication.getAuthorities().contains("Admin")
-        ) {
+        if (!postUid.equals(uid) && !authentication.getAuthorities().contains("Admin")) {
             return GeneralResponse.generator(403, "Permission denied.");
         }
 

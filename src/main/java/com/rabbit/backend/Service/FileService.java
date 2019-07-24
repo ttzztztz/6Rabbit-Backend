@@ -8,7 +8,11 @@ public class FileService {
     @Value("${rabbit.path}")
     private String basePath;
 
-    public String avatarPath(String uid){
+    public String avatarPath(String uid) {
         return basePath + "avatar/" + uid + ".avatar";
+    }
+
+    public String attachPath(String uid) {
+        return basePath + "attach/" + uid + ".file";
     }
 }

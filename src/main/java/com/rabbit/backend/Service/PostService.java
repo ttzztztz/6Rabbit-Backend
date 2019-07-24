@@ -54,4 +54,8 @@ public class PostService {
         }
         return post;
     }
+
+    public String uid(String pid){
+        return postDAO.authorUid(pid);
+    }
 }

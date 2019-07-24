@@ -1,6 +1,7 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Thread.*;
+import com.rabbit.backend.Service.AttachService;
 import com.rabbit.backend.Service.NotificationService;
 import com.rabbit.backend.Service.PostService;
 import com.rabbit.backend.Service.ThreadService;
@@ -21,12 +22,15 @@ public class ThreadController {
     private ThreadService threadService;
     private PostService postService;
     private NotificationService notificationService;
+    private AttachService attachService;
 
     @Autowired
-    public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService) {
+    public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService,
+                            AttachService attachService) {
         this.threadService = threadService;
         this.postService = postService;
         this.notificationService = notificationService;
+        this.attachService = attachService;
     }
 
     @GetMapping("/list/{fid}/{page}")
@@ -96,6 +100,7 @@ public class ThreadController {
         ) {
             return GeneralResponse.generator(403, "Permission denied.");
         }
+        attachService.deleteByTid(tid);
         threadService.delete(tid);
         return GeneralResponse.generator(200);
     }
@@ -129,8 +134,11 @@ public class ThreadController {
         }
 
         threadService.reply(tid, form, uid);
-        notificationService.push(uid, threadItem.getUser().getUid(),
-                "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/info/" + tid + "/1");
+        if (!uid.equals(threadItem.getUser().getUid())) {
+            notificationService.push(uid, threadItem.getUser().getUid(),
+                    "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/info/" + tid + "/1");
+        }
+
         return GeneralResponse.generator(200);
     }
 
@@ -142,10 +150,9 @@ public class ThreadController {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
-        ThreadItem threadItem = threadService.info(tid);
-        if (!threadItem.getUser().getUid().equals(uid)
-                && !authentication.getAuthorities().contains("Admin")
-        ) {
+        String threadUid = threadService.uid(tid);
+
+        if (!threadUid.equals(uid) && !authentication.getAuthorities().contains("Admin")) {
             return GeneralResponse.generator(403, "Permission denied.");
         }
 

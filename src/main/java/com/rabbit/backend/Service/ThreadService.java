@@ -99,4 +99,8 @@ public class ThreadService {
         list.addAll(threadDAO.listWithoutTop(fid, (page - 1) * PAGESIZE, page * PAGESIZE));
         return list;
     }
+
+    public String uid(String tid) {
+        return threadDAO.authorUid(tid);
+    }
 }

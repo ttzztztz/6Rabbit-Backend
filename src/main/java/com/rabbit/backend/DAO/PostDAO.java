@@ -48,4 +48,7 @@ public interface PostDAO {
 
     @Select("SELECT tid FROM post WHERE pid = #{pid}")
     String tid(@Param("pid") String pid);
+
+    @Select("SELECT uid FROM post WHERE pid = #{pid}")
+    String authorUid(@Param("pid") String pid);
 }
