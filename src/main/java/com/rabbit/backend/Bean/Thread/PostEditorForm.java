@@ -12,8 +12,8 @@ public class PostEditorForm {
     private String uid;
     private String tid;
 
-    private Integer quotepid;
+    private Integer quotepid = 0;
     @NotBlank
     @SafeHtml(whitelistType = SafeHtml.WhiteListType.RELAXED)
-    private String content;
+    private String message;
 }

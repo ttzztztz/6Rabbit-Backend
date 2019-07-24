@@ -22,5 +22,5 @@ public class ThreadEditorForm {
 
     @NotBlank
     @SafeHtml(whitelistType = SafeHtml.WhiteListType.RELAXED)
-    private String content;
+    private String message;
 }

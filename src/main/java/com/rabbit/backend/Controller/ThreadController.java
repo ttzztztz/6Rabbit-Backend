@@ -99,8 +99,8 @@ public class ThreadController {
 
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> create(@Valid @RequestBody ThreadEditorForm form, Authentication authentication,
-                                      Errors errors) {
+    public Map<String, Object> create(@Valid @RequestBody ThreadEditorForm form, Errors errors,
+                                      Authentication authentication) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
         }
@@ -113,7 +113,7 @@ public class ThreadController {
     @PostMapping("/reply/{tid}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> create(@PathVariable("tid") String tid, @Valid @RequestBody PostEditorForm form,
-                                      Authentication authentication, Errors errors) {
+                                      Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
         }
@@ -132,7 +132,7 @@ public class ThreadController {
     @PutMapping("/{tid}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> update(@PathVariable("tid") String tid, @Valid @RequestBody ThreadEditorForm form,
-                                      Authentication authentication, Errors errors) {
+                                      Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
         }
@@ -144,7 +144,7 @@ public class ThreadController {
             return GeneralResponse.generator(-1, "Permission denied.");
         }
 
-        threadService.update(tid, form.getFid(), form.getSubject(), form.getContent());
+        threadService.update(tid, form.getFid(), form.getSubject(), form.getMessage());
         return GeneralResponse.generator(1);
     }
 }

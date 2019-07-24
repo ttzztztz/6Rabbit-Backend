@@ -60,7 +60,7 @@ public class ThreadService {
     public void reply(String tid, PostEditorForm form, String uid) {
         form.setTid(tid);
         form.setUid(uid);
-        postDAO.insert(form);
+        postDAO.insertWithPostEditorForm(form);
 
         String pid = form.getPid();
         threadDAO.updateLastReply(tid, pid, uid, new Date());
@@ -79,7 +79,7 @@ public class ThreadService {
         form.setUid(uid);
         threadDAO.insert(form);
         String tid = form.getTid();
-        postDAO.insert(form);
+        postDAO.insertWithThreadEditorForm(form);
         threadDAO.updateFirstPid(tid, form.getFirstpid());
         staticDAO.increment("forum", "threads", "fid", form.getFid(), 1);
         return tid;

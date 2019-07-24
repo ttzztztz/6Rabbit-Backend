@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 @Repository
 public interface CreditsLogDAO {
-    @Select("SELECT * FROM credits_type WHERE uid = #{uid} LIMIT ${from},${to} ORDER BY cid DESC")
+    @Select("SELECT * FROM credits_type WHERE uid = #{uid} ORDER BY cid DESC LIMIT ${from},${to}")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })

@@ -56,7 +56,7 @@ public class PostController {
             return GeneralResponse.generator(-1, "Permission denied.");
         }
 
-        postService.update(pid, form.getContent());
+        postService.update(pid, form.getMessage());
         return GeneralResponse.generator(1);
     }
 }

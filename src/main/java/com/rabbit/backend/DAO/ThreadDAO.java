@@ -26,14 +26,14 @@ public interface ThreadDAO {
     })
     ThreadItem find(@Param("tid") String tid);
 
-    @Select("SELECT * FROM thread WHERE fid = #{fid} LIMIT ${from},${to} ORDER BY lastpid DESC")
+    @Select("SELECT * FROM thread WHERE fid = #{fid} ORDER BY lastpid DESC LIMIT ${from},${to}")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<ThreadListItem> listWithTop(@Param("fid") String fid, @Param("from") Integer from, @Param("to") Integer to);
 
-    @Select("SELECT * FROM thread WHERE fid = #{fid} AND isTop = 0 LIMIT ${from},${to} ORDER BY lastpid DESC")
+    @Select("SELECT * FROM thread WHERE fid = #{fid} AND isTop = 0 ORDER BY lastpid DESC LIMIT ${from},${to}")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
@@ -46,14 +46,14 @@ public interface ThreadDAO {
     @Select("SELECT uid FROM thread WHERE tid = #{tid}")
     String authorUid(@Param("tid") String tid);
 
-    @Select("SELECT * FROM thread WHERE fid = #{fid} AND isTop = 1 LIMIT ${from},${to} ORDER BY lastpid DESC")
+    @Select("SELECT * FROM thread WHERE fid = #{fid} AND isTop = 1 ORDER BY lastpid DESC")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<ThreadListItem> forumTopThreadByFid(@Param("fid") String fid);
 
-    @Select("SELECT * FROM thread WHERE isTop = 2 LIMIT ${from},${to} ORDER BY lastpid DESC")
+    @Select("SELECT * FROM thread WHERE isTop = 2 ORDER BY lastpid DESC")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))

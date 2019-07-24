@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 @Repository
 public interface NotificationDAO {
-    @Select("SELECT * FROM notification WHERE toUid = #{toUid} LIMIT ${from},${to} ORDER BY nid DESC")
+    @Select("SELECT * FROM notification WHERE toUid = #{toUid} ORDER BY nid DESC LIMIT ${from},${to}")
     @Results({
             @Result(property = "fromUser", column = "fromUid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
             @Result(property = "toUser", column = "toUid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))

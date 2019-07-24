@@ -17,7 +17,7 @@ public interface PostDAO {
     })
     Post find(@Param("pid") String pid);
 
-    @Select("SELECT * FROM post WHERE tid = #{tid} AND isFirst = 0 LIMIT ${from},${to} ORDER BY pid")
+    @Select("SELECT * FROM post WHERE tid = #{tid} AND isFirst = 0 ORDER BY pid LIMIT ${from},${to}")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
     })
@@ -38,13 +38,13 @@ public interface PostDAO {
     @Update("UPDATE post SET message = #{message} WHERE pid = #{pid}")
     void update(@Param("pid") String pid, @Param("message") String message);
 
-    @Insert("INSERT INTO post (uid, tid, quotepid, content) VALUES (#{uid}, #{tid}, #{quotepid}, #{content})")
+    @Insert("INSERT INTO post (uid, tid, quotepid, message) VALUES (#{uid}, #{tid}, #{quotepid}, #{message})")
     @Options(keyProperty = "pid", keyColumn = "pid", useGeneratedKeys = true)
-    void insert(PostEditorForm form);
+    void insertWithPostEditorForm(PostEditorForm form);
 
-    @Insert("INSERT INTO post (uid, tid, quotepid, content) VALUES (#{uid}, #{tid}, #{quotepid}, #{content})")
+    @Insert("INSERT INTO post (uid, tid, isFirst, message) VALUES (#{uid}, #{tid}, 1, #{message})")
     @Options(keyProperty = "firstpid", keyColumn = "pid", useGeneratedKeys = true)
-    void insert(ThreadEditorForm form);
+    void insertWithThreadEditorForm(ThreadEditorForm form);
 
     @Select("SELECT tid FROM post WHERE pid = #{pid}")
     String tid(@Param("pid") String pid);
