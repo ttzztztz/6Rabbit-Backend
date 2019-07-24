@@ -64,7 +64,7 @@ public class NotificationService {
         return result;
     }
 
-    public void insert(String fromUid, String toUid, String content, String link) {
+    public void push(String fromUid, String toUid, String content, String link) {
         DAO.insert(fromUid, toUid, content, link);
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Map;
 
 @RestController
@@ -29,10 +30,6 @@ public class PostController {
         String uid = (String) authentication.getPrincipal();
         Post post = postService.find(pid);
 
-        if (post == null) {
-            return GeneralResponse.generator(-1, "Post doesn't exist.");
-        }
-
         if (!post.getUser().getUid().equals(uid)
                 && !authentication.getAuthorities().contains("Admin")
         ) {
@@ -44,7 +41,7 @@ public class PostController {
 
     @PutMapping("/{pid}")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> update(@PathVariable("pid") String pid, @RequestBody PostEditorForm form, Errors errors,
+    public Map<String, Object> update(@PathVariable("pid") String pid, @Valid @RequestBody PostEditorForm form, Errors errors,
                                       Authentication authentication) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
@@ -52,10 +49,6 @@ public class PostController {
 
         String uid = (String) authentication.getPrincipal();
         Post post = postService.find(pid);
-
-        if (post == null) {
-            return GeneralResponse.generator(-1, "Post doesn't exist.");
-        }
 
         if (!post.getUser().getUid().equals(uid)
                 && !authentication.getAuthorities().contains("Admin")

@@ -2,13 +2,14 @@ package com.rabbit.backend.DAO;
 
 import com.rabbit.backend.Bean.Thread.Post;
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
+import com.rabbit.backend.Bean.Thread.ThreadEditorForm;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 @Mapper
+@Repository
 public interface PostDAO {
     @Select("SELECT * FROM post WHERE pid = #{pid}")
     @Results({
@@ -31,10 +32,20 @@ public interface PostDAO {
     @Select("SELECT * FROM post WHERE tid = #{tid} AND isFirst = 1 LIMIT 1")
     Post firstPost(@Param("tid") String tid);
 
-    @Update("UPDATE post SET content = #{content} WHERE pid = #{pid}")
-    void update(@Param("pid") String pid, @Param("content") String content);
+    @Select("SELECT pid FROM post WHERE tid = #{tid} AND isFirst = 1 LIMIT 1")
+    String firstPid(@Param("tid") String tid);
 
-    @Insert("INSERT INTO post (uid, tid, quotepid, content) VALUES (#{uid}, #{tid}, #{form.quotepid}, #{form.content})")
-    @Options(keyProperty = "form.pid", keyColumn = "pid", useGeneratedKeys = true)
-    void insert(@Param("tid") String tid, @Param("form") PostEditorForm form, @Param("uid") String uid);
+    @Update("UPDATE post SET message = #{message} WHERE pid = #{pid}")
+    void update(@Param("pid") String pid, @Param("message") String message);
+
+    @Insert("INSERT INTO post (uid, tid, quotepid, content) VALUES (#{uid}, #{tid}, #{quotepid}, #{content})")
+    @Options(keyProperty = "pid", keyColumn = "pid", useGeneratedKeys = true)
+    void insert(PostEditorForm form);
+
+    @Insert("INSERT INTO post (uid, tid, quotepid, content) VALUES (#{uid}, #{tid}, #{quotepid}, #{content})")
+    @Options(keyProperty = "firstpid", keyColumn = "pid", useGeneratedKeys = true)
+    void insert(ThreadEditorForm form);
+
+    @Select("SELECT tid FROM post WHERE pid = #{pid}")
+    String tid(@Param("pid") String pid);
 }

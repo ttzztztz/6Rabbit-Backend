@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FieldErrorResponse {
-    public static Map<String, Object> generator(Errors errors){
+    public static Map<String, Object> generator(Errors errors) {
         Map<String, Object> errResponse = new HashMap<>();
         List<ObjectError> objectErrorList = errors.getAllErrors();
         for (ObjectError error : objectErrorList) {

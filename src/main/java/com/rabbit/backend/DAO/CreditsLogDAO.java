@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 @Mapper
+@Repository
 public interface CreditsLogDAO {
     @Select("SELECT * FROM credits_type WHERE uid = #{uid} LIMIT ${from},${to} ORDER BY cid DESC")
     @Results({

@@ -9,5 +9,5 @@ public class Forum {
     private String fid;
     private String name;
     private String description;
-    private Integer rank;
+    private Integer threads;
 }

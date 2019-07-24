@@ -26,6 +26,14 @@ public class ThreadController {
         this.postService = postService;
     }
 
+    @GetMapping("/list/{fid}/{page}")
+    public Map<String, Object> list(@PathVariable("fid") String fid, @PathVariable("page") Integer page) {
+        ThreadListResponse threadListResponse = new ThreadListResponse();
+        threadListResponse.setForum(threadService.forum(fid));
+        threadListResponse.setList(threadService.list(fid, page));
+        return GeneralResponse.generator(1, threadListResponse);
+    }
+
     @PostMapping("/digest")
     @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> setDigest(@Valid @RequestBody ThreadDigestForm form, Errors errors) {
@@ -91,29 +99,26 @@ public class ThreadController {
 
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> create(@RequestBody ThreadEditorForm form, Errors errors) {
+    public Map<String, Object> create(@Valid @RequestBody ThreadEditorForm form, Authentication authentication,
+                                      Errors errors) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
         }
 
-        // todo: thread create
-        return GeneralResponse.generator(1);
+        String uid = (String) authentication.getPrincipal();
+        String tid = threadService.insert(uid, form);
+        return GeneralResponse.generator(1, tid);
     }
 
     @PostMapping("/reply/{tid}")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> create(@PathVariable("tid") String tid, @RequestBody PostEditorForm form,
+    public Map<String, Object> create(@PathVariable("tid") String tid, @Valid @RequestBody PostEditorForm form,
                                       Authentication authentication, Errors errors) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
         ThreadItem threadItem = threadService.info(tid);
-
-        if (threadItem == null) {
-            return GeneralResponse.generator(-1, "Thread doesn't exist.");
-        }
-
         if (threadItem.getIsClosed()
                 && !authentication.getAuthorities().contains("Admin")
         ) {
@@ -126,27 +131,20 @@ public class ThreadController {
 
     @PutMapping("/{tid}")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> update(@PathVariable("tid") String tid, @RequestBody ThreadEditorForm form,
+    public Map<String, Object> update(@PathVariable("tid") String tid, @Valid @RequestBody ThreadEditorForm form,
                                       Authentication authentication, Errors errors) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(-1, FieldErrorResponse.generator(errors));
         }
-
         String uid = (String) authentication.getPrincipal();
         ThreadItem threadItem = threadService.info(tid);
-
-        if (threadItem == null) {
-            return GeneralResponse.generator(-1, "Thread doesn't exist.");
-        }
-
         if (!threadItem.getUser().getUid().equals(uid)
                 && !authentication.getAuthorities().contains("Admin")
         ) {
             return GeneralResponse.generator(-1, "Permission denied.");
         }
 
-        //todo: thread_update
+        threadService.update(tid, form.getFid(), form.getSubject(), form.getContent());
         return GeneralResponse.generator(1);
     }
-
 }

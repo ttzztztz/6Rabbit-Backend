@@ -23,7 +23,7 @@ public class PasswordUtils {
         return saltBuilder.toString();
     }
 
-    public static String generatePassword(String rawPassword, String salt){
+    public static String generatePassword(String rawPassword, String salt) {
         return DigestUtils.md5DigestAsHex((rawPassword + salt).getBytes());
     }
 }

@@ -12,10 +12,11 @@ public class NotFoundException extends RuntimeException {
         this.errMessage = errMessage;
     }
 
-    public Integer getCode(){
+    public Integer getCode() {
         return this.code;
     }
-    public String getErrMessage(){
+
+    public String getErrMessage() {
         return this.errMessage;
     }
 }
