@@ -1,5 +1,6 @@
 package com.rabbit.backend.DAO;
 
+import com.rabbit.backend.Bean.Credits.CreditsRule;
 import com.rabbit.backend.Bean.User.MyUser;
 import com.rabbit.backend.Bean.User.OtherUser;
 import com.rabbit.backend.Bean.User.UpdateProfileForm;
@@ -49,4 +50,11 @@ public interface UserDAO {
             " mobile = #{form.mobile}, wechat = #{form.wechat}, signature = #{form.signature}" +
             " WHERE uid = #{uid}")
     void updateFields(@Param("uid") String uid, @Param("form") UpdateProfileForm form);
+
+    @Update("UPDATE user SET " +
+            "credits = credits + ${rule.credits}," +
+            "golds = golds + ${rule.golds}," +
+            "rmbs = rmbs + ${rule.rmbs}" +
+            " WHERE uid = #{uid}")
+    void applyRule(@Param("uid") String uid, @Param("rule") CreditsRule rule);
 }

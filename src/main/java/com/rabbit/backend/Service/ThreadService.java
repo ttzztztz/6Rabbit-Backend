@@ -80,7 +80,7 @@ public class ThreadService {
         threadDAO.insert(form);
         String tid = form.getTid();
         postDAO.insertWithThreadEditorForm(form);
-        threadDAO.updateFirstPid(tid, form.getFirstpid());
+        threadDAO.updateFirstPid(tid, form.getFirstpid(), uid);
         staticDAO.increment("forum", "threads", "fid", form.getFid(), 1);
         return tid;
     }

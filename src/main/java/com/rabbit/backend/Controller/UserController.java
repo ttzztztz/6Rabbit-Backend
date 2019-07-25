@@ -8,15 +8,15 @@ import com.rabbit.backend.Service.UserService;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import com.rabbit.backend.Utilities.FieldErrorResponse;
 import com.rabbit.backend.Utilities.GeneralResponse;
+import com.rabbit.backend.Utilities.IPUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.DigestUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,9 +43,14 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Map<String, Object> register(@Valid @RequestBody RegisterForm form, Errors errors) {
+    public Map<String, Object> register(@Valid @RequestBody RegisterForm form, Errors errors, HttpServletRequest httpServletRequest) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+        }
+
+        String IP = IPUtil.getIPAddress(httpServletRequest);
+        if (!service.registerLimitCheck(IP)) {
+            return GeneralResponse.generator(503, "Request too frequently.");
         }
 
         Boolean usernameExistenceCheck = service.exist("username", form.getUsername());
@@ -59,14 +64,14 @@ public class UserController {
         }
 
         String uid = service.register(form.getUsername(), form.getPassword(), form.getEmail());
+        service.registerLimitIncrement(IP);
         return GeneralResponse.generator(200, uid);
     }
 
     @PostMapping("/info/password")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> updatePassword(Authentication authentication,
-                                              @Valid @RequestBody UpdatePasswordForm form, Errors errors
-    ) {
+                                              @Valid @RequestBody UpdatePasswordForm form, Errors errors) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
@@ -111,9 +116,14 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody LoginForm form, Errors errors) {
+    public Map<String, Object> login(@RequestBody LoginForm form, Errors errors, HttpServletRequest httpServletRequest) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+        }
+
+        String IP = IPUtil.getIPAddress(httpServletRequest);
+        if (!service.loginLimitCheck(IP)) {
+            return GeneralResponse.generator(503, "Request too frequently.");
         }
 
         User user = service.selectUser("username", form.getUsername());
@@ -131,6 +141,7 @@ public class UserController {
             response.put("uid", user.getUid());
             return GeneralResponse.generator(200, response);
         } else {
+            service.loginLimitIncrement(IP);
             return GeneralResponse.generator(400, "Username or Password invalid.");
         }
     }
@@ -143,7 +154,6 @@ public class UserController {
 
         response.setCount(creditsLogService.count(uid));
         response.setList(creditsLogService.list(uid, page));
-
         return GeneralResponse.generator(200, response);
     }
 }

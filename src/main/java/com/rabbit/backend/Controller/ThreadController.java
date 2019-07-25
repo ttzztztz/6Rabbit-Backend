@@ -1,10 +1,7 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Thread.*;
-import com.rabbit.backend.Service.AttachService;
-import com.rabbit.backend.Service.NotificationService;
-import com.rabbit.backend.Service.PostService;
-import com.rabbit.backend.Service.ThreadService;
+import com.rabbit.backend.Service.*;
 import com.rabbit.backend.Utilities.FieldErrorResponse;
 import com.rabbit.backend.Utilities.GeneralResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +20,16 @@ public class ThreadController {
     private PostService postService;
     private NotificationService notificationService;
     private AttachService attachService;
+    private CreditsService creditsService;
 
     @Autowired
     public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService,
-                            AttachService attachService) {
+                            AttachService attachService, CreditsService creditsService) {
         this.threadService = threadService;
         this.postService = postService;
         this.notificationService = notificationService;
         this.attachService = attachService;
+        this.creditsService = creditsService;
     }
 
     @GetMapping("/list/{fid}/{page}")
@@ -103,6 +102,7 @@ public class ThreadController {
         }
         attachService.deleteByTid(tid);
         threadService.delete(tid);
+        creditsService.applyRule(uid, "DeleteThread");
         return GeneralResponse.generator(200);
     }
 
@@ -118,6 +118,7 @@ public class ThreadController {
         String tid = threadService.insert(uid, form);
 
         attachService.batchAttachThread(form.getAttach(), tid, uid);
+        creditsService.applyRule(uid, "CreateThread");
         return GeneralResponse.generator(200, tid);
     }
 
@@ -141,7 +142,7 @@ public class ThreadController {
             notificationService.push(uid, threadItem.getUser().getUid(),
                     "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/info/" + tid + "/1");
         }
-
+        creditsService.applyRule(uid, "CreatePost");
         return GeneralResponse.generator(200);
     }
 

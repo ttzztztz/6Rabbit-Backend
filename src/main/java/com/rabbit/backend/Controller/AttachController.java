@@ -15,12 +15,10 @@ import java.util.Map;
 @PreAuthorize("hasAuthority('User')")
 public class AttachController {
     private AttachService attachService;
-    private FileService fileService;
 
     @Autowired
-    public AttachController(AttachService attachService, FileService fileService) {
+    public AttachController(AttachService attachService) {
         this.attachService = attachService;
-        this.fileService = fileService;
     }
 
     @DeleteMapping("/{aid}")

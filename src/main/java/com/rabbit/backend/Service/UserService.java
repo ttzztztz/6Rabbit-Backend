@@ -6,17 +6,30 @@ import com.rabbit.backend.Bean.User.UpdateProfileForm;
 import com.rabbit.backend.Bean.User.User;
 import com.rabbit.backend.DAO.UserDAO;
 import com.rabbit.backend.Security.PasswordUtils;
+import com.rabbit.backend.Utilities.TimestampUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService {
     private UserDAO DAO;
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Value("${rabbit.limit.login}")
+    private int loginLimitPerIP;
+
+    @Value("${rabbit.limit.register}")
+    private int registerLimitPerIP;
 
     @Autowired
-    public UserService(UserDAO userDAO) {
+    public UserService(UserDAO userDAO, StringRedisTemplate stringRedisTemplate) {
         this.DAO = userDAO;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     public User selectUser(String key, String value) {
@@ -56,5 +69,34 @@ public class UserService {
     @Transactional
     public void updateProfile(String uid, UpdateProfileForm form) {
         DAO.updateFields(uid, form);
+    }
+
+    private boolean limitCheck(String rule, String IP, int limit) {
+        String key = "limit:" + rule + ":" + IP;
+        String currentHit = stringRedisTemplate.boundValueOps(key).get();
+        return currentHit == null || Integer.parseInt(currentHit) < limit;
+    }
+
+    private void limitIncrement(String rule, String IP) {
+        String key = "limit:" + rule + ":" + IP;
+        stringRedisTemplate.boundValueOps(key).increment();
+        stringRedisTemplate.boundValueOps(key).expire(TimestampUtil.getDayEndTimestamp() - System.currentTimeMillis()
+                , TimeUnit.MILLISECONDS);
+    }
+
+    public void loginLimitIncrement(String IP) {
+        limitIncrement("login", IP);
+    }
+
+    public void registerLimitIncrement(String IP) {
+        limitIncrement("register", IP);
+    }
+
+    public boolean loginLimitCheck(String IP) {
+        return limitCheck("login", IP, loginLimitPerIP);
+    }
+
+    public boolean registerLimitCheck(String IP) {
+        return limitCheck("register", IP, registerLimitPerIP);
     }
 }

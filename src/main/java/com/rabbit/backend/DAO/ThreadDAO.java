@@ -71,9 +71,9 @@ public interface ThreadDAO {
     @Options(keyProperty = "tid", keyColumn = "tid", useGeneratedKeys = true)
     void insert(ThreadEditorForm thread);
 
-    @Update("UPDATE thread SET firstpid = #{firstpid} WHERE tid = #{tid}")
-    void updateFirstPid(@Param("tid") String tid, @Param("firstpid") String firstpid);
+    @Update("UPDATE thread SET firstpid = #{firstpid}, lastpid = #{firstpid}, lastuid = #{uid} WHERE tid = #{tid}")
+    void updateFirstPid(@Param("tid") String tid, @Param("firstpid") String firstpid, @Param("uid") String uid);
 
-    @Select("SELECT fid FROM table WHERE tid = #{tid}")
+    @Select("SELECT fid FROM thread WHERE tid = #{tid}")
     String fid(@Param("tid") String tid);
 }

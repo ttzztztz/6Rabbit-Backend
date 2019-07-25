@@ -1,7 +1,7 @@
 package com.rabbit.backend.Controller;
 
-import com.rabbit.backend.Bean.Thread.Post;
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
+import com.rabbit.backend.Service.CreditsService;
 import com.rabbit.backend.Service.PostService;
 import com.rabbit.backend.Utilities.FieldErrorResponse;
 import com.rabbit.backend.Utilities.GeneralResponse;
@@ -18,21 +18,24 @@ import java.util.Map;
 @RequestMapping("/post")
 public class PostController {
     private PostService postService;
+    private CreditsService creditsService;
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService, CreditsService creditsService) {
         this.postService = postService;
+        this.creditsService = creditsService;
     }
 
     @DeleteMapping("/{pid}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> delete(@PathVariable("pid") String pid, Authentication authentication) {
-        if (!postService.uid(pid).equals(authentication.getPrincipal())
-                && !authentication.getAuthorities().contains("Admin")
-        ) {
+        String uid = (String) authentication.getPrincipal();
+        if (!postService.uid(pid).equals(uid) && !authentication.getAuthorities().contains("Admin")) {
             return GeneralResponse.generator(403, "Permission denied.");
         }
+
         postService.delete(pid);
+        creditsService.applyRule(uid, "DeleteThread");
         return GeneralResponse.generator(200);
     }
 
