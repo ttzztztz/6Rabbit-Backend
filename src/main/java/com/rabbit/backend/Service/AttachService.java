@@ -2,6 +2,7 @@ package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Attach.Attach;
 import com.rabbit.backend.Bean.Attach.AttachUpload;
+import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import com.rabbit.backend.DAO.AttachDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,10 @@ public class AttachService {
         return attachDAO.findByTid(tid);
     }
 
+    public List<ThreadAttach> threadList(String tid) {
+        return attachDAO.findByTidInThreadlist(tid);
+    }
+
     @Transactional
     public Boolean deleteByTid(String tid) {
         List<Attach> attachList = attachDAO.findByTid(tid);
@@ -70,5 +75,32 @@ public class AttachService {
     public String insert(AttachUpload attachUpload) {
         attachDAO.insert(attachUpload);
         return attachUpload.getAid();
+    }
+
+    public List<Attach> findUnused(String uid) {
+        return attachDAO.findUnused(uid);
+    }
+
+    private void attachThread(String aid, String tid) {
+        attachDAO.updateAttachThread(aid, tid);
+    }
+
+    private Boolean attachAccess(String aid, String uid) {
+        Attach attach = attachDAO.find(aid);
+        return attach.getTid() == null && attach.getUser().getUid().equals(uid);
+    }
+
+    public void batchAttachThread(List<String> attachList, String tid, String uid) {
+        if (attachList != null && attachList.size() != 0) {
+            for (String aid : attachList) {
+                if (this.attachAccess(aid, uid)) {
+                    this.attachThread(aid, tid);
+                }
+            }
+        }
+    }
+
+    public Attach find(String aid) {
+        return attachDAO.find(aid);
     }
 }

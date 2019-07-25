@@ -81,6 +81,7 @@ public class ThreadController {
         response.setThread(threadService.info(tid));
         response.setPostList(postService.list(tid, page));
         response.setFirstPost(postService.firstPost(tid));
+        response.setAttachList(attachService.threadList(tid));
 
         return GeneralResponse.generator(200, response);
     }
@@ -115,6 +116,8 @@ public class ThreadController {
 
         String uid = (String) authentication.getPrincipal();
         String tid = threadService.insert(uid, form);
+
+        attachService.batchAttachThread(form.getAttach(), tid, uid);
         return GeneralResponse.generator(200, tid);
     }
 
@@ -150,12 +153,12 @@ public class ThreadController {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
-        String threadUid = threadService.uid(tid);
-
-        if (!threadUid.equals(uid) && !authentication.getAuthorities().contains("Admin")) {
+        if (!threadService.uid(tid).equals(uid)
+                && !authentication.getAuthorities().contains("Admin")) {
             return GeneralResponse.generator(403, "Permission denied.");
         }
 
+        attachService.batchAttachThread(form.getAttach(), tid, uid);
         threadService.update(tid, form.getFid(), form.getSubject(), form.getMessage());
         return GeneralResponse.generator(200);
     }

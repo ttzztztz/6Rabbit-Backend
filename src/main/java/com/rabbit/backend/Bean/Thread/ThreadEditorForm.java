@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.SafeHtml;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
 public class ThreadEditorForm {
@@ -23,4 +24,6 @@ public class ThreadEditorForm {
     @NotBlank
     @SafeHtml(whitelistType = SafeHtml.WhiteListType.RELAXED)
     private String message;
+
+    private List<String> attach;
 }

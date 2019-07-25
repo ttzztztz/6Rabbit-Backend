@@ -6,10 +6,7 @@ import com.rabbit.backend.Utilities.GeneralResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -36,5 +33,9 @@ public class AttachController {
         return GeneralResponse.generator(attachService.deleteByAid(aid) ? 200 : 400);
     }
 
-
+    @GetMapping("/unused")
+    public Map<String, Object> unused(Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        return GeneralResponse.generator(200, attachService.findUnused(uid));
+    }
 }

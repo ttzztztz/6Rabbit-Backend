@@ -22,6 +22,7 @@ public class RabbitControllerAdvice {
 
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleException(HttpServletRequest request, Exception ex) {
         return GeneralResponse.generator(500, ex.getMessage());
     }

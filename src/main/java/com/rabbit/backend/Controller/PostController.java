@@ -27,10 +27,7 @@ public class PostController {
     @DeleteMapping("/{pid}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> delete(@PathVariable("pid") String pid, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        Post post = postService.find(pid);
-
-        if (!post.getUser().getUid().equals(uid)
+        if (!postService.uid(pid).equals(authentication.getPrincipal())
                 && !authentication.getAuthorities().contains("Admin")
         ) {
             return GeneralResponse.generator(403, "Permission denied.");
@@ -46,10 +43,9 @@ public class PostController {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
-        String uid = (String) authentication.getPrincipal();
-        String postUid = postService.uid(pid);
 
-        if (!postUid.equals(uid) && !authentication.getAuthorities().contains("Admin")) {
+        if (!postService.uid(pid).equals(authentication.getPrincipal())
+                && !authentication.getAuthorities().contains("Admin")) {
             return GeneralResponse.generator(403, "Permission denied.");
         }
 

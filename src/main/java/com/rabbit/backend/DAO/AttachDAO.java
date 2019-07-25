@@ -2,6 +2,7 @@ package com.rabbit.backend.DAO;
 
 import com.rabbit.backend.Bean.Attach.Attach;
 import com.rabbit.backend.Bean.Attach.AttachUpload;
+import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +28,21 @@ public interface AttachDAO {
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<Attach> findByTid(@Param("tid") String tid);
+
+    @Select("SELECT * FROM attach WHERE tid = #{tid}")
+    List<ThreadAttach> findByTidInThreadlist(@Param("tid") String tid);
+
+    @Select("SELECT * FROM attach WHERE uid = #{uid} AND tid IS NULL")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
+    })
+    List<Attach> findUnused(@Param("uid") String uid);
+
+    @Select("SELECT * FROM attach WHERE tid IS NULL")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
+    })
+    List<Attach> findAllUnused();
 
     @Select("SELECT COUNT(*) FROM attach WHERE tid = #{tid}")
     Integer threadAttachCount(@Param("tid") String tid);
