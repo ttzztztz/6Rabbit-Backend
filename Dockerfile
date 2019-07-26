@@ -13,7 +13,6 @@ RUN chmod 777 ./mvnw && ./mvnw install -DskipTests
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 # Step 2
-
 FROM openjdk:12-alpine
 
 ARG DEPENDENCY=/var/rabbit/target/dependency

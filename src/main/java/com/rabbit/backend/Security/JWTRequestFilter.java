@@ -20,14 +20,19 @@ public class JWTRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException, ExpiredJwtException {
         String token = request.getHeader("Authorization");
 
-        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UsernamePasswordAuthenticationToken authentication = JWTUtils.verify(token);
+        try {
+            if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UsernamePasswordAuthenticationToken authentication = JWTUtils.verify(token);
 
-            if (authentication != null) {
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (authentication != null) {
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
+        } catch (Exception e) {
+            // do nothing...
         }
+
 
         chain.doFilter(request, response);
     }
