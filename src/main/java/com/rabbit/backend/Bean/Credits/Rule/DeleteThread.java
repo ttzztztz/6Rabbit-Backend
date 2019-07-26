@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
 public class DeleteThread extends CreditsRule {
 
     public DeleteThread() {
-        super(-1, -1, 0, -1);
+        super(-1, -1, 0, -1, false);
     }
 }

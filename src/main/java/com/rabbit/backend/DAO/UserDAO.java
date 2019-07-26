@@ -1,10 +1,7 @@
 package com.rabbit.backend.DAO;
 
 import com.rabbit.backend.Bean.Credits.CreditsRule;
-import com.rabbit.backend.Bean.User.MyUser;
-import com.rabbit.backend.Bean.User.OtherUser;
-import com.rabbit.backend.Bean.User.UpdateProfileForm;
-import com.rabbit.backend.Bean.User.User;
+import com.rabbit.backend.Bean.User.*;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -52,9 +49,15 @@ public interface UserDAO {
     void updateFields(@Param("uid") String uid, @Param("form") UpdateProfileForm form);
 
     @Update("UPDATE user SET " +
-            "credits = credits + ${rule.credits}," +
-            "golds = golds + ${rule.golds}," +
+            "credits = credits + ${rule.credits}, " +
+            "golds = golds + ${rule.golds}, " +
             "rmbs = rmbs + ${rule.rmbs}" +
             " WHERE uid = #{uid}")
     void applyRule(@Param("uid") String uid, @Param("rule") CreditsRule rule);
+
+    @Update("UPDATE user SET ${creditsType} = #{credits} WHERE uid = #{uid}")
+    void decreaseCredits(@Param("uid") String uid, @Param("creditsType") String creditsType, @Param("credits") String credits);
+
+    @Select("SELECT uid, credits, golds, rmbs FROM user WHERE uid = #{uid}")
+    UserCredits readCredits(@Param("uid") String uid);
 }

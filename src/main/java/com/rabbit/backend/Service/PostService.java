@@ -3,9 +3,7 @@ package com.rabbit.backend.Service;
 import com.rabbit.backend.Bean.Thread.Post;
 import com.rabbit.backend.DAO.PostDAO;
 import com.rabbit.backend.DAO.StaticDAO;
-import com.rabbit.backend.DAO.ThreadDAO;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
-import com.rabbit.backend.Utilities.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,16 +14,14 @@ import java.util.List;
 @Service
 public class PostService {
     private PostDAO postDAO;
-    private ThreadDAO threadDAO;
     private StaticDAO staticDAO;
 
     @Value("${rabbit.pagesize}")
     private Integer PAGESIZE;
 
     @Autowired
-    public PostService(PostDAO postDAO, ThreadDAO threadDAO, StaticDAO staticDAO) {
+    public PostService(PostDAO postDAO, StaticDAO staticDAO) {
         this.postDAO = postDAO;
-        this.threadDAO = threadDAO;
         this.staticDAO = staticDAO;
     }
 

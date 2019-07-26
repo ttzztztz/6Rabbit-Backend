@@ -1,6 +1,6 @@
 package com.rabbit.backend.DAO;
 
-import com.rabbit.backend.Bean.User.CreditsLog;
+import com.rabbit.backend.Bean.Credits.CreditsLog;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 

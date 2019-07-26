@@ -1,7 +1,8 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
-import com.rabbit.backend.Service.CreditsService;
+import com.rabbit.backend.Service.PayService;
+import com.rabbit.backend.Service.RuleService;
 import com.rabbit.backend.Service.PostService;
 import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
@@ -18,12 +19,12 @@ import java.util.Map;
 @RequestMapping("/post")
 public class PostController {
     private PostService postService;
-    private CreditsService creditsService;
+    private RuleService ruleService;
 
     @Autowired
-    public PostController(PostService postService, CreditsService creditsService) {
+    public PostController(PostService postService, RuleService ruleService) {
         this.postService = postService;
-        this.creditsService = creditsService;
+        this.ruleService = ruleService;
     }
 
     @DeleteMapping("/{pid}")
@@ -35,7 +36,7 @@ public class PostController {
         }
 
         postService.delete(pid);
-        creditsService.applyRule(uid, "DeleteThread");
+        ruleService.applyRule(uid, "DeleteThread");
         return GeneralResponse.generator(200);
     }
 

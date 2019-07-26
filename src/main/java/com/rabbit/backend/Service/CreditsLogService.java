@@ -1,6 +1,6 @@
 package com.rabbit.backend.Service;
 
-import com.rabbit.backend.Bean.User.CreditsLog;
+import com.rabbit.backend.Bean.Credits.CreditsLog;
 import com.rabbit.backend.DAO.CreditsLogDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

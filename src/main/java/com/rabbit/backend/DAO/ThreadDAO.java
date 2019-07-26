@@ -1,5 +1,6 @@
 package com.rabbit.backend.DAO;
 
+import com.rabbit.backend.Bean.Credits.CreditsPay;
 import com.rabbit.backend.Bean.Thread.ThreadEditorForm;
 import com.rabbit.backend.Bean.Thread.ThreadItem;
 import com.rabbit.backend.Bean.Thread.ThreadListItem;
@@ -25,6 +26,13 @@ public interface ThreadDAO {
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
     })
     ThreadItem find(@Param("tid") String tid);
+
+    @Select("SELECT * FROM thread WHERE tid = #{tid}")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
+    })
+    ThreadListItem findThreadListItem(@Param("tid") String tid);
 
     @Select("SELECT * FROM thread WHERE fid = #{fid} ORDER BY lastpid DESC LIMIT ${from},${to}")
     @Results({

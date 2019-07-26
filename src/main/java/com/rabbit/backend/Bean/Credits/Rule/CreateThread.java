@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
 public class CreateThread extends CreditsRule {
 
     public CreateThread() {
-        super(1, 1, 0, 3);
+        super(1, 1, 0, 3, false);
     }
 }

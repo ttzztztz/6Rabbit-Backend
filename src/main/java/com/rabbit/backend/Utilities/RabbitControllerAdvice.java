@@ -1,5 +1,6 @@
 package com.rabbit.backend.Utilities;
 
+import com.rabbit.backend.Utilities.Exceptions.NotEnoughCreditsException;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,13 @@ public class RabbitControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, Object> handleNotFoundException(HttpServletRequest request, NotFoundException ex) {
         return GeneralResponse.generator(404, ex.getErrMessage());
+    }
+
+    @ExceptionHandler(value = NotEnoughCreditsException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, Object> handleNotEnoughCreditsException(HttpServletRequest request, NotEnoughCreditsException ex) {
+        return GeneralResponse.generator(ex.getCode(), ex.getErrMessage());
     }
 
     @ExceptionHandler(value = Exception.class)

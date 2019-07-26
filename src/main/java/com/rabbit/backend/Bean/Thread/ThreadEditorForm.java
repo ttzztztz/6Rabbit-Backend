@@ -1,5 +1,6 @@
 package com.rabbit.backend.Bean.Thread;
 
+import com.rabbit.backend.Bean.Attach.ThreadAttachForm;
 import com.rabbit.backend.Utilities.SafeHtml;
 import lombok.Data;
 
@@ -24,7 +25,7 @@ public class ThreadEditorForm {
     @NotBlank
     private String message;
 
-    private List<String> attach;
+    private List<ThreadAttachForm> attach;
 
     public String getMessage() {
         return SafeHtml.sanitize(this.message);

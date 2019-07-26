@@ -20,16 +20,18 @@ public class ThreadController {
     private PostService postService;
     private NotificationService notificationService;
     private AttachService attachService;
-    private CreditsService creditsService;
+    private RuleService ruleService;
+    private PayService payService;
 
     @Autowired
     public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService,
-                            AttachService attachService, CreditsService creditsService) {
+                            AttachService attachService, RuleService ruleService, PayService payService) {
         this.threadService = threadService;
         this.postService = postService;
         this.notificationService = notificationService;
         this.attachService = attachService;
-        this.creditsService = creditsService;
+        this.ruleService = ruleService;
+        this.payService = payService;
     }
 
     @GetMapping("/list/{fid}/{page}")
@@ -74,13 +76,26 @@ public class ThreadController {
     }
 
     @GetMapping("/{tid}/{page}")
-    public Map<String, Object> info(@PathVariable("tid") String tid, @PathVariable("page") Integer page) {
-        ThreadInfoResponse response = new ThreadInfoResponse();
+    public Map<String, Object> info(@PathVariable("tid") String tid, @PathVariable("page") Integer page,
+                                    Authentication authentication) {
+        String uid = authentication == null ? null : (String) authentication.getPrincipal();
 
-        response.setThread(threadService.info(tid));
+        ThreadInfoResponse response = new ThreadInfoResponse();
+        ThreadItem threadItem = threadService.info(tid);
+        response.setThread(threadItem);
         response.setPostList(postService.list(tid, page));
-        response.setFirstPost(postService.firstPost(tid));
+
+        Post firstPost = postService.firstPost(tid);
+        response.setFirstPost(firstPost);
         response.setAttachList(attachService.threadList(tid));
+
+        if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0
+                && (uid == null || payService.userThreadNeedPay(uid, tid))) {
+            firstPost.setMessage("");
+            response.setNeedBuy(true);
+        } else {
+            response.setNeedBuy(false);
+        }
 
         return GeneralResponse.generator(200, response);
     }
@@ -102,7 +117,7 @@ public class ThreadController {
         }
         attachService.deleteByTid(tid);
         threadService.delete(tid);
-        creditsService.applyRule(uid, "DeleteThread");
+        ruleService.applyRule(uid, "DeleteThread");
         return GeneralResponse.generator(200);
     }
 
@@ -118,7 +133,7 @@ public class ThreadController {
         String tid = threadService.insert(uid, form);
 
         attachService.batchAttachThread(form.getAttach(), tid, uid);
-        creditsService.applyRule(uid, "CreateThread");
+        ruleService.applyRule(uid, "CreateThread");
         return GeneralResponse.generator(200, tid);
     }
 
@@ -137,12 +152,16 @@ public class ThreadController {
             return GeneralResponse.generator(400, "Thread already closed.");
         }
 
+        if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0 && payService.userThreadNeedPay(uid, tid)) {
+            return GeneralResponse.generator(403, "Purchase thread first.");
+        }
+
         threadService.reply(tid, form, uid);
         if (!uid.equals(threadItem.getUser().getUid())) {
             notificationService.push(uid, threadItem.getUser().getUid(),
                     "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/info/" + tid + "/1");
         }
-        creditsService.applyRule(uid, "CreatePost");
+        ruleService.applyRule(uid, "CreatePost");
         return GeneralResponse.generator(200);
     }
 
@@ -162,5 +181,20 @@ public class ThreadController {
         attachService.batchAttachThread(form.getAttach(), tid, uid);
         threadService.update(tid, form.getFid(), form.getSubject(), form.getMessage());
         return GeneralResponse.generator(200);
+    }
+
+    @GetMapping("/pay/{tid}")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> pay(@PathVariable("tid") String tid, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        if (payService.userThreadNeedPay(uid, tid)) {
+            if (payService.purchaseThread(uid, tid)) {
+                return GeneralResponse.generator(200);
+            } else {
+                return GeneralResponse.generator(400, "Credits Not Enough.");
+            }
+        } else {
+            return GeneralResponse.generator(200);
+        }
     }
 }

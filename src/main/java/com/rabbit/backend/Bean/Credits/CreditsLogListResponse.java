@@ -1,4 +1,4 @@
-package com.rabbit.backend.Bean.User;
+package com.rabbit.backend.Bean.Credits;
 
 import lombok.Data;
 

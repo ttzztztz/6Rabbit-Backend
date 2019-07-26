@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
 public class CreatePost extends CreditsRule {
 
     public CreatePost() {
-        super(1, 1, 0, 3);
+        super(1, 1, 0, 3, false);
     }
 }

@@ -1,14 +1,16 @@
 package com.rabbit.backend.Controller;
 
+import com.rabbit.backend.Bean.Credits.CreditsLogListResponse;
 import com.rabbit.backend.Bean.User.*;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Security.PasswordUtils;
 import com.rabbit.backend.Service.CreditsLogService;
+import com.rabbit.backend.Service.PayService;
 import com.rabbit.backend.Service.UserService;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
+import com.rabbit.backend.Utilities.IPUtil;
 import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
-import com.rabbit.backend.Utilities.IPUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -23,18 +25,20 @@ import java.util.Map;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    private UserService service;
+    private UserService userService;
     private CreditsLogService creditsLogService;
+    private PayService payService;
 
     @Autowired
-    public UserController(UserService userService, CreditsLogService creditsLogService) {
-        this.service = userService;
+    public UserController(UserService userService, CreditsLogService creditsLogService, PayService payService) {
+        this.userService = userService;
         this.creditsLogService = creditsLogService;
+        this.payService = payService;
     }
 
     @GetMapping("/info/{uid}")
     public OtherUser info(@PathVariable("uid") String uid) {
-        OtherUser user = service.selectOtherUserByUid(uid);
+        OtherUser user = userService.selectOtherUserByUid(uid);
         if (user == null) {
             throw new NotFoundException(1, "user doesn't Exist");
         }
@@ -48,12 +52,12 @@ public class UserController {
         }
 
         String IP = IPUtil.getIPAddress();
-        if (!service.registerLimitCheck(IP)) {
+        if (!userService.registerLimitCheck(IP)) {
             return GeneralResponse.generator(503, "Request too frequently.");
         }
 
-        Boolean usernameExistenceCheck = service.exist("username", form.getUsername());
-        Boolean emailExistenceCheck = service.exist("email", form.getEmail());
+        Boolean usernameExistenceCheck = userService.exist("username", form.getUsername());
+        Boolean emailExistenceCheck = userService.exist("email", form.getEmail());
         if (usernameExistenceCheck) {
             return GeneralResponse.generator(400, "Username already exist.");
         }
@@ -62,8 +66,8 @@ public class UserController {
             return GeneralResponse.generator(400, "Email already exist.");
         }
 
-        String uid = service.register(form.getUsername(), form.getPassword(), form.getEmail());
-        service.registerLimitIncrement(IP);
+        String uid = userService.register(form.getUsername(), form.getPassword(), form.getEmail());
+        userService.registerLimitIncrement(IP);
         return GeneralResponse.generator(200, uid);
     }
 
@@ -77,7 +81,7 @@ public class UserController {
 
         String uid = (String) authentication.getPrincipal();
 
-        User user = service.selectUser("uid", uid);
+        User user = userService.selectUser("uid", uid);
         if (user == null) {
             return GeneralResponse.generator(400, "Username or Password invalid.");
         }
@@ -88,7 +92,7 @@ public class UserController {
         if (!checkResult) {
             return GeneralResponse.generator(400, "Username or Password invalid.");
         }
-        service.updatePassword(uid, form.getNewPassword());
+        userService.updatePassword(uid, form.getNewPassword());
         return GeneralResponse.generator(200);
     }
 
@@ -101,7 +105,7 @@ public class UserController {
         }
         String uid = (String) authentication.getPrincipal();
 
-        service.updateProfile(uid, form);
+        userService.updateProfile(uid, form);
         return GeneralResponse.generator(200);
     }
 
@@ -109,7 +113,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> myProfile(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        MyUser user = service.selectMyUser("uid", uid);
+        MyUser user = userService.selectMyUser("uid", uid);
 
         return GeneralResponse.generator(200, user);
     }
@@ -121,11 +125,11 @@ public class UserController {
         }
 
         String IP = IPUtil.getIPAddress();
-        if (!service.loginLimitCheck(IP)) {
+        if (!userService.loginLimitCheck(IP)) {
             return GeneralResponse.generator(503, "Request too frequently.");
         }
 
-        User user = service.selectUser("username", form.getUsername());
+        User user = userService.selectUser("username", form.getUsername());
         if (user == null) {
             return GeneralResponse.generator(400, "Username or Password invalid.");
         }
@@ -140,19 +144,33 @@ public class UserController {
             response.put("uid", user.getUid());
             return GeneralResponse.generator(200, response);
         } else {
-            service.loginLimitIncrement(IP);
+            userService.loginLimitIncrement(IP);
             return GeneralResponse.generator(400, "Username or Password invalid.");
         }
     }
 
     @GetMapping("/credits/log/{page}")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> creditsLog(Authentication authentication, @PathVariable("page") Integer page) {
+    public Map<String, Object> creditsLog(@PathVariable("page") Integer page, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         CreditsLogListResponse response = new CreditsLogListResponse();
 
         response.setCount(creditsLogService.count(uid));
         response.setList(creditsLogService.list(uid, page));
         return GeneralResponse.generator(200, response);
+    }
+
+    @GetMapping("/purchased/threads/{page}")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> purchasedThread(@PathVariable("page") Integer page, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        return GeneralResponse.generator(200, payService.threadPurchasedList(uid, page));
+    }
+
+    @GetMapping("/purchased/attach/{page}")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> purchasedAttach(@PathVariable("page") Integer page, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        return GeneralResponse.generator(200, payService.attachPurchasedList(uid, page));
     }
 }

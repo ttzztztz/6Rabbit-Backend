@@ -11,4 +11,5 @@ public class ThreadInfoResponse {
     private List<Post> postList;
     private Post firstPost;
     private List<ThreadAttach> attachList;
+    private Boolean needBuy;
 }

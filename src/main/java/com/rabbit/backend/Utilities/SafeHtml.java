@@ -1,8 +1,8 @@
 package com.rabbit.backend.Utilities;
 
+import com.google.common.base.Predicate;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
-import com.google.common.base.Predicate;
 
 import java.util.regex.Pattern;
 

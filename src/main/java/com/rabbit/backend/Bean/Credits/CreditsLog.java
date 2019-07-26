@@ -1,5 +1,6 @@
-package com.rabbit.backend.Bean.User;
+package com.rabbit.backend.Bean.Credits;
 
+import com.rabbit.backend.Bean.User.OtherUser;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,7 @@
 package com.rabbit.backend.DAO;
 
 import com.rabbit.backend.Bean.Attach.Attach;
+import com.rabbit.backend.Bean.Attach.AttachPayListItem;
 import com.rabbit.backend.Bean.Attach.AttachUpload;
 import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import org.apache.ibatis.annotations.*;
@@ -56,10 +57,18 @@ public interface AttachDAO {
     @Delete("DELETE FROM attach WHERE tid = #{tid}")
     void deleteByTid(@Param("tid") String tid);
 
-    @Update("UPDATE attach SET tid = #{tid} WHERE aid = #{aid}")
-    void updateAttachThread(@Param("aid") String aid, @Param("tid") String tid);
+    @Update("UPDATE attach SET tid = #{tid}, creditsType = #{creditsType}, credits = #{credits} " +
+            "WHERE aid = #{aid}")
+    void updateAttachThread(@Param("aid") String aid, @Param("tid") String tid,
+                            @Param("creditsType") Integer creditsType, @Param("credits") Integer credits);
 
     @Insert("INSERT INTO attach(uid, fileSize, fileName, originalName) VALUES (#{uid}, #{fileSize}, #{fileName}, #{originalName})")
     @Options(keyColumn = "aid", keyProperty = "aid", useGeneratedKeys = true)
     void insert(AttachUpload attachUpload);
+
+    @Select("SELECT * FROM attach WHERE aid = #{aid}")
+    @Results({
+            @Result(property = "tid", column = "tid", one = @One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
+    })
+    AttachPayListItem findAttachPayListItem(@Param("aid") String aid);
 }

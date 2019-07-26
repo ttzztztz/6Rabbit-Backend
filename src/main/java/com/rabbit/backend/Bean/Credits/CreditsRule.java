@@ -4,16 +4,18 @@ import lombok.Data;
 
 @Data
 public abstract class CreditsRule {
-    private int credits = 0;
-    private int golds = 0;
-    private int rmbs = 0;
+    private int credits;
+    private int golds;
+    private int rmbs;
 
-    private int dailyLimit = 3;
+    private int dailyLimit;
+    private boolean aboveZero;
 
-    public CreditsRule(int credits, int golds, int rmbs, int dailyLimit) {
+    public CreditsRule(int credits, int golds, int rmbs, int dailyLimit, boolean aboveZero) {
         this.credits = credits;
         this.golds = golds;
         this.rmbs = rmbs;
         this.dailyLimit = dailyLimit;
+        this.aboveZero = aboveZero;
     }
 }

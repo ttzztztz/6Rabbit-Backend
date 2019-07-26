@@ -21,4 +21,7 @@ public abstract class Thread {
     private String lastpid;
     private Date createDate;
     private Date replyDate;
+
+    private Integer creditsType;
+    private Integer credits;
 }

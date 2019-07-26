@@ -3,6 +3,7 @@ package com.rabbit.backend.Service;
 import com.rabbit.backend.Bean.Attach.Attach;
 import com.rabbit.backend.Bean.Attach.AttachUpload;
 import com.rabbit.backend.Bean.Attach.ThreadAttach;
+import com.rabbit.backend.Bean.Attach.ThreadAttachForm;
 import com.rabbit.backend.DAO.AttachDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -70,8 +71,8 @@ public class AttachService {
         }
     }
 
-    public void updateAttachThread(String aid, String tid) {
-        attachDAO.updateAttachThread(aid, tid);
+    public void updateAttachThread(String aid, String tid, Integer creditsType, Integer credits) {
+        attachDAO.updateAttachThread(aid, tid, creditsType, credits);
     }
 
     public Integer threadAttachCount(String tid) {
@@ -95,8 +96,8 @@ public class AttachService {
         return attachDAO.findUnused(uid);
     }
 
-    private void attachThread(String aid, String tid) {
-        attachDAO.updateAttachThread(aid, tid);
+    private void attachThread(String aid, String tid, Integer creditsType, Integer credits) {
+        attachDAO.updateAttachThread(aid, tid, creditsType, credits);
     }
 
     private Boolean attachAccess(String aid, String uid) {
@@ -104,11 +105,12 @@ public class AttachService {
         return attach.getTid() == null && attach.getUser().getUid().equals(uid);
     }
 
-    public void batchAttachThread(List<String> attachList, String tid, String uid) {
+    public void batchAttachThread(List<ThreadAttachForm> attachList, String tid, String uid) {
         if (attachList != null && attachList.size() != 0) {
-            for (String aid : attachList) {
-                if (this.attachAccess(aid, uid)) {
-                    this.attachThread(aid, tid);
+            for (ThreadAttachForm attachForm : attachList) {
+                if (this.attachAccess(attachForm.getAid(), uid)) {
+                    this.attachThread(attachForm.getAid(), tid,
+                            attachForm.getCreditsType(), attachForm.getCredits());
                 }
             }
         }

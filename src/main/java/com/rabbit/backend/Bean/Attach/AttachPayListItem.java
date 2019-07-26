@@ -1,22 +1,19 @@
 package com.rabbit.backend.Bean.Attach;
 
-import com.rabbit.backend.Bean.User.OtherUser;
+import com.rabbit.backend.Bean.Thread.ThreadListItem;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component("attach")
+@Component
 @Data
-public class Attach {
+public class AttachPayListItem {
     private String aid;
-    private String tid;
-    private OtherUser user;
+    private ThreadListItem thread;
     private Integer fileSize;
     private Integer downloads;
     private String fileName;
     private String originalName;
-    private Integer creditsType;
-    private Integer credits;
     private Date createDate;
 }
