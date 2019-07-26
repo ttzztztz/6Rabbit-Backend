@@ -1,5 +1,5 @@
 # Step 1
-FROM openjdk:12-oracle AS build
+FROM openjdk:12-alpine AS build
 
 RUN mkdir -p /var/rabbit
 WORKDIR /var/rabbit
@@ -9,7 +9,7 @@ COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
 
-RUN chmod 777 ./mvnw && sudo ./mvnw install -DskipTests
+RUN chmod 777 ./mvnw && ./mvnw install -DskipTests
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 # Step 2
