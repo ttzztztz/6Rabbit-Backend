@@ -25,9 +25,12 @@ public interface ThreadPayDAO {
     @Select("SELECT COUNT(*) FROM thread_pay_log WHERE tid = #{tid}")
     Integer countByTid(@Param("tid") String tid);
 
-    @Select("SELECT tid FROM thread_pay_log WHERE uid = #{uid} ORDER BY createDate LIMIT ${from},${to}")
+    @Select("SELECT thread.* FROM thread_pay_log " +
+            "INNER JOIN thread ON `thread_pay_log`.`tid` = `thread`.`tid` " +
+            "WHERE thread_pay_log.uid = #{uid} ORDER BY thread_pay_log.createDate LIMIT ${from},${to}")
     @Results({
-            @Result(column = "tid", property = "tid", one = @One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<ThreadListItem> findByUid(@Param("uid") String uid,
                                    @Param("from") Integer from, @Param("to") Integer to);

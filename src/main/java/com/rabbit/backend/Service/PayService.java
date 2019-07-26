@@ -1,7 +1,7 @@
 package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Attach.Attach;
-import com.rabbit.backend.Bean.Attach.AttachPayListItem;
+import com.rabbit.backend.Bean.Attach.AttachListItem;
 import com.rabbit.backend.Bean.Credits.AttachPayLog;
 import com.rabbit.backend.Bean.Credits.CreditsPay;
 import com.rabbit.backend.Bean.Credits.ThreadPayLog;
@@ -77,7 +77,7 @@ public class PayService {
         return threadPayDAO.findByUid(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
     }
 
-    public List<AttachPayListItem> attachPurchasedList(String uid, Integer page) {
+    public List<AttachListItem> attachPurchasedList(String uid, Integer page) {
         return attachPayDAO.findByUid(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
     }
 
@@ -95,8 +95,8 @@ public class PayService {
         attachPayDAO.insert(attachPayLog);
     }
 
-    private Boolean decreasePurchaseCredits(String uid, CreditsPay creditsPay) {
-        MyUser user = userDAO.findMy("uid", uid);
+    private Boolean decreasePurchaseCredits(String buyerUid, String sellerUid, CreditsPay creditsPay) {
+        MyUser user = userDAO.findMy("uid", buyerUid);
         switch (creditsPay.getCreditsType()) {
             case 0:
                 return true;
@@ -104,21 +104,24 @@ public class PayService {
                 if (user.getCredits() < creditsPay.getCredits()) {
                     return false;
                 } else {
-                    userDAO.decreaseCredits(uid, "credits", creditsPay.getCredits().toString());
+                    userDAO.decreaseCredits(buyerUid, "credits", creditsPay.getCredits());
+                    userDAO.increaseCredits(sellerUid, "credits", creditsPay.getCredits());
                     return true;
                 }
             case 2:
                 if (user.getGolds() < creditsPay.getCredits()) {
                     return false;
                 } else {
-                    userDAO.decreaseCredits(uid, "golds", creditsPay.getCredits().toString());
+                    userDAO.decreaseCredits(buyerUid, "golds", creditsPay.getCredits());
+                    userDAO.increaseCredits(sellerUid, "golds", creditsPay.getCredits());
                     return true;
                 }
             case 3:
                 if (user.getRmbs() < creditsPay.getCredits()) {
                     return false;
                 } else {
-                    userDAO.decreaseCredits(uid, "rmbs", creditsPay.getCredits().toString());
+                    userDAO.decreaseCredits(buyerUid, "rmbs", creditsPay.getCredits());
+                    userDAO.increaseCredits(sellerUid, "rmbs", creditsPay.getCredits());
                     return true;
                 }
             default:
@@ -127,23 +130,23 @@ public class PayService {
     }
 
     @Transactional
-    public Boolean purchaseThread(String uid, String tid) {
+    public Boolean purchaseThread(String buyerUid, String sellerUid, String tid) {
         CreditsPay creditsPay = threadPayDAO.creditsPay(tid);
-        if (!decreasePurchaseCredits(uid, creditsPay)) {
+        if (!decreasePurchaseCredits(buyerUid, sellerUid, creditsPay)) {
             return false;
         } else {
-            insertPurchaseThread(uid, tid);
+            insertPurchaseThread(buyerUid, tid);
             return true;
         }
     }
 
     @Transactional
-    public Boolean purchaseAttach(String uid, String aid) {
+    public Boolean purchaseAttach(String buyerUid, String sellerUid, String aid) {
         CreditsPay creditsPay = attachPayDAO.creditsPay(aid);
-        if (!decreasePurchaseCredits(uid, creditsPay)) {
+        if (!decreasePurchaseCredits(buyerUid, sellerUid, creditsPay)) {
             return false;
         } else {
-            insertPurchaseAttach(uid, aid);
+            insertPurchaseAttach(buyerUid, aid);
             return true;
         }
     }

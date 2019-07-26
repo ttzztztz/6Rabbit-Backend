@@ -71,9 +71,9 @@ public class FileController {
             avatarInputStream.close();
             fileOutputStream.close();
             avatar.delete();
-            return GeneralResponse.generator(200);
+            return GeneralResponse.generate(200);
         } catch (IOException e) {
-            return GeneralResponse.generator(500, e.getMessage());
+            return GeneralResponse.generate(500, e.getMessage());
         }
     }
 
@@ -83,7 +83,7 @@ public class FileController {
         String uid = (String) authentication.getPrincipal();
         Integer unusedAttaches = attachService.userUnusedAttachCount(uid);
         if (unusedAttaches >= maxUnusedAttachCountPerUser) {
-            return GeneralResponse.generator(400, "User max unused attach count exceed.");
+            return GeneralResponse.generate(400, "User max unused attach count exceed.");
         }
 
         try {
@@ -102,9 +102,9 @@ public class FileController {
             attachUpload.setFileSize(((Long) file.length()).intValue());
             attachUpload.setOriginalName(attach.getSubmittedFileName());
             String aid = attachService.insert(attachUpload);
-            return GeneralResponse.generator(200, aid);
+            return GeneralResponse.generate(200, aid);
         } catch (IOException e) {
-            return GeneralResponse.generator(500, e.getMessage());
+            return GeneralResponse.generate(500, e.getMessage());
         }
     }
 
@@ -117,13 +117,12 @@ public class FileController {
             return;
         }
         String uid = (String) jwt.getPrincipal();
-
         Attach attach = attachService.find(aid);
+
         if (attach == null || attach.getTid() == null) {
             response.setStatus(404);
             return;
         }
-
         if (!payService.userAttachDownloadAccess(uid, attach, attach.getTid())) {
             response.setStatus(403);
             return;

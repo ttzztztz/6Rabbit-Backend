@@ -28,29 +28,30 @@ public class AttachController {
         String uid = (String) authentication.getPrincipal();
         String attachUid = attachService.uid(aid);
         if (!attachUid.equals(uid) && !authentication.getAuthorities().contains("Admin")) {
-            return GeneralResponse.generator(403, "Permission denied.");
+            return GeneralResponse.generate(403, "Permission denied.");
         }
-        return GeneralResponse.generator(attachService.deleteByAid(aid) ? 200 : 400);
+        return GeneralResponse.generate(attachService.deleteByAid(aid) ? 200 : 400);
     }
 
     @GetMapping("/unused")
     public Map<String, Object> unused(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        return GeneralResponse.generator(200, attachService.findUnused(uid));
+        return GeneralResponse.generate(200, attachService.findUnused(uid));
     }
 
     @GetMapping("/pay/{aid}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> pay(@PathVariable("aid") String aid, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        if (payService.userAttachNeedPay(uid, aid)) {
-            if (payService.purchaseAttach(uid, aid)) {
-                return GeneralResponse.generator(200);
+        String buyerUid = (String) authentication.getPrincipal();
+        String sellerUid = attachService.uid(aid);
+        if (payService.userAttachNeedPay(buyerUid, aid)) {
+            if (payService.purchaseAttach(buyerUid, sellerUid, aid)) {
+                return GeneralResponse.generate(200);
             } else {
-                return GeneralResponse.generator(400, "Credits Not Enough.");
+                return GeneralResponse.generate(400, "Credits Not Enough.");
             }
         } else {
-            return GeneralResponse.generator(200);
+            return GeneralResponse.generate(200);
         }
     }
 }

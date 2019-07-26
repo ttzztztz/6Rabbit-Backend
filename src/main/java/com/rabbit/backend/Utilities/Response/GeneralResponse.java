@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class GeneralResponse {
 
-    public static Map<String, Object> generator(Integer code, Object message) {
+    public static Map<String, Object> generate(Integer code, Object message) {
         Map<String, Object> result = new HashMap<>();
 
         result.put("code", code);
@@ -14,7 +14,7 @@ public class GeneralResponse {
         return result;
     }
 
-    public static Map<String, Object> generator(Integer code) {
+    public static Map<String, Object> generate(Integer code) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", code);
 

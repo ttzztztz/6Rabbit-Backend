@@ -39,40 +39,40 @@ public class ThreadController {
         ThreadListResponse threadListResponse = new ThreadListResponse();
         threadListResponse.setForum(threadService.forum(fid));
         threadListResponse.setList(threadService.list(fid, page));
-        return GeneralResponse.generator(200, threadListResponse);
+        return GeneralResponse.generate(200, threadListResponse);
     }
 
     @PostMapping("/digest")
     @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> setDigest(@Valid @RequestBody ThreadDigestForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
         threadService.modify(form.getTid(), "digest", form.getDigest().toString());
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @PostMapping("/top")
     @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> setTop(@Valid @RequestBody ThreadTopForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
         threadService.modify(form.getTid(), "isTop", form.getTop().toString());
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @PostMapping("/close")
     @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> setClosed(@Valid @RequestBody ThreadCloseForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
         threadService.modify(form.getTid(), "isClosed", form.getClose().toString());
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @GetMapping("/{tid}/{page}")
@@ -97,7 +97,7 @@ public class ThreadController {
             response.setNeedBuy(false);
         }
 
-        return GeneralResponse.generator(200, response);
+        return GeneralResponse.generate(200, response);
     }
 
     @DeleteMapping("/{tid}")
@@ -107,18 +107,18 @@ public class ThreadController {
         ThreadItem threadItem = threadService.info(tid);
 
         if (threadItem == null) {
-            return GeneralResponse.generator(404, "Thread doesn't exist.");
+            return GeneralResponse.generate(404, "Thread doesn't exist.");
         }
 
         if (!threadItem.getUser().getUid().equals(uid)
                 && !authentication.getAuthorities().contains("Admin")
         ) {
-            return GeneralResponse.generator(403, "Permission denied.");
+            return GeneralResponse.generate(403, "Permission denied.");
         }
         attachService.deleteByTid(tid);
         threadService.delete(tid);
         ruleService.applyRule(uid, "DeleteThread");
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @PostMapping("/create")
@@ -126,7 +126,7 @@ public class ThreadController {
     public Map<String, Object> create(@Valid @RequestBody ThreadEditorForm form, Errors errors,
                                       Authentication authentication) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
         String uid = (String) authentication.getPrincipal();
@@ -134,7 +134,7 @@ public class ThreadController {
 
         attachService.batchAttachThread(form.getAttach(), tid, uid);
         ruleService.applyRule(uid, "CreateThread");
-        return GeneralResponse.generator(200, tid);
+        return GeneralResponse.generate(200, tid);
     }
 
     @PostMapping("/reply/{tid}")
@@ -142,18 +142,18 @@ public class ThreadController {
     public Map<String, Object> create(@PathVariable("tid") String tid, @Valid @RequestBody PostEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
         ThreadItem threadItem = threadService.info(tid);
         if (threadItem.getIsClosed()
                 && !authentication.getAuthorities().contains("Admin")
         ) {
-            return GeneralResponse.generator(400, "Thread already closed.");
+            return GeneralResponse.generate(400, "Thread already closed.");
         }
 
         if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0 && payService.userThreadNeedPay(uid, tid)) {
-            return GeneralResponse.generator(403, "Purchase thread first.");
+            return GeneralResponse.generate(403, "Purchase thread first.");
         }
 
         threadService.reply(tid, form, uid);
@@ -162,7 +162,7 @@ public class ThreadController {
                     "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/info/" + tid + "/1");
         }
         ruleService.applyRule(uid, "CreatePost");
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @PutMapping("/{tid}")
@@ -170,31 +170,32 @@ public class ThreadController {
     public Map<String, Object> update(@PathVariable("tid") String tid, @Valid @RequestBody ThreadEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
         if (!threadService.uid(tid).equals(uid)
                 && !authentication.getAuthorities().contains("Admin")) {
-            return GeneralResponse.generator(403, "Permission denied.");
+            return GeneralResponse.generate(403, "Permission denied.");
         }
 
         attachService.batchAttachThread(form.getAttach(), tid, uid);
         threadService.update(tid, form.getFid(), form.getSubject(), form.getMessage());
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @GetMapping("/pay/{tid}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> pay(@PathVariable("tid") String tid, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        if (payService.userThreadNeedPay(uid, tid)) {
-            if (payService.purchaseThread(uid, tid)) {
-                return GeneralResponse.generator(200);
+        String buyerUid = (String) authentication.getPrincipal();
+        String sellerUid = threadService.uid(tid);
+        if (payService.userThreadNeedPay(buyerUid, tid)) {
+            if (payService.purchaseThread(buyerUid, sellerUid, tid)) {
+                return GeneralResponse.generate(200);
             } else {
-                return GeneralResponse.generator(400, "Credits Not Enough.");
+                return GeneralResponse.generate(400, "Credits Not Enough.");
             }
         } else {
-            return GeneralResponse.generator(200);
+            return GeneralResponse.generate(200);
         }
     }
 }

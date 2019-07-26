@@ -17,22 +17,18 @@ import java.io.IOException;
 public class JWTRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-
+            throws ServletException, IOException, ExpiredJwtException {
         String token = request.getHeader("Authorization");
-        try {
 
-            if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UsernamePasswordAuthenticationToken authentication = JWTUtils.verify(token);
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UsernamePasswordAuthenticationToken authentication = JWTUtils.verify(token);
 
-                if (authentication != null) {
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+            if (authentication != null) {
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        } catch (ExpiredJwtException ex) {
-            // do nothing...
         }
+
         chain.doFilter(request, response);
     }
 }

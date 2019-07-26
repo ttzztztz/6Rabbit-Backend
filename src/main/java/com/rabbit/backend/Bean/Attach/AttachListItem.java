@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Component
 @Data
-public class AttachPayListItem {
+public class AttachListItem {
     private String aid;
     private ThreadListItem thread;
     private Integer fileSize;

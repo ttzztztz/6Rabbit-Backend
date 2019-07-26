@@ -1,7 +1,7 @@
 package com.rabbit.backend.DAO;
 
 import com.rabbit.backend.Bean.Attach.Attach;
-import com.rabbit.backend.Bean.Attach.AttachPayListItem;
+import com.rabbit.backend.Bean.Attach.AttachListItem;
 import com.rabbit.backend.Bean.Attach.AttachUpload;
 import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import org.apache.ibatis.annotations.*;
@@ -68,7 +68,7 @@ public interface AttachDAO {
 
     @Select("SELECT * FROM attach WHERE aid = #{aid}")
     @Results({
-            @Result(property = "tid", column = "tid", one = @One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
+            @Result(property = "thread", column = "tid", one = @One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
     })
-    AttachPayListItem findAttachPayListItem(@Param("aid") String aid);
+    AttachListItem findAttachPayListItem(@Param("aid") String aid);
 }

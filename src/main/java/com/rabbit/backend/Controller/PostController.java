@@ -1,7 +1,6 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
-import com.rabbit.backend.Service.PayService;
 import com.rabbit.backend.Service.RuleService;
 import com.rabbit.backend.Service.PostService;
 import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
@@ -32,12 +31,12 @@ public class PostController {
     public Map<String, Object> delete(@PathVariable("pid") String pid, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         if (!postService.uid(pid).equals(uid) && !authentication.getAuthorities().contains("Admin")) {
-            return GeneralResponse.generator(403, "Permission denied.");
+            return GeneralResponse.generate(403, "Permission denied.");
         }
 
         postService.delete(pid);
         ruleService.applyRule(uid, "DeleteThread");
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @PutMapping("/{pid}")
@@ -45,15 +44,15 @@ public class PostController {
     public Map<String, Object> update(@PathVariable("pid") String pid, @Valid @RequestBody PostEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
         if (!postService.uid(pid).equals(authentication.getPrincipal())
                 && !authentication.getAuthorities().contains("Admin")) {
-            return GeneralResponse.generator(403, "Permission denied.");
+            return GeneralResponse.generate(403, "Permission denied.");
         }
 
         postService.update(pid, form.getMessage());
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 }

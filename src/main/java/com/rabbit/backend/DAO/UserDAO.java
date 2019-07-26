@@ -55,8 +55,11 @@ public interface UserDAO {
             " WHERE uid = #{uid}")
     void applyRule(@Param("uid") String uid, @Param("rule") CreditsRule rule);
 
-    @Update("UPDATE user SET ${creditsType} = #{credits} WHERE uid = #{uid}")
-    void decreaseCredits(@Param("uid") String uid, @Param("creditsType") String creditsType, @Param("credits") String credits);
+    @Update("UPDATE user SET ${creditsType} = ${creditsType} - #{credits} WHERE uid = #{uid}")
+    void decreaseCredits(@Param("uid") String uid, @Param("creditsType") String creditsType, @Param("credits") Integer credits);
+
+    @Update("UPDATE user SET ${creditsType} = ${creditsType} + #{credits} WHERE uid = #{uid}")
+    void increaseCredits(@Param("uid") String uid, @Param("creditsType") String creditsType, @Param("credits") Integer credits);
 
     @Select("SELECT uid, credits, golds, rmbs FROM user WHERE uid = #{uid}")
     UserCredits readCredits(@Param("uid") String uid);

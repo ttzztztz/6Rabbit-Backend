@@ -25,9 +25,9 @@ public class NotificationController {
     public Map<String, Object> deleteOne(@PathVariable("nid") String nid, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         if (notificationService.deleteOne(nid, uid)) {
-            return GeneralResponse.generator(200);
+            return GeneralResponse.generate(200);
         } else {
-            return GeneralResponse.generator(403, "Permission denied.");
+            return GeneralResponse.generate(403, "Permission denied.");
         }
     }
 
@@ -35,9 +35,9 @@ public class NotificationController {
     public Map<String, Object> readOne(@PathVariable("nid") String nid, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         if (notificationService.setOneRead(nid, uid)) {
-            return GeneralResponse.generator(200);
+            return GeneralResponse.generate(200);
         } else {
-            return GeneralResponse.generator(403, "Permission denied.");
+            return GeneralResponse.generate(403, "Permission denied.");
         }
     }
 
@@ -47,26 +47,26 @@ public class NotificationController {
         NotificationListResponse response = new NotificationListResponse();
         response.setCount(notificationService.count(uid));
         response.setList(notificationService.list(uid, page));
-        return GeneralResponse.generator(200, response);
+        return GeneralResponse.generate(200, response);
     }
 
     @PostMapping("/all")
     public Map<String, Object> readAll(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         notificationService.setAllRead(uid);
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @DeleteMapping("/all")
     public Map<String, Object> deleteAll(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         notificationService.deleteAll(uid);
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @GetMapping("/all")
     public Map<String, Object> count(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        return GeneralResponse.generator(200, notificationService.count(uid));
+        return GeneralResponse.generate(200, notificationService.count(uid));
     }
 }

@@ -1,6 +1,7 @@
 package com.rabbit.backend.DAO;
 
 import com.rabbit.backend.Bean.Credits.CreditsLog;
+import com.rabbit.backend.Bean.Credits.CreditsLogForm;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -20,9 +21,16 @@ public interface CreditsLogDAO {
 
     @Insert("INSERT INTO credits_type (uid, status, type, description, creditsType, credits) " +
             "VALUES (#{uid}, #{status}, #{type}, #{description}, #{creditsType}, #{credits})")
-    void insert(@Param("uid") String uid, @Param("status") Integer status, @Param("type") Integer type, @Param("description") String description,
-                @Param("creditsType") Integer creditsType, @Param("credits") Integer credits);
+    @Options(keyProperty = "cid", keyColumn = "cid", useGeneratedKeys = true)
+    void insert(CreditsLogForm form);
 
     @Select("SELECT COUNT(*) FROM credits_type WHERE uid = #{uid}")
     Integer count(@Param("uid") String uid);
+
+
+    @Select("SELECT * FROM credits_type WHERE cid = #{cid}")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
+    })
+    CreditsLog find(@Param("cid") String cid);
 }

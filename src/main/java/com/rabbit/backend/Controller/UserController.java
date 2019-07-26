@@ -48,27 +48,27 @@ public class UserController {
     @PostMapping("/register")
     public Map<String, Object> register(@Valid @RequestBody RegisterForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
         String IP = IPUtil.getIPAddress();
         if (!userService.registerLimitCheck(IP)) {
-            return GeneralResponse.generator(503, "Request too frequently.");
+            return GeneralResponse.generate(503, "Request too frequently.");
         }
 
         Boolean usernameExistenceCheck = userService.exist("username", form.getUsername());
         Boolean emailExistenceCheck = userService.exist("email", form.getEmail());
         if (usernameExistenceCheck) {
-            return GeneralResponse.generator(400, "Username already exist.");
+            return GeneralResponse.generate(400, "Username already exist.");
         }
 
         if (emailExistenceCheck) {
-            return GeneralResponse.generator(400, "Email already exist.");
+            return GeneralResponse.generate(400, "Email already exist.");
         }
 
         String uid = userService.register(form.getUsername(), form.getPassword(), form.getEmail());
         userService.registerLimitIncrement(IP);
-        return GeneralResponse.generator(200, uid);
+        return GeneralResponse.generate(200, uid);
     }
 
     @PostMapping("/info/password")
@@ -76,24 +76,24 @@ public class UserController {
     public Map<String, Object> updatePassword(Authentication authentication,
                                               @Valid @RequestBody UpdatePasswordForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
         String uid = (String) authentication.getPrincipal();
 
         User user = userService.selectUser("uid", uid);
         if (user == null) {
-            return GeneralResponse.generator(400, "Username or Password invalid.");
+            return GeneralResponse.generate(400, "Username or Password invalid.");
         }
         boolean checkResult = DigestUtils.md5DigestAsHex((form.getOldPassword() + user.getSalt()).getBytes()).equals(
                 user.getPassword()
         );
 
         if (!checkResult) {
-            return GeneralResponse.generator(400, "Username or Password invalid.");
+            return GeneralResponse.generate(400, "Username or Password invalid.");
         }
         userService.updatePassword(uid, form.getNewPassword());
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @PostMapping("/info/profile")
@@ -101,12 +101,12 @@ public class UserController {
     public Map<String, Object> updateProfile(Authentication authentication,
                                              @Valid @RequestBody UpdateProfileForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
 
         userService.updateProfile(uid, form);
-        return GeneralResponse.generator(200);
+        return GeneralResponse.generate(200);
     }
 
     @GetMapping("/info/my")
@@ -115,23 +115,23 @@ public class UserController {
         String uid = (String) authentication.getPrincipal();
         MyUser user = userService.selectMyUser("uid", uid);
 
-        return GeneralResponse.generator(200, user);
+        return GeneralResponse.generate(200, user);
     }
 
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody LoginForm form, Errors errors) {
         if (errors.hasErrors()) {
-            return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
         String IP = IPUtil.getIPAddress();
         if (!userService.loginLimitCheck(IP)) {
-            return GeneralResponse.generator(503, "Request too frequently.");
+            return GeneralResponse.generate(503, "Request too frequently.");
         }
 
         User user = userService.selectUser("username", form.getUsername());
         if (user == null) {
-            return GeneralResponse.generator(400, "Username or Password invalid.");
+            return GeneralResponse.generate(400, "Username or Password invalid.");
         }
         boolean loginResult = PasswordUtils.checkPassword(user.getPassword(), form.getPassword(), user.getSalt());
 
@@ -142,10 +142,10 @@ public class UserController {
             response.put("token", token);
             response.put("username", user.getUsername());
             response.put("uid", user.getUid());
-            return GeneralResponse.generator(200, response);
+            return GeneralResponse.generate(200, response);
         } else {
             userService.loginLimitIncrement(IP);
-            return GeneralResponse.generator(400, "Username or Password invalid.");
+            return GeneralResponse.generate(400, "Username or Password invalid.");
         }
     }
 
@@ -157,20 +157,20 @@ public class UserController {
 
         response.setCount(creditsLogService.count(uid));
         response.setList(creditsLogService.list(uid, page));
-        return GeneralResponse.generator(200, response);
+        return GeneralResponse.generate(200, response);
     }
 
     @GetMapping("/purchased/threads/{page}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> purchasedThread(@PathVariable("page") Integer page, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        return GeneralResponse.generator(200, payService.threadPurchasedList(uid, page));
+        return GeneralResponse.generate(200, payService.threadPurchasedList(uid, page));
     }
 
     @GetMapping("/purchased/attach/{page}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> purchasedAttach(@PathVariable("page") Integer page, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        return GeneralResponse.generator(200, payService.attachPurchasedList(uid, page));
+        return GeneralResponse.generate(200, payService.attachPurchasedList(uid, page));
     }
 }
