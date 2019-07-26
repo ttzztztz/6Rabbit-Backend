@@ -14,9 +14,9 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 # Step 2
 
-FROM openjdk:12-oracle
+FROM openjdk:12-alpine
 
-ARG DEPENDENCY=/var/rabbit/app/target/dependency
+ARG DEPENDENCY=/var/rabbit/target/dependency
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
