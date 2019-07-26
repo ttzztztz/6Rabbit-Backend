@@ -2,7 +2,7 @@ package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Notification.NotificationListResponse;
 import com.rabbit.backend.Service.NotificationService;
-import com.rabbit.backend.Utilities.GeneralResponse;
+import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;

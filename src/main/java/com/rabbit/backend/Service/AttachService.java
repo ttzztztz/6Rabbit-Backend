@@ -5,6 +5,7 @@ import com.rabbit.backend.Bean.Attach.AttachUpload;
 import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import com.rabbit.backend.DAO.AttachDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,12 +61,25 @@ public class AttachService {
         return failedCount == 0;
     }
 
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void deleteAllUnused() {
+        List<Attach> attachList = attachDAO.findAllUnused();
+        for (Attach attach : attachList) {
+            deleteByAttach(attach);
+        }
+    }
+
     public void updateAttachThread(String aid, String tid) {
         attachDAO.updateAttachThread(aid, tid);
     }
 
     public Integer threadAttachCount(String tid) {
         return attachDAO.threadAttachCount(tid);
+    }
+
+    public Integer userUnusedAttachCount(String uid) {
+        return attachDAO.userUnusedCount(uid);
     }
 
     public String uid(String aid) {

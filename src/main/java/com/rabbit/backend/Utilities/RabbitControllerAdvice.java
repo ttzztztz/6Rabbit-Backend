@@ -1,6 +1,7 @@
 package com.rabbit.backend.Utilities;
 
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
+import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;

@@ -5,9 +5,10 @@ import com.rabbit.backend.Bean.Attach.AttachUpload;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Service.AttachService;
 import com.rabbit.backend.Service.FileService;
-import com.rabbit.backend.Utilities.GeneralResponse;
+import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +31,9 @@ public class FileController {
         this.fileService = fileService;
         this.attachService = attachService;
     }
+
+    @Value("${rabbit.limit.max-unused-attach-per-user}")
+    private Integer maxUnusedAttachCountPerUser;
 
     @GetMapping("/avatar/{uid}")
     public void getAvatar(HttpServletResponse response, @PathVariable("uid") String uid) throws IOException {
@@ -69,6 +73,11 @@ public class FileController {
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> upload(Part attach, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
+        Integer unusedAttaches = attachService.userUnusedAttachCount(uid);
+        if (unusedAttaches >= maxUnusedAttachCountPerUser) {
+            return GeneralResponse.generator(400, "User max unused attach count exceed.");
+        }
+
         try {
             String path = fileService.attachPath(uid);
             File file = new File(path);

@@ -6,8 +6,8 @@ import com.rabbit.backend.Security.PasswordUtils;
 import com.rabbit.backend.Service.CreditsLogService;
 import com.rabbit.backend.Service.UserService;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
-import com.rabbit.backend.Utilities.FieldErrorResponse;
-import com.rabbit.backend.Utilities.GeneralResponse;
+import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
+import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import com.rabbit.backend.Utilities.IPUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +16,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,12 +42,12 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Map<String, Object> register(@Valid @RequestBody RegisterForm form, Errors errors, HttpServletRequest httpServletRequest) {
+    public Map<String, Object> register(@Valid @RequestBody RegisterForm form, Errors errors) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
 
-        String IP = IPUtil.getIPAddress(httpServletRequest);
+        String IP = IPUtil.getIPAddress();
         if (!service.registerLimitCheck(IP)) {
             return GeneralResponse.generator(503, "Request too frequently.");
         }
@@ -116,12 +115,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody LoginForm form, Errors errors, HttpServletRequest httpServletRequest) {
+    public Map<String, Object> login(@RequestBody LoginForm form, Errors errors) {
         if (errors.hasErrors()) {
             return GeneralResponse.generator(500, FieldErrorResponse.generator(errors));
         }
 
-        String IP = IPUtil.getIPAddress(httpServletRequest);
+        String IP = IPUtil.getIPAddress();
         if (!service.loginLimitCheck(IP)) {
             return GeneralResponse.generator(503, "Request too frequently.");
         }

@@ -1,4 +1,4 @@
-package com.rabbit.backend.Utilities;
+package com.rabbit.backend.Utilities.Response;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Map;
 public class GeneralResponse {
 
     public static Map<String, Object> generator(Integer code, Object message) {
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
 
         result.put("code", code);
         result.put("message", message);
@@ -15,8 +15,7 @@ public class GeneralResponse {
     }
 
     public static Map<String, Object> generator(Integer code) {
-        Map<String, Object> result = new HashMap<String, Object>();
-
+        Map<String, Object> result = new HashMap<>();
         result.put("code", code);
 
         return result;

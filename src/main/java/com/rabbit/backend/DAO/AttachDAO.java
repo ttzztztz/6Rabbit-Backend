@@ -47,6 +47,9 @@ public interface AttachDAO {
     @Select("SELECT COUNT(*) FROM attach WHERE tid = #{tid}")
     Integer threadAttachCount(@Param("tid") String tid);
 
+    @Select("SELECT COUNT(*) FROM attach WHERE uid = #{uid} AND tid IS NULL")
+    Integer userUnusedCount(@Param("uid") String uid);
+
     @Delete("DELETE FROM attach WHERE aid = #{aid}")
     void delete(@Param("aid") String aid);
 

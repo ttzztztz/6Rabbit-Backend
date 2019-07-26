@@ -1,4 +1,4 @@
-package com.rabbit.backend.Utilities;
+package com.rabbit.backend.Utilities.Response;
 
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;

@@ -5,6 +5,7 @@ import com.rabbit.backend.DAO.PostDAO;
 import com.rabbit.backend.DAO.StaticDAO;
 import com.rabbit.backend.DAO.ThreadDAO;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
+import com.rabbit.backend.Utilities.SafeHtml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class PostService {
         return post;
     }
 
-    public String uid(String pid){
+    public String uid(String pid) {
         return postDAO.authorUid(pid);
     }
 }

@@ -1,7 +1,7 @@
 package com.rabbit.backend.Bean.Thread;
 
+import com.rabbit.backend.Utilities.SafeHtml;
 import lombok.Data;
-import org.hibernate.validator.constraints.SafeHtml;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -22,8 +22,11 @@ public class ThreadEditorForm {
     private String subject;
 
     @NotBlank
-    @SafeHtml(whitelistType = SafeHtml.WhiteListType.RELAXED)
     private String message;
 
     private List<String> attach;
+
+    public String getMessage() {
+        return SafeHtml.sanitize(this.message);
+    }
 }

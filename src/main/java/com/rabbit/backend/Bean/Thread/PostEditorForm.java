@@ -1,7 +1,6 @@
 package com.rabbit.backend.Bean.Thread;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.SafeHtml;
 
 import javax.validation.constraints.NotBlank;
 
@@ -14,6 +13,9 @@ public class PostEditorForm {
 
     private Integer quotepid = 0;
     @NotBlank
-    @SafeHtml(whitelistType = SafeHtml.WhiteListType.RELAXED)
     private String message;
+
+    public String getMessage() {
+        return com.rabbit.backend.Utilities.SafeHtml.sanitize(this.message);
+    }
 }
