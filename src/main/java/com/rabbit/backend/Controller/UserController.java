@@ -5,6 +5,7 @@ import com.rabbit.backend.Bean.User.*;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Security.PasswordUtils;
 import com.rabbit.backend.Service.CreditsLogService;
+import com.rabbit.backend.Service.MailService;
 import com.rabbit.backend.Service.PayService;
 import com.rabbit.backend.Service.UserService;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
@@ -28,12 +29,15 @@ public class UserController {
     private UserService userService;
     private CreditsLogService creditsLogService;
     private PayService payService;
+    private MailService mailService;
 
     @Autowired
-    public UserController(UserService userService, CreditsLogService creditsLogService, PayService payService) {
+    public UserController(UserService userService, CreditsLogService creditsLogService,
+                          PayService payService, MailService mailService) {
         this.userService = userService;
         this.creditsLogService = creditsLogService;
         this.payService = payService;
+        this.mailService = mailService;
     }
 
     @GetMapping("/info/{uid}")
@@ -68,6 +72,7 @@ public class UserController {
 
         String uid = userService.register(form.getUsername(), form.getPassword(), form.getEmail());
         userService.registerLimitIncrement(IP);
+        mailService.sendMail(form.getEmail(), "感谢您注册酷兔网！", "感谢您注册酷兔网！请您在发表帖子时遵守法律法规，文明上网，理性发言！");
         return GeneralResponse.generate(200, uid);
     }
 

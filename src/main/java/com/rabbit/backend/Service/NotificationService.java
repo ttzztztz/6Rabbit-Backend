@@ -4,6 +4,7 @@ import com.rabbit.backend.Bean.Notification.Notification;
 import com.rabbit.backend.DAO.NotificationDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -64,6 +65,7 @@ public class NotificationService {
         return result;
     }
 
+    @Async
     public void push(String fromUid, String toUid, String content, String link) {
         DAO.insert(fromUid, toUid, content, link);
     }
