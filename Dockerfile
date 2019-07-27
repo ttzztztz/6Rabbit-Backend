@@ -9,14 +9,15 @@ COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
 
-RUN chmod 777 ./mvnw && ./mvnw install -DskipTests
+RUN chmod -x ./mvnw && ./mvnw install -DskipTests
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 # Step 2
 FROM openjdk:12-alpine
 
 ARG DEPENDENCY=/var/rabbit/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.rabbit.backend.BackendApplication"]
+RUN mkdir -p /var/rabbit
+COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /var/rabbit/lib
+COPY --from=build ${DEPENDENCY}/META-INF /var/rabbit/META-INF
+COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /var/rabbit
+ENTRYPOINT ["java","-cp","/var/rabbit:/var/rabbit/lib/*","com.rabbit.backend.BackendApplication"]

@@ -22,16 +22,18 @@ public class ThreadController {
     private AttachService attachService;
     private RuleService ruleService;
     private PayService payService;
+    private FrequentService frequentService;
 
     @Autowired
     public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService,
-                            AttachService attachService, RuleService ruleService, PayService payService) {
+                            AttachService attachService, RuleService ruleService, PayService payService, FrequentService frequentService) {
         this.threadService = threadService;
         this.postService = postService;
         this.notificationService = notificationService;
         this.attachService = attachService;
         this.ruleService = ruleService;
         this.payService = payService;
+        this.frequentService = frequentService;
     }
 
     @GetMapping("/list/{fid}/{page}")
@@ -130,6 +132,10 @@ public class ThreadController {
         }
 
         String uid = (String) authentication.getPrincipal();
+        String key = "thread:create:" + uid;
+        if (!frequentService.check(key, 30)) {
+            return GeneralResponse.generate(400, "Post too frequent, try again after 30 seconds.");
+        }
         String tid = threadService.insert(uid, form);
 
         attachService.batchAttachThread(form.getAttach(), tid, uid);
@@ -154,6 +160,11 @@ public class ThreadController {
 
         if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0 && payService.userThreadNeedPay(uid, tid)) {
             return GeneralResponse.generate(403, "Purchase thread first.");
+        }
+
+        String key = "thread:reply:" + uid;
+        if (!frequentService.check(key, 5)) {
+            return GeneralResponse.generate(400, "Reply too frequent, try again after 5 seconds.");
         }
 
         threadService.reply(tid, form, uid);
