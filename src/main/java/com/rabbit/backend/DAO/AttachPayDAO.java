@@ -14,7 +14,7 @@ public interface AttachPayDAO {
     @Select("SELECT * FROM attach_pay_log WHERE bid = #{bid}")
     AttachPayLog find(@Param("bid") String bid);
 
-    @Select("SELECT 1 FROM attach_pay_log WHERE aid = #{aid}, uid = #{uid}")
+    @Select("SELECT 1 FROM attach_pay_log WHERE aid = #{aid} AND uid = #{uid}")
     Integer isPay(@Param("aid") String aid, @Param("uid") String uid);
 
     @Insert("INSERT INTO attach_pay_log(uid, aid, creditsType, credits) " +

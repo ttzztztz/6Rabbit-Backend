@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component("notification")
+@Component
 @Data
 public class Notification {
     private String nid;

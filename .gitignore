@@ -32,3 +32,5 @@ build/
 .vscode/
 
 application-dev.properties
+rabbit.properties
+docker-commands.txt

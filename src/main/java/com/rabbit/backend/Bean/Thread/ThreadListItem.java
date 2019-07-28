@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Component("thread_list_item")
+@Component
 public class ThreadListItem extends Thread {
     private String fid;
 }

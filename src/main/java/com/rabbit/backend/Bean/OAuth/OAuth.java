@@ -3,7 +3,7 @@ package com.rabbit.backend.Bean.OAuth;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
-@Component("oauth")
+@Component
 @Data
 public class OAuth {
     private String oid;

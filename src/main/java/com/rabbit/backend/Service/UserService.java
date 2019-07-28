@@ -5,6 +5,7 @@ import com.rabbit.backend.Bean.User.OtherUser;
 import com.rabbit.backend.Bean.User.UpdateProfileForm;
 import com.rabbit.backend.Bean.User.User;
 import com.rabbit.backend.DAO.UserDAO;
+import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Security.PasswordUtils;
 import com.rabbit.backend.Utilities.TimestampUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -98,5 +101,15 @@ public class UserService {
 
     public boolean registerLimitCheck(String IP) {
         return limitCheck("register", IP, registerLimitPerIP);
+    }
+
+    public Map<String, Object> loginResponse(User user) {
+        String token = JWTUtils.sign(user.getUid(), user.getUsername(), user.getUsergroup().getIsAdmin());
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("token", token);
+        response.put("username", user.getUsername());
+        response.put("uid", user.getUid());
+        return response;
     }
 }

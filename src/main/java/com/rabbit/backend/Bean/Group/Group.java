@@ -3,7 +3,7 @@ package com.rabbit.backend.Bean.Group;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
-@Component("group")
+@Component
 @Data
 public class Group {
     private String gid;

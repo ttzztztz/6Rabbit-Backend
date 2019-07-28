@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component("user")
+@Component
 @Data
 public class User {
     private String uid;

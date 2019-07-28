@@ -4,7 +4,7 @@ import com.rabbit.backend.Bean.Group.Group;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
-@Component("otheruser")
+@Component
 @Data
 public class OtherUser {
     private String uid;

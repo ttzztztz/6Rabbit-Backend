@@ -12,8 +12,11 @@ public interface OAuthDAO {
     @Select("SELECT * FROM oauth WHERE oid = #{oid}")
     OAuth findByOid(@Param("oid") String oid);
 
-    @Select("SELECT * FROM oauth WHERE uid = #{uid}, platform = #{platform} LIMIT 1")
+    @Select("SELECT * FROM oauth WHERE uid = #{uid} AND platform = #{platform} LIMIT 1")
     OAuth find(@Param("uid") String uid, @Param("platform") String platform);
+
+    @Select("SELECT * FROM oauth WHERE openid = #{openid} AND platform = #{platform} LIMIT 1")
+    OAuth findByOpenid(@Param("openid") String openid, @Param("platform") String platform);
 
     @Delete("DELETE FROM oauth WHERE oid = #{oid}")
     void delete(@Param("oid") String oid);

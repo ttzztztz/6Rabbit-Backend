@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
-@Component("thread_item")
+@Component
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ThreadItem extends Thread {

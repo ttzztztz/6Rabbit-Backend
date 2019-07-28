@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component("thread")
+@Component
 @Data
 public abstract class Thread {
     private String tid;

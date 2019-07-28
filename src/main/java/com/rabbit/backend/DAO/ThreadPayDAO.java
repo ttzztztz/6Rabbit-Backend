@@ -14,7 +14,7 @@ public interface ThreadPayDAO {
     @Select("SELECT * FROM thread_pay_log WHERE bid = #{bid}")
     ThreadPayLog find(@Param("bid") String bid);
 
-    @Select("SELECT 1 FROM thread_pay_log WHERE tid = #{tid}, uid = #{uid}")
+    @Select("SELECT 1 FROM thread_pay_log WHERE tid = #{tid} AND uid = #{uid}")
     Integer isPay(@Param("tid") String tid, @Param("uid") String uid);
 
     @Insert("INSERT INTO thread_pay_log(uid, tid, creditsType, credits) " +

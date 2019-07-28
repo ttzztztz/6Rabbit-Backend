@@ -2,13 +2,13 @@ package com.rabbit.backend.Service;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
@@ -39,12 +39,38 @@ public class FileService {
         return path + "/" + fileName;
     }
 
-    public void downloadFileByStream(InputStream fstream, OutputStream ostream
-            , Long contentLength, HttpServletResponse response) throws IOException {
+    public void downloadFileByStream(InputStream fstream, OutputStream ostream,
+                                     Long contentLength, HttpServletResponse response) throws IOException {
         response.setContentLengthLong(contentLength);
         response.setContentType("application/octet-stream");
         response.setStatus(200);
         IOUtils.copy(fstream, ostream);
         response.flushBuffer();
+    }
+
+    @Async
+    public void downloadRemoteFile(String filePath, String url) {
+        File tempFile = new File(filePath + ".tmp");
+        try {
+            URLConnection connection = new URL(url).openConnection();
+            OutputStream ostream = new FileOutputStream(tempFile);
+            InputStream istream = connection.getInputStream();
+            IOUtils.copy(istream, ostream);
+            istream.close();
+            ostream.close();
+
+            File realFile = new File(filePath);
+            if (tempFile.exists() && tempFile.length() <= 512 * 1024) {
+                InputStream ifstream = new FileInputStream(tempFile);
+                OutputStream ofstream = new FileOutputStream(realFile);
+                IOUtils.copy(ifstream, ofstream);
+                ifstream.close();
+                ofstream.close();
+            }
+        } catch (IOException ex) {
+            // do nothing ...
+        } finally {
+            tempFile.delete();
+        }
     }
 }

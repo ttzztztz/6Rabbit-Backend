@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 @Data
-@Component("quote_post")
+@Component
 public class QuotePost {
     private String pid;
     private OtherUser user;

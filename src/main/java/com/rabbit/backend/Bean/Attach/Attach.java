@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component("attach")
+@Component
 @Data
 public class Attach {
     private String aid;

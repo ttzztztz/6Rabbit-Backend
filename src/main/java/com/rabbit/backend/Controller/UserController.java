@@ -2,7 +2,6 @@ package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Credits.CreditsLogListResponse;
 import com.rabbit.backend.Bean.User.*;
-import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Security.PasswordUtils;
 import com.rabbit.backend.Service.CreditsLogService;
 import com.rabbit.backend.Service.MailService;
@@ -20,7 +19,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -141,13 +139,7 @@ public class UserController {
         boolean loginResult = PasswordUtils.checkPassword(user.getPassword(), form.getPassword(), user.getSalt());
 
         if (loginResult) {
-            String token = JWTUtils.sign(user.getUid(), user.getUsername(), user.getUsergroup().getIsAdmin());
-            Map<String, Object> response = new HashMap<>();
-
-            response.put("token", token);
-            response.put("username", user.getUsername());
-            response.put("uid", user.getUid());
-            return GeneralResponse.generate(200, response);
+            return GeneralResponse.generate(200, userService.loginResponse(user));
         } else {
             userService.loginLimitIncrement(IP);
             return GeneralResponse.generate(400, "Username or Password invalid.");

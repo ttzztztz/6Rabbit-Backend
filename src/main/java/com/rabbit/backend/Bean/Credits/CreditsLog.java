@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component("creditlog")
+@Component
 @Data
 public class CreditsLog {
     private String cid;
