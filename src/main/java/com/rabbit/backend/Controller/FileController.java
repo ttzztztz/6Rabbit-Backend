@@ -141,4 +141,41 @@ public class FileController {
             ostream.close();
         }
     }
+
+    @GetMapping("/picture/{aid}")
+    public void picturePreview(@PathVariable("aid") String aid, HttpServletResponse response)
+            throws IOException {
+        Attach attach = attachService.find(aid);
+        if (attach == null || attach.getTid() == null) {
+            response.setStatus(404);
+            return;
+        }
+
+        String[] fileOriginalNameSplitResult = attach.getOriginalName().split(".");
+        String fileOriginalNameSuffix = fileOriginalNameSplitResult[fileOriginalNameSplitResult.length - 1].toLowerCase();
+        String[] allowSuffixes = {"bmp", "jpg", "jpeg", "png", "gif"};
+        boolean findResult = false;
+        for (String allowSuffix : allowSuffixes) {
+            if (allowSuffix.equals(fileOriginalNameSuffix)) {
+                findResult = true;
+                break;
+            }
+        }
+
+        if (!findResult) {
+            response.setStatus(400);
+            return;
+        }
+        File file = new File(attach.getFileName());
+        if (!file.exists()) {
+            response.setStatus(404);
+        } else {
+            response.setHeader("Content-Disposition", "attachment;filename=" + attach.getOriginalName());
+            InputStream fstream = new FileInputStream(file);
+            OutputStream ostream = response.getOutputStream();
+            fileService.downloadFileByStream(fstream, ostream, file.length(), response);
+            fstream.close();
+            ostream.close();
+        }
+    }
 }
