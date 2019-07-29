@@ -82,8 +82,11 @@ public class OAuthController {
                                         HttpServletRequest request) {
         // login & register
         OAuthUserInfo oAuthUserInfo = oAuthService.callback(platform, request);
-        OAuth oAuth = oAuthService.findByOpenid(oAuthUserInfo.getOpenid(), platform);
+        if (oAuthUserInfo == null) {
+            return GeneralResponse.generate(500, "Connection to OAuth Server error.");
+        }
 
+        OAuth oAuth = oAuthService.findByOpenid(oAuthUserInfo.getOpenid(), platform);
         if (oAuth == null) {
             String key = "oauth:" + platform + ":" + oAuthUserInfo.getOpenid();
             String sessionId = request.getSession().getId();

@@ -4,7 +4,8 @@ import lombok.Data;
 
 @Data
 class UserInfoResponse {
-    private String id;
-    private String login;
-    private String avatar_url;
+    private String nickname;
+
+    private String figureurl_qq_1;
+    private String figureurl_qq_2;
 }

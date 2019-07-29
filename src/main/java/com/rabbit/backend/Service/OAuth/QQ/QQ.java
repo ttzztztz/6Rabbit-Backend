@@ -2,6 +2,8 @@ package com.rabbit.backend.Service.OAuth.QQ;
 
 import com.rabbit.backend.Bean.OAuth.OAuthUserInfo;
 import com.rabbit.backend.Bean.OAuth.OAuthWebsite;
+import org.apache.tomcat.util.json.JSONParser;
+import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpEntity;
@@ -13,9 +15,10 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
-// todo: not finished yet !
 @Configuration("OAuth_QQ")
 public class QQ extends OAuthWebsite {
     @Value("${rabbit.oauth.qq.APP_ID}")
@@ -49,39 +52,80 @@ public class QQ extends OAuthWebsite {
         return request.getParameter("code");
     }
 
+    private Map<String, String> getParam(String string) {
+        Map<String, String> map = new HashMap<>();
+        String[] kvArray = string.split("&");
+        for (String s : kvArray) {
+            String[] kv = s.split("=");
+            map.put(kv[0], kv[1]);
+        }
+        return map;
+    }
+
     public String getAccessToken(String code) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Accept", "application/json");
         MultiValueMap params = new LinkedMultiValueMap();
-        HttpEntity<MultiValueMap> requestEntity = new HttpEntity<>(params, headers);
+        HttpEntity<MultiValueMap> requestEntity = new HttpEntity<>(params, new HttpHeaders());
 
-        AccessTokenResponse accessTokenResponse = restTemplate.postForObject(TOKEN_URL + "?" +
+        String accessTokenResponse = restTemplate.postForObject(TOKEN_URL + "?" +
                 "client_id=" + APP_ID +
                 "&client_secret=" + APP_SECRET +
-                "&code=" + code, requestEntity, AccessTokenResponse.class);
+                "&code=" + code, requestEntity, String.class);
 
-        if (accessTokenResponse == null) {
+        if (accessTokenResponse == null || !accessTokenResponse.contains("access_token")) {
             return null;
         } else {
-            return accessTokenResponse.getAccess_token();
+            Map<String, String> accessTokenResponseMap = getParam(accessTokenResponse);
+            return accessTokenResponseMap.get("access_token");
         }
     }
 
-    public OAuthUserInfo getUserInfo(String access_token) {
-        OAuthUserInfo result = new OAuthUserInfo();
-
+    public String getOpenId(String access_token) throws ParseException {
         RestTemplate restTemplate = new RestTemplate();
-        UserInfoResponse userInfoResponse = restTemplate.getForObject(USER_INFO_URL + "?" +
-                "access_token=" + access_token, UserInfoResponse.class);
+        String openIdResponse = restTemplate.getForObject(ME_URL + "?" +
+                "access_token=" + access_token, String.class);
 
-        if (userInfoResponse == null) {
+        if (openIdResponse == null) {
             return null;
         }
 
-        result.setAvatarURL(userInfoResponse.getAvatar_url());
-        result.setOpenid(userInfoResponse.getId());
-        result.setUsername(userInfoResponse.getLogin());
+        String structuredResponse = openIdResponse
+                .substring(openIdResponse.indexOf("(") + 1)
+                .substring(0, openIdResponse.indexOf(")"));
+
+        JSONParser jsonParser = new JSONParser(structuredResponse);
+        return (String) jsonParser.parseObject().get("openid");
+    }
+
+    public OAuthUserInfo getUserInfo(String access_token) {
+        if (access_token == null) {
+            return null;
+        }
+
+        OAuthUserInfo result = new OAuthUserInfo();
+        try {
+            String openid = getOpenId(access_token);
+
+            RestTemplate restTemplate = new RestTemplate();
+            UserInfoResponse userInfoResponse = restTemplate.getForObject(USER_INFO_URL + "?" +
+                    "access_token=" + access_token +
+                    "&openid=" + openid +
+                    "&&oauth_consumer_key=" + APP_ID, UserInfoResponse.class);
+
+            if (userInfoResponse == null) {
+                return null;
+            }
+
+            result.setAvatarURL(userInfoResponse.getFigureurl_qq_1() != null
+                    ? userInfoResponse.getFigureurl_qq_1()
+                    : userInfoResponse.getFigureurl_qq_2());
+
+            result.setOpenid(openid);
+            result.setUsername(userInfoResponse.getNickname());
+        } catch (ParseException ex) {
+            return null;
+        }
+
         return result;
     }
 }
