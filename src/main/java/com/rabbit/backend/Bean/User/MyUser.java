@@ -16,6 +16,7 @@ public class MyUser {
     private String mobile;
     private String qq;
     private String wechat;
+    private String signature;
     private Integer credits;
     private Integer golds;
     private Integer rmbs;

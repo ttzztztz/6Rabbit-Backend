@@ -10,4 +10,5 @@ public class OtherUser {
     private String uid;
     private String username;
     private Group usergroup;
+    private String signature;
 }

@@ -146,6 +146,15 @@ public class UserController {
         }
     }
 
+    @GetMapping("/token")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> updateToken(Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        User user = userService.selectUser("uid", uid);
+
+        return GeneralResponse.generate(200, userService.loginResponse(user));
+    }
+
     @GetMapping("/credits/log/{page}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> creditsLog(@PathVariable("page") Integer page, Authentication authentication) {

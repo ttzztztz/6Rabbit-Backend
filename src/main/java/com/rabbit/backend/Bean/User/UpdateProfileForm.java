@@ -26,6 +26,6 @@ public class UpdateProfileForm {
     @Size(max = 64, message = "Wechat too long.")
     public String wechat = "";
 
-    @Size(max = 128, message = "Signature too long.")
+    @Size(max = 72, message = "Signature too long.")
     public String signature = "";
 }
