@@ -14,7 +14,7 @@ public class GlobalHeaderFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        response.setHeader("X-Powered-By", "6Rabbit/2.00");
+        response.addHeader("X-Powered-By", "6Rabbit/2.00");
 
         filterChain.doFilter(request, response);
     }

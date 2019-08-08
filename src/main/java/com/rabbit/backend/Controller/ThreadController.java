@@ -209,4 +209,11 @@ public class ThreadController {
             return GeneralResponse.generate(200);
         }
     }
+
+    @DeleteMapping("/batch")
+    @PreAuthorize("hasAuthority('Admin')")
+    public Map<String, Object> batchDelete(@Valid @RequestBody BatchDeleteForm form) {
+        threadService.batchDelete(form.getTidList());
+        return GeneralResponse.generate(200);
+    }
 }

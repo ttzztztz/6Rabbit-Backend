@@ -12,6 +12,7 @@ import com.rabbit.backend.DAO.ThreadDAO;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +47,13 @@ public class ThreadService {
         String fid = threadDAO.fid(tid);
         staticDAO.decrement("forum", "threads", "fid", fid, 1);
         threadDAO.delete(tid);
+    }
+
+    @Async
+    public void batchDelete(List<String> tidList) {
+        for (String tid : tidList) {
+            delete(tid);
+        }
     }
 
     public ThreadItem info(String tid) {

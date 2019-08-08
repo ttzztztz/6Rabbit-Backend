@@ -47,8 +47,7 @@ public class Github extends OAuthWebsite {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", "application/json");
-        MultiValueMap params = new LinkedMultiValueMap();
-        HttpEntity<MultiValueMap> requestEntity = new HttpEntity<>(params, headers);
+        HttpEntity<MultiValueMap> requestEntity = new HttpEntity<>(new LinkedMultiValueMap(), headers);
 
         AccessTokenResponse accessTokenResponse = restTemplate.postForObject(TOKEN_URL + "?" +
                 "client_id=" + APP_ID +
