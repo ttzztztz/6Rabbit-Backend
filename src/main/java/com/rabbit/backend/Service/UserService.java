@@ -110,6 +110,7 @@ public class UserService {
         response.put("token", token);
         response.put("username", user.getUsername());
         response.put("uid", user.getUid());
+        response.put("isAdmin", user.getUsergroup().getIsAdmin());
         return response;
     }
 }

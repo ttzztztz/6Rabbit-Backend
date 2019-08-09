@@ -10,4 +10,5 @@ public class Forum {
     private String name;
     private String description;
     private Integer threads;
+    private String type;
 }

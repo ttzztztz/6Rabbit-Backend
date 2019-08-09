@@ -3,6 +3,7 @@ package com.rabbit.backend.Bean.Thread;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Data
 public class PostEditorForm {
@@ -11,8 +12,10 @@ public class PostEditorForm {
     private String uid;
     private String tid;
 
-    private Integer quotepid = 0;
-    @NotBlank
+    private String quotepid = "0";
+
+    @NotBlank(message = "Message mustn't be null")
+    @Size(min = 5, message = "Message must have more than 5 characters")
     private String message;
 
     public String getMessage() {

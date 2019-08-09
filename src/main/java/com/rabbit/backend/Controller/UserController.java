@@ -134,6 +134,7 @@ public class UserController {
 
         User user = userService.selectUser("username", form.getUsername());
         if (user == null) {
+            userService.loginLimitIncrement(IP);
             return GeneralResponse.generate(400, "Username or Password invalid.");
         }
         boolean loginResult = PasswordUtils.checkPassword(user.getPassword(), form.getPassword(), user.getSalt());

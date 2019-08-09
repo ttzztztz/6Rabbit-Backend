@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public class FieldErrorResponse {
-    public static Map<String, Object> generator(Errors errors) {
+    @Deprecated
+    public static Map<String, Object> oldGenerator(Errors errors) {
         Map<String, Object> errResponse = new HashMap<>();
         List<ObjectError> objectErrorList = errors.getAllErrors();
         for (ObjectError error : objectErrorList) {
@@ -21,5 +22,19 @@ public class FieldErrorResponse {
             }
         }
         return errResponse;
+    }
+
+    public static String generator(Errors errors) {
+        StringBuilder errResponse = new StringBuilder();
+        List<ObjectError> objectErrorList = errors.getAllErrors();
+        for (ObjectError error : objectErrorList) {
+            if (error instanceof FieldError) {
+                FieldError fieldError = (FieldError) error;
+                errResponse.append(fieldError.getField()).append(":").append(fieldError.getDefaultMessage()).append("\n");
+            } else {
+                errResponse.append(error.getObjectName()).append(":").append(error.getDefaultMessage()).append("\n");
+            }
+        }
+        return errResponse.toString();
     }
 }

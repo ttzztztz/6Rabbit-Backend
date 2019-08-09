@@ -162,6 +162,14 @@ public class ThreadController {
             return GeneralResponse.generate(403, "Purchase thread first.");
         }
 
+        String quotePid = form.getQuotepid();
+        if (!quotePid.equals("0")) {
+            Post quotePost = postService.find(quotePid);
+            if (quotePost == null || !quotePost.getTid().equals(form.getTid())) {
+                return GeneralResponse.generate(404, "Invalid quote.");
+            }
+        }
+
         String key = "thread:reply:" + uid;
         if (!frequentService.check(key, 5)) {
             return GeneralResponse.generate(400, "Reply too frequent, try again after 5 seconds.");
