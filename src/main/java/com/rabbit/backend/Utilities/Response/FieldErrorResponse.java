@@ -27,12 +27,22 @@ public class FieldErrorResponse {
     public static String generator(Errors errors) {
         StringBuilder errResponse = new StringBuilder();
         List<ObjectError> objectErrorList = errors.getAllErrors();
+        Map<String, Boolean> usedField = new HashMap<>();
+
         for (ObjectError error : objectErrorList) {
             if (error instanceof FieldError) {
                 FieldError fieldError = (FieldError) error;
-                errResponse.append(fieldError.getField()).append(":").append(fieldError.getDefaultMessage()).append("\n");
+                String field = fieldError.getField();
+                if (usedField.get(field) == null) {
+                    usedField.put(field, true);
+                    errResponse.append(field).append(":").append(fieldError.getDefaultMessage()).append("\n");
+                }
             } else {
-                errResponse.append(error.getObjectName()).append(":").append(error.getDefaultMessage()).append("\n");
+                String field = error.getObjectName();
+                if (usedField.get(field) == null) {
+                    usedField.put(field, true);
+                    errResponse.append(field).append(":").append(error.getDefaultMessage()).append("\n");
+                }
             }
         }
         return errResponse.toString();

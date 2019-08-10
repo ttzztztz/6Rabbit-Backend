@@ -74,7 +74,7 @@ public class UserController {
         return GeneralResponse.generate(200, uid);
     }
 
-    @PostMapping("/info/password")
+    @PutMapping("/info/password")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> updatePassword(Authentication authentication,
                                               @Valid @RequestBody UpdatePasswordForm form, Errors errors) {
@@ -99,7 +99,7 @@ public class UserController {
         return GeneralResponse.generate(200);
     }
 
-    @PostMapping("/info/profile")
+    @PutMapping("/info/my")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> updateProfile(Authentication authentication,
                                              @Valid @RequestBody UpdateProfileForm form, Errors errors) {

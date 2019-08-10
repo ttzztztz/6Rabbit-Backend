@@ -87,8 +87,7 @@ public class SafeHtml {
             .allowStandardUrlProtocols()
             .allowAttributes("nohref").onElements("a")
             .allowAttributes("name").matching(NAME).onElements("a")
-            .allowAttributes(
-                    "onfocus", "onblur", "onclick", "onmousedown", "onmouseup")
+            .allowAttributes("onfocus", "onblur", "onclick", "onmousedown", "onmouseup")
             .matching(HISTORY_BACK).onElements("a")
             .requireRelNofollowOnLinks()
             .allowAttributes("src").matching(ONSITE_OR_OFFSITE_URL::test)

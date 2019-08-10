@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： db
--- 生成日期： 2019-08-09 03:11:03
+-- 生成日期： 2019-08-10 02:34:21
 -- 服务器版本： 5.7.26
 -- PHP 版本： 7.2.19
 
@@ -83,7 +83,8 @@ CREATE TABLE `forum` (
   `fid` int(11) UNSIGNED NOT NULL,
   `name` char(36) NOT NULL,
   `description` text NOT NULL,
-  `threads` int(11) UNSIGNED NOT NULL DEFAULT '0'
+  `threads` int(11) UNSIGNED NOT NULL DEFAULT '0',
+  `type` char(10) NOT NULL DEFAULT 'normal'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

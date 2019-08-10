@@ -1,6 +1,7 @@
 package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Notification.Notification;
+import com.rabbit.backend.Bean.Notification.NotificationCountResponse;
 import com.rabbit.backend.DAO.NotificationDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,11 +57,11 @@ public class NotificationService {
         DAO.deleteAll(toUid);
     }
 
-    public Map<String, Integer> count(String toUid) {
-        Map<String, Integer> result = new HashMap<>();
+    public NotificationCountResponse count(String toUid) {
+        NotificationCountResponse result = new NotificationCountResponse();
 
-        result.put("total", DAO.totalCount(toUid));
-        result.put("unread", DAO.unreadCount(toUid));
+        result.setTotal(DAO.totalCount(toUid));
+        result.setUnread(DAO.unreadCount(toUid));
 
         return result;
     }
