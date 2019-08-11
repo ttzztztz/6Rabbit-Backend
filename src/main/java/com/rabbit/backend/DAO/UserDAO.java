@@ -1,9 +1,12 @@
 package com.rabbit.backend.DAO;
 
 import com.rabbit.backend.Bean.Credits.CreditsRule;
+import com.rabbit.backend.Bean.Thread.ThreadListItem;
 import com.rabbit.backend.Bean.User.*;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Mapper
 @Repository
@@ -63,4 +66,29 @@ public interface UserDAO {
 
     @Select("SELECT uid, credits, golds, rmbs FROM user WHERE uid = #{uid}")
     UserCredits readCredits(@Param("uid") String uid);
+
+    @Select("SELECT DISTINCT `thread`.*, `temp`.`createDate` AS `purchasedDate` FROM " +
+            "(SELECT `attach`.`tid`, `attach_pay_log`.`createDate` FROM `attach_pay_log` " +
+            "INNER JOIN attach ON `attach_pay_log`.`aid` = `attach`.`aid` " +
+            "WHERE `attach_pay_log`.`uid` = #{uid} " +
+            "UNION " +
+            "SELECT `tid`, `createDate` FROM `thread_pay_log` " +
+            "WHERE `uid` = #{uid}) temp " +
+            "INNER JOIN thread ON `temp`.`tid` = `thread`.`tid` " +
+            "ORDER BY `temp`.`createDate` DESC " +
+            "LIMIT ${from}, ${to}")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
+    })
+    List<ThreadListItem> purchasedList(@Param("uid") String uid, @Param("from") Integer from, @Param("to") Integer to);
+
+    @Select("SELECT COUNT(DISTINCT `tid`) FROM " +
+            "(SELECT `attach`.`tid` FROM `attach_pay_log` " +
+            "INNER JOIN attach ON `attach_pay_log`.`aid` = `attach`.`aid` " +
+            "WHERE `attach_pay_log`.`uid` = #{uid} " +
+            "UNION " +
+            "SELECT `tid` FROM `thread_pay_log` " +
+            "WHERE `uid` = #{uid}) temp")
+    Integer purchasedListCount(@Param("uid") String uid);
 }

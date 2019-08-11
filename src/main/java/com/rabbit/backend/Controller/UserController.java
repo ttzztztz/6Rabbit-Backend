@@ -3,10 +3,7 @@ package com.rabbit.backend.Controller;
 import com.rabbit.backend.Bean.Credits.CreditsLogListResponse;
 import com.rabbit.backend.Bean.User.*;
 import com.rabbit.backend.Security.PasswordUtils;
-import com.rabbit.backend.Service.CreditsLogService;
-import com.rabbit.backend.Service.MailService;
-import com.rabbit.backend.Service.PayService;
-import com.rabbit.backend.Service.UserService;
+import com.rabbit.backend.Service.*;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import com.rabbit.backend.Utilities.IPUtil;
 import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
@@ -28,14 +25,38 @@ public class UserController {
     private CreditsLogService creditsLogService;
     private PayService payService;
     private MailService mailService;
+    private ThreadService threadService;
+    private PostService postService;
 
     @Autowired
-    public UserController(UserService userService, CreditsLogService creditsLogService,
-                          PayService payService, MailService mailService) {
+    public UserController(UserService userService, CreditsLogService creditsLogService, PayService payService,
+                          MailService mailService, ThreadService threadService, PostService postService) {
         this.userService = userService;
         this.creditsLogService = creditsLogService;
         this.payService = payService;
         this.mailService = mailService;
+        this.threadService = threadService;
+        this.postService = postService;
+    }
+
+    @GetMapping("/thread/{uid}/{page}")
+    public Map<String, Object> userThreadList(@PathVariable("uid") String uid, @PathVariable("page") Integer page) {
+        UserThreadListResponse userThreadListResponse = new UserThreadListResponse();
+
+        userThreadListResponse.setThreads(threadService.userThreads(uid));
+        userThreadListResponse.setList(threadService.listByUser(uid, page));
+
+        return GeneralResponse.generate(200, userThreadListResponse);
+    }
+
+    @GetMapping("/post/{uid}/{page}")
+    public Map<String, Object> userPostList(@PathVariable("uid") String uid, @PathVariable("page") Integer page) {
+        UserPostListResponse userPostListResponse = new UserPostListResponse();
+
+        userPostListResponse.setPosts(postService.userPosts(uid));
+        userPostListResponse.setList(postService.listByUser(uid, page));
+
+        return GeneralResponse.generate(200, userPostListResponse);
     }
 
     @GetMapping("/info/{uid}")
@@ -179,5 +200,17 @@ public class UserController {
     public Map<String, Object> purchasedAttach(@PathVariable("page") Integer page, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         return GeneralResponse.generate(200, payService.attachPurchasedList(uid, page));
+    }
+
+    @GetMapping("/purchased/aggregate/{page}")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> purchasedAggregateList(@PathVariable("page") Integer page, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        UserPurchasedListResponse userPurchasedListResponse = new UserPurchasedListResponse();
+
+        userPurchasedListResponse.setList(userService.purchasedList(uid, page));
+        userPurchasedListResponse.setCount(userService.purchasedListCount(uid));
+
+        return GeneralResponse.generate(200, userPurchasedListResponse);
     }
 }

@@ -108,7 +108,15 @@ public class ThreadService {
         return list;
     }
 
+    public List<ThreadListItem> listByUser(String uid, Integer page) {
+        return threadDAO.listByUser(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
+    }
+
     public String uid(String tid) {
         return threadDAO.authorUid(tid);
+    }
+
+    public Integer userThreads(String uid) {
+        return threadDAO.userThreads(uid);
     }
 }

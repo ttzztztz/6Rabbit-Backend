@@ -3,6 +3,7 @@ package com.rabbit.backend.DAO;
 import com.rabbit.backend.Bean.Thread.Post;
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
 import com.rabbit.backend.Bean.Thread.ThreadEditorForm;
+import com.rabbit.backend.Bean.Thread.UserPost;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -51,4 +52,13 @@ public interface PostDAO {
 
     @Select("SELECT uid FROM post WHERE pid = #{pid}")
     String authorUid(@Param("pid") String pid);
+
+    @Select("SELECT COUNT(1) FROM post WHERE uid = #{uid}")
+    Integer userPosts(@Param("uid") String uid);
+
+    @Select("SELECT * FROM post WHERE uid = #{uid} ORDER BY pid DESC LIMIT ${from},${to}")
+    @Results({
+            @Result(property = "thread", column = "tid", one=@One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
+    })
+    List<UserPost> listByUser(@Param("uid") String uid, @Param("from") Integer from, @Param("to") Integer to);
 }

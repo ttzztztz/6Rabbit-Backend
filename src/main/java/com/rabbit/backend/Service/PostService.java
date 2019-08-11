@@ -1,6 +1,7 @@
 package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Thread.Post;
+import com.rabbit.backend.Bean.Thread.UserPost;
 import com.rabbit.backend.DAO.PostDAO;
 import com.rabbit.backend.DAO.StaticDAO;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
@@ -54,5 +55,13 @@ public class PostService {
 
     public String uid(String pid) {
         return postDAO.authorUid(pid);
+    }
+
+    public Integer userPosts(String uid) {
+        return postDAO.userPosts(uid);
+    }
+
+    public List<UserPost> listByUser(String uid, Integer page) {
+        return postDAO.listByUser(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
     }
 }

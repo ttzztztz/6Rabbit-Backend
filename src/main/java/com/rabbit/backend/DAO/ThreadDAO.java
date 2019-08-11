@@ -1,6 +1,5 @@
 package com.rabbit.backend.DAO;
 
-import com.rabbit.backend.Bean.Credits.CreditsPay;
 import com.rabbit.backend.Bean.Thread.ThreadEditorForm;
 import com.rabbit.backend.Bean.Thread.ThreadItem;
 import com.rabbit.backend.Bean.Thread.ThreadListItem;
@@ -47,6 +46,16 @@ public interface ThreadDAO {
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<ThreadListItem> listWithoutTop(@Param("fid") String fid, @Param("from") Integer from, @Param("to") Integer to);
+
+    @Select("SELECT * FROM thread WHERE uid = #{uid} ORDER BY tid DESC LIMIT ${from},${to}")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
+    })
+    List<ThreadListItem> listByUser(@Param("uid") String uid, @Param("from") Integer from, @Param("to") Integer to);
+
+    @Select("SELECT COUNT(1) FROM thread WHERE uid = #{uid}")
+    Integer userThreads(@Param("uid") String uid);
 
     @Select("SELECT COUNT(*) FROM post WHERE tid = #{tid}")
     Integer postsCount(@Param("tid") String tid);

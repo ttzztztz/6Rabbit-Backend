@@ -1,5 +1,6 @@
 package com.rabbit.backend.Service;
 
+import com.rabbit.backend.Bean.Thread.ThreadListItem;
 import com.rabbit.backend.Bean.User.MyUser;
 import com.rabbit.backend.Bean.User.OtherUser;
 import com.rabbit.backend.Bean.User.UpdateProfileForm;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +30,9 @@ public class UserService {
 
     @Value("${rabbit.limit.register}")
     private int registerLimitPerIP;
+
+    @Value("${rabbit.pagesize}")
+    private Integer PAGESIZE;
 
     @Autowired
     public UserService(UserDAO userDAO, StringRedisTemplate stringRedisTemplate) {
@@ -112,5 +117,13 @@ public class UserService {
         response.put("uid", user.getUid());
         response.put("isAdmin", user.getUsergroup().getIsAdmin());
         return response;
+    }
+
+    public List<ThreadListItem> purchasedList(String uid, Integer page) {
+        return DAO.purchasedList(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
+    }
+
+    public Integer purchasedListCount(String uid) {
+        return DAO.purchasedListCount(uid);
     }
 }
