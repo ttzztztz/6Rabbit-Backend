@@ -221,7 +221,7 @@ public class ThreadController {
     @DeleteMapping("/batch")
     @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> batchDelete(@Valid @RequestBody BatchDeleteForm form) {
-        threadService.batchDelete(form.getTidList());
+        threadService.batchDelete(form.getTid());
         return GeneralResponse.generate(200);
     }
 }

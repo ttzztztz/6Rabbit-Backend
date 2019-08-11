@@ -8,5 +8,5 @@ import java.util.List;
 @Data
 public class BatchDeleteForm {
     @Size(min = 1, max = 20)
-    List<String> tidList;
+    List<String> tid;
 }

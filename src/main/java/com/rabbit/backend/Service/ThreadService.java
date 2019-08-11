@@ -16,9 +16,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 
 @Service
 public class ThreadService {
@@ -38,8 +38,11 @@ public class ThreadService {
         this.forumDAO = forumDAO;
     }
 
-    public void modify(String tid, String key, String value) {
-        threadDAO.modify(tid, key, value);
+    @Transactional
+    public void modify(List<String> tidList, String key, String value) {
+        for (String tid : tidList) {
+            threadDAO.modify(tid, key, value);
+        }
     }
 
     @Transactional
@@ -98,7 +101,7 @@ public class ThreadService {
     }
 
     public List<ThreadListItem> list(String fid, Integer page) {
-        List<ThreadListItem> list = new Vector<>();
+        List<ThreadListItem> list = new ArrayList<>();
         if (page == 1) {
             list.addAll(threadDAO.globalTopThread());
             list.addAll(threadDAO.forumTopThreadByFid(fid));
