@@ -60,12 +60,12 @@ public class UserController {
     }
 
     @GetMapping("/info/{uid}")
-    public OtherUser info(@PathVariable("uid") String uid) {
+    public Map<String, Object> info(@PathVariable("uid") String uid) {
         OtherUser user = userService.selectOtherUserByUid(uid);
         if (user == null) {
             throw new NotFoundException(1, "user doesn't Exist");
         }
-        return user;
+        return GeneralResponse.generate(200, user);
     }
 
     @PostMapping("/register")
