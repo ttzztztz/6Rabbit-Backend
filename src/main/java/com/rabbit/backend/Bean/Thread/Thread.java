@@ -15,7 +15,7 @@ public abstract class Thread {
     private Integer posts;
     private Boolean isTop;
     private Boolean isClosed;
-    private Integer digest;
+    private Integer diamond;
     private OtherUser lastUser;
     private String firstpid;
     private String lastpid;

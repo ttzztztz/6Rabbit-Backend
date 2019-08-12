@@ -44,14 +44,14 @@ public class ThreadController {
         return GeneralResponse.generate(200, threadListResponse);
     }
 
-    @PostMapping("/digest")
+    @PostMapping("/diamond")
     @PreAuthorize("hasAuthority('Admin')")
-    public Map<String, Object> setDigest(@Valid @RequestBody ThreadDigestForm form, Errors errors) {
+    public Map<String, Object> setDiamond(@Valid @RequestBody ThreadDiamondForm form, Errors errors) {
         if (errors.hasErrors()) {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
-        threadService.modify(form.getTid(), "digest", form.getDigest().toString());
+        threadService.modify(form.getTid(), "diamond", form.getDiamond().toString());
         return GeneralResponse.generate(200);
     }
 

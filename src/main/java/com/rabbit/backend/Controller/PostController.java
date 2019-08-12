@@ -1,8 +1,8 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
-import com.rabbit.backend.Service.RuleService;
 import com.rabbit.backend.Service.PostService;
+import com.rabbit.backend.Service.RuleService;
 import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import org.springframework.beans.factory.annotation.Autowired;

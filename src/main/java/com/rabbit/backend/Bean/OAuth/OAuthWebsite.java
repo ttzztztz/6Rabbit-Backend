@@ -3,7 +3,6 @@ package com.rabbit.backend.Bean.OAuth;
 import lombok.Data;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URI;
 
 @Data
 public abstract class OAuthWebsite {

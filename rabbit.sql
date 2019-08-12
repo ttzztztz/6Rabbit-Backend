@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： db
--- 生成日期： 2019-08-10 02:34:21
+-- 生成日期： 2019-08-12 02:03:11
 -- 服务器版本： 5.7.26
 -- PHP 版本： 7.2.19
 
@@ -146,7 +146,7 @@ CREATE TABLE `thread` (
   `posts` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `isTop` tinyint(1) NOT NULL DEFAULT '0',
   `isClosed` tinyint(1) NOT NULL DEFAULT '0',
-  `digest` tinyint(1) NOT NULL DEFAULT '0',
+  `diamond` tinyint(1) NOT NULL DEFAULT '0',
   `lastuid` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `firstpid` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `lastpid` int(11) UNSIGNED NOT NULL DEFAULT '0',
@@ -187,7 +187,7 @@ CREATE TABLE `user` (
   `rmbs` int(11) NOT NULL DEFAULT '0',
   `password` char(64) NOT NULL,
   `salt` char(64) NOT NULL,
-  `gender` int(1) NOT NULL DEFAULT '0',
+  `gender` int(1) NOT NULL DEFAULT '2',
   `email` char(64) NOT NULL,
   `mobile` char(32) NOT NULL DEFAULT '',
   `qq` char(32) NOT NULL DEFAULT '',

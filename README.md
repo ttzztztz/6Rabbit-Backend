@@ -8,5 +8,4 @@
     -   docker run --link mysql:mysql --link redis:redis \
         -p 8000:8000 \
         -e SECRET=test \
-        -e EMAIL_PWD=pwd_here \
         -d registry.cn-hangzhou.aliyuncs.com/ttzztztz/6rabbit-backend:latest
