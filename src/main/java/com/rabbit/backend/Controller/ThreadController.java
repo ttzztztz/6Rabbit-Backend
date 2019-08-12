@@ -1,6 +1,7 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Thread.*;
+import com.rabbit.backend.Security.CheckAuthority;
 import com.rabbit.backend.Service.*;
 import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
@@ -113,7 +114,7 @@ public class ThreadController {
         }
 
         if (!threadItem.getUser().getUid().equals(uid)
-                && !authentication.getAuthorities().contains("Admin")
+                && !CheckAuthority.hasAuthority(authentication, "Admin")
         ) {
             return GeneralResponse.generate(403, "Permission denied.");
         }
@@ -153,7 +154,7 @@ public class ThreadController {
         String uid = (String) authentication.getPrincipal();
         ThreadItem threadItem = threadService.info(tid);
         if (threadItem.getIsClosed()
-                && !authentication.getAuthorities().contains("Admin")
+                && !CheckAuthority.hasAuthority(authentication, "Admin")
         ) {
             return GeneralResponse.generate(400, "Thread already closed.");
         }
@@ -191,9 +192,10 @@ public class ThreadController {
         if (errors.hasErrors()) {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
+
         String uid = (String) authentication.getPrincipal();
         if (!threadService.uid(tid).equals(uid)
-                && !authentication.getAuthorities().contains("Admin")) {
+                && !CheckAuthority.hasAuthority(authentication, "Admin")) {
             return GeneralResponse.generate(403, "Permission denied.");
         }
 

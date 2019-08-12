@@ -1,6 +1,8 @@
 package com.rabbit.backend.Controller;
 
+import com.rabbit.backend.Bean.Thread.Post;
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
+import com.rabbit.backend.Security.CheckAuthority;
 import com.rabbit.backend.Service.PostService;
 import com.rabbit.backend.Service.RuleService;
 import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
@@ -30,13 +32,19 @@ public class PostController {
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> delete(@PathVariable("pid") String pid, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        if (!postService.uid(pid).equals(uid) && !authentication.getAuthorities().contains("Admin")) {
+        if (!postService.uid(pid).equals(uid) && !CheckAuthority.hasAuthority(authentication, "Admin")) {
             return GeneralResponse.generate(403, "Permission denied.");
         }
 
         postService.delete(pid);
         ruleService.applyRule(uid, "DeleteThread");
         return GeneralResponse.generate(200);
+    }
+
+    @GetMapping("/{pid}")
+    public Map<String, Object> getInfo(@PathVariable("pid") String pid) {
+        Post post = postService.find(pid);
+        return GeneralResponse.generate(200, post);
     }
 
     @PutMapping("/{pid}")
@@ -48,7 +56,7 @@ public class PostController {
         }
 
         if (!postService.uid(pid).equals(authentication.getPrincipal())
-                && !authentication.getAuthorities().contains("Admin")) {
+                && !CheckAuthority.hasAuthority(authentication, "Admin")) {
             return GeneralResponse.generate(403, "Permission denied.");
         }
 

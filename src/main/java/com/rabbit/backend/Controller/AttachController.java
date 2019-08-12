@@ -1,5 +1,6 @@
 package com.rabbit.backend.Controller;
 
+import com.rabbit.backend.Security.CheckAuthority;
 import com.rabbit.backend.Service.AttachService;
 import com.rabbit.backend.Service.PayService;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
@@ -27,7 +28,7 @@ public class AttachController {
     public Map<String, Object> delete(@PathVariable("aid") String aid, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         String attachUid = attachService.uid(aid);
-        if (!attachUid.equals(uid) && !authentication.getAuthorities().contains("Admin")) {
+        if (!attachUid.equals(uid) && !CheckAuthority.hasAuthority(authentication, "Admin")) {
             return GeneralResponse.generate(403, "Permission denied.");
         }
         return GeneralResponse.generate(attachService.deleteByAid(aid) ? 200 : 400);
