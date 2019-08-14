@@ -1,24 +1,20 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.OAuth.OAuth;
-import com.rabbit.backend.Bean.OAuth.OAuthBindKey;
+import com.rabbit.backend.Bean.OAuth.OAuthInfoResponse;
 import com.rabbit.backend.Bean.OAuth.OAuthUserInfo;
 import com.rabbit.backend.Bean.User.User;
 import com.rabbit.backend.Service.FileService;
 import com.rabbit.backend.Service.OAuthService;
 import com.rabbit.backend.Service.UserService;
-import com.rabbit.backend.Utilities.OAuthRedirectURLUtil;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/oauth")
@@ -26,30 +22,24 @@ public class OAuthController {
     private OAuthService oAuthService;
     private UserService userService;
     private FileService fileService;
-    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
-    public OAuthController(OAuthService oAuthService, UserService userService, FileService fileService,
-                           StringRedisTemplate stringRedisTemplate) {
+    public OAuthController(OAuthService oAuthService, UserService userService, FileService fileService) {
         this.oAuthService = oAuthService;
         this.userService = userService;
         this.fileService = fileService;
-        this.stringRedisTemplate = stringRedisTemplate;
     }
 
-    @DeleteMapping("/{oid}")
+    @DeleteMapping("/{platform}")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> delete(@PathVariable("oid") String oid, Authentication authentication) {
-        OAuth oAuth = oAuthService.findByOid(oid);
-        if (oAuth == null) {
+    public Map<String, Object> delete(@PathVariable("platform") String platform, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+
+        if (oAuthService.bindExist(platform, uid)) {
             return GeneralResponse.generate(404, "Not found.");
         }
-        String uid = (String) authentication.getPrincipal();
-        if (!uid.equals(oAuth.getUid())) {
-            return GeneralResponse.generate(403, "No Permission.");
-        }
 
-        oAuthService.delete(oid);
+        oAuthService.deleteByUser(platform, uid);
         return GeneralResponse.generate(200);
     }
 
@@ -63,70 +53,56 @@ public class OAuthController {
     @GetMapping("/{platform}")
     public void getLoginURL(@PathVariable("platform") String platform, HttpServletResponse response) {
         response.setStatus(301);
-        response.setHeader("Refresh", "0;URL=" + oAuthService.getURL(platform,
-                OAuthRedirectURLUtil.generate(platform)
-        ));
+        response.setHeader("Refresh", "0;URL=" + oAuthService.getURL(platform));
     }
 
-    @GetMapping("/{platform}/{token}")
-    public void getBindURL(@PathVariable("platform") String platform, @PathVariable("token") String token,
-                           HttpServletResponse response) {
-        response.setStatus(301);
-        response.setHeader("Refresh", "0;URL=" + oAuthService.getURL(platform,
-                OAuthRedirectURLUtil.generate(platform, token)
-        ));
-    }
-
-    @PostMapping("/{platform}")
-    public Map<String, Object> callback(@PathVariable("platform") String platform,
-                                        HttpServletRequest request) {
-        // login & register
-        OAuthUserInfo oAuthUserInfo = oAuthService.callback(platform, request);
+    @GetMapping("/login/{platform}/{code}")
+    public Map<String, Object> login(@PathVariable("platform") String platform, @PathVariable("code") String code) {
+        OAuthUserInfo oAuthUserInfo = oAuthService.callback(platform, code);
         if (oAuthUserInfo == null) {
             return GeneralResponse.generate(500, "Connection to OAuth Server error.");
         }
 
         OAuth oAuth = oAuthService.findByOpenid(oAuthUserInfo.getOpenid(), platform);
         if (oAuth == null) {
-            String key = "oauth:" + platform + ":" + oAuthUserInfo.getOpenid();
-            String sessionId = request.getSession().getId();
-            stringRedisTemplate.boundValueOps(key).set(sessionId);
-            stringRedisTemplate.boundValueOps(key).expire(5 * 60 * 1000, TimeUnit.MILLISECONDS);
-
-            OAuthBindKey oAuthBindKey = new OAuthBindKey();
-            oAuthBindKey.setKey(sessionId);
-            oAuthBindKey.setOpenid(oAuthUserInfo.getOpenid());
-            return GeneralResponse.generate(404, oAuthBindKey);
+            return GeneralResponse.generate(404, "Platform doesn't exist.");
         } else {
             User user = userService.selectUser("uid", oAuth.getUid());
-
             String avatarPath = fileService.avatarPath(oAuth.getUid());
             String avatarRemoteAddress = oAuthUserInfo.getAvatarURL();
 
             fileService.downloadRemoteFile(avatarPath, avatarRemoteAddress);
+            oAuthService.deleteTokenFromCache(platform, code);
             return GeneralResponse.generate(200, userService.loginResponse(user));
         }
     }
 
-    @PutMapping("/{platform}")
+    @GetMapping("/bind/{platform}/{code}")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> bind(@PathVariable("platform") String platform, OAuthBindKey oAuthBindKey,
+    public Map<String, Object> bind(@PathVariable("platform") String platform, @PathVariable("code") String code,
                                     Authentication authentication) {
-        //bind
         String uid = (String) authentication.getPrincipal();
-        String key = "oauth:" + platform + ":" + oAuthBindKey.getOpenid();
-        String sessionID = stringRedisTemplate.boundValueOps(key).get();
-        if (sessionID == null || !sessionID.equals(oAuthBindKey.getKey())) {
-            return GeneralResponse.generate(400, "Session expired or invalid request.");
-        } else {
-            OAuth oAuth = new OAuth();
-            oAuth.setOpenid(oAuthBindKey.getOpenid());
-            oAuth.setPlatform(platform);
-            oAuth.setUid(uid);
-            oAuthService.insert(oAuth);
+        oAuthService.bind(platform, code, uid);
+        return GeneralResponse.generate(200);
+    }
 
-            return GeneralResponse.generate(200);
+    @GetMapping("/info/{platform}/{code}")
+    public Map<String, Object> info(@PathVariable("platform") String platform, @PathVariable("code") String code) {
+        OAuthUserInfo oAuthUserInfo = oAuthService.callback(platform, code);
+
+        if (oAuthUserInfo == null) {
+            return GeneralResponse.generate(404, "Invalid information.");
+        } else {
+            OAuthInfoResponse response = new OAuthInfoResponse();
+            response.setUserInfo(oAuthUserInfo);
+            response.setActive(oAuthService.findUid(platform, oAuthUserInfo.getOpenid()) != null);
+            return GeneralResponse.generate(200, response);
         }
     }
 
+    @DeleteMapping("/{platform}/{code}")
+    public Map<String, Object> delete(@PathVariable("platform") String platform, @PathVariable("code") String code) {
+        oAuthService.deleteTokenFromCache(platform, code);
+        return GeneralResponse.generate(200);
+    }
 }

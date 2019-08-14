@@ -40,7 +40,7 @@ public class FileController {
         this.ruleService = ruleService;
     }
 
-    @Value("${rabbit.limit.max-unused-attach-per-user}")
+    @Value("${rabbit.limit.MAX_UNUSED_ATTACH_PER_USER}")
     private Integer maxUnusedAttachCountPerUser;
 
     @GetMapping("/avatar/{uid}")

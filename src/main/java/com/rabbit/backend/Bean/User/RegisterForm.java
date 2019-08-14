@@ -16,4 +16,7 @@ public class RegisterForm {
     @NotBlank
     @Email(message = "Email format invalid.")
     private String email;
+
+    private String bindOAuthCode;
+    private String bindOAuthPlatform;
 }

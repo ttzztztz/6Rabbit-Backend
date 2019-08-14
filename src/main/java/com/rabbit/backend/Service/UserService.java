@@ -1,10 +1,7 @@
 package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Thread.ThreadListItem;
-import com.rabbit.backend.Bean.User.MyUser;
-import com.rabbit.backend.Bean.User.OtherUser;
-import com.rabbit.backend.Bean.User.UpdateProfileForm;
-import com.rabbit.backend.Bean.User.User;
+import com.rabbit.backend.Bean.User.*;
 import com.rabbit.backend.DAO.UserDAO;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Security.PasswordUtils;
@@ -15,9 +12,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -108,14 +103,15 @@ public class UserService {
         return limitCheck("register", IP, registerLimitPerIP);
     }
 
-    public Map<String, Object> loginResponse(User user) {
+    public UserLoginResponse loginResponse(User user) {
         String token = JWTUtils.sign(user.getUid(), user.getUsername(), user.getUsergroup().getIsAdmin());
-        Map<String, Object> response = new HashMap<>();
 
-        response.put("token", token);
-        response.put("username", user.getUsername());
-        response.put("uid", user.getUid());
-        response.put("isAdmin", user.getUsergroup().getIsAdmin());
+        UserLoginResponse response = new UserLoginResponse();
+        response.setToken(token);
+        response.setUsername(user.getUsername());
+        response.setUid(user.getUid());
+        response.setIsAdmin(user.getUsergroup().getIsAdmin());
+
         return response;
     }
 

@@ -2,6 +2,7 @@ package com.rabbit.backend.Service.OAuth.Github;
 
 import com.rabbit.backend.Bean.OAuth.OAuthUserInfo;
 import com.rabbit.backend.Bean.OAuth.OAuthWebsite;
+import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpEntity;
@@ -11,8 +12,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.servlet.http.HttpServletRequest;
 
 @Configuration("OAuth_Github")
 public class Github extends OAuthWebsite {
@@ -26,21 +25,16 @@ public class Github extends OAuthWebsite {
     private String TOKEN_URL = "https://github.com/login/oauth/access_token";
     private String USER_INFO_URL = "https://api.github.com/user";
 
-    public String buildLoginURL(String redirect) {
+    public String buildLoginURL() {
         MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
 
         multiValueMap.add("response_type", "code");
         multiValueMap.add("client_id", APP_ID);
-        multiValueMap.add("redirect_uri", redirect);
 
         UriComponents uriComponents = UriComponentsBuilder.fromUriString(
                 this.CONNECT_URL).queryParams(multiValueMap).build();
 
         return uriComponents.encode().toUri().toString();
-    }
-
-    public String getCode(HttpServletRequest request) {
-        return request.getParameter("code");
     }
 
     public String getAccessToken(String code) {
@@ -54,8 +48,8 @@ public class Github extends OAuthWebsite {
                 "&client_secret=" + APP_SECRET +
                 "&code=" + code, requestEntity, AccessTokenResponse.class);
 
-        if (accessTokenResponse == null) {
-            return null;
+        if (accessTokenResponse == null || accessTokenResponse.getAccess_token() == null) {
+            throw new NotFoundException(400, "Invalid code.");
         } else {
             return accessTokenResponse.getAccess_token();
         }

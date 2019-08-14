@@ -27,16 +27,18 @@ public class UserController {
     private MailService mailService;
     private ThreadService threadService;
     private PostService postService;
+    private OAuthService oAuthService;
 
     @Autowired
     public UserController(UserService userService, CreditsLogService creditsLogService, PayService payService,
-                          MailService mailService, ThreadService threadService, PostService postService) {
+                          MailService mailService, ThreadService threadService, PostService postService, OAuthService oAuthService) {
         this.userService = userService;
         this.creditsLogService = creditsLogService;
         this.payService = payService;
         this.mailService = mailService;
         this.threadService = threadService;
         this.postService = postService;
+        this.oAuthService = oAuthService;
     }
 
     @GetMapping("/thread/{uid}/{page}")
@@ -92,6 +94,11 @@ public class UserController {
         String uid = userService.register(form.getUsername(), form.getPassword(), form.getEmail());
         userService.registerLimitIncrement(IP);
         mailService.sendMail(form.getEmail(), "感谢您注册酷兔网！", "感谢您注册酷兔网！请您在发表帖子时遵守法律法规，文明上网，理性发言！");
+
+        if (form.getBindOAuthCode() != null && form.getBindOAuthPlatform() != null) {
+            oAuthService.bind(form.getBindOAuthPlatform(), form.getBindOAuthCode(), uid);
+        }
+
         return GeneralResponse.generate(200, uid);
     }
 
@@ -185,6 +192,7 @@ public class UserController {
 
         response.setCount(creditsLogService.count(uid));
         response.setList(creditsLogService.list(uid, page));
+
         return GeneralResponse.generate(200, response);
     }
 

@@ -21,10 +21,19 @@ public interface OAuthDAO {
     @Delete("DELETE FROM oauth WHERE oid = #{oid}")
     void delete(@Param("oid") String oid);
 
+    @Delete("DELETE FROM oauth WHERE platform = #{platform} AND uid = #{uid}")
+    void deleteByUser(@Param("platform") String platform, @Param("uid") String uid);
+
     @Select("SELECT * FROM oauth WHERE uid = #{uid}")
     List<OAuth> listByUid(@Param("uid") String uid);
+
+    @Select("SELECT oid FROM oauth WHERE uid = #{uid} AND platform = #{platform}")
+    String findOidByUidAndPlatform(@Param("uid") String uid, @Param("platform") String platform);
 
     @Insert("INSERT INTO oauth(uid, platform, openid) VALUES (#{uid}, #{platform}, #{openid})")
     @Options(keyColumn = "oid", keyProperty = "oid", useGeneratedKeys = true)
     void insert(OAuth item);
+
+    @Select("SELECT uid FROM oauth WHERE platform = #{platform} AND openid = #{openid}")
+    String findUid(@Param("platform") String platform, @Param("openid") String openid);
 }

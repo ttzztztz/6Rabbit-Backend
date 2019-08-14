@@ -2,6 +2,7 @@ package com.rabbit.backend.Service.OAuth.QQ;
 
 import com.rabbit.backend.Bean.OAuth.OAuthUserInfo;
 import com.rabbit.backend.Bean.OAuth.OAuthWebsite;
+import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -27,18 +27,21 @@ public class QQ extends OAuthWebsite {
     @Value("${rabbit.oauth.qq.APP_SECRET}")
     private String APP_SECRET;
 
+    @Value("${rabbit.oauth.qq.REDIRECT}")
+    private String APP_REDIRECT;
+
     private String CONNECT_URL = "https://graph.qq.com/oauth2.0/authorize";
     private String TOKEN_URL = "https://graph.qq.com/oauth2.0/token";
     private String ME_URL = "https://graph.qq.com/oauth2.0/me";
     private String USER_INFO_URL = "https://graph.qq.com/user/get_user_info";
 
-    public String buildLoginURL(String redirect) {
+    public String buildLoginURL() {
         Random rand = new Random(System.currentTimeMillis());
         MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
 
         multiValueMap.add("response_type", "code");
         multiValueMap.add("client_id", APP_ID);
-        multiValueMap.add("redirect_uri", redirect);
+        multiValueMap.add("redirect_uri", APP_REDIRECT);
         multiValueMap.add("state", String.valueOf(rand.nextInt(1000000)));
         multiValueMap.add("scope", "get_user_info,add_t,add_pic_t,add_share");
 
@@ -46,10 +49,6 @@ public class QQ extends OAuthWebsite {
                 this.CONNECT_URL).queryParams(multiValueMap).build();
 
         return uriComponents.encode().toUri().toString();
-    }
-
-    public String getCode(HttpServletRequest request) {
-        return request.getParameter("code");
     }
 
     private Map<String, String> getParam(String string) {
@@ -73,7 +72,7 @@ public class QQ extends OAuthWebsite {
                 "&code=" + code, requestEntity, String.class);
 
         if (accessTokenResponse == null || !accessTokenResponse.contains("access_token")) {
-            return null;
+            throw new NotFoundException(400, "Invalid code.");
         } else {
             Map<String, String> accessTokenResponseMap = getParam(accessTokenResponse);
             return accessTokenResponseMap.get("access_token");

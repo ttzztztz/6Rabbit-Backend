@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： db
--- 生成日期： 2019-08-12 02:03:11
+-- 生成日期： 2019-08-14 01:32:00
 -- 服务器版本： 5.7.26
 -- PHP 版本： 7.2.19
 
@@ -39,7 +39,7 @@ CREATE TABLE `attach` (
   `creditsType` tinyint(4) NOT NULL DEFAULT '0',
   `credits` int(11) NOT NULL DEFAULT '0',
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -54,7 +54,7 @@ CREATE TABLE `attach_pay_log` (
   `creditsType` tinyint(4) NOT NULL,
   `credits` int(11) NOT NULL,
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -71,7 +71,7 @@ CREATE TABLE `credits_log` (
   `creditsType` tinyint(4) NOT NULL,
   `credits` int(11) NOT NULL,
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -85,7 +85,7 @@ CREATE TABLE `forum` (
   `description` text NOT NULL,
   `threads` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `type` char(10) NOT NULL DEFAULT 'normal'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -101,7 +101,7 @@ CREATE TABLE `notification` (
   `link` text NOT NULL,
   `isRead` tinyint(1) NOT NULL DEFAULT '0',
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -114,7 +114,7 @@ CREATE TABLE `oauth` (
   `uid` int(10) UNSIGNED NOT NULL,
   `platform` char(36) NOT NULL DEFAULT '',
   `openid` char(48) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -130,7 +130,7 @@ CREATE TABLE `post` (
   `isFirst` tinyint(1) NOT NULL DEFAULT '0',
   `message` mediumtext NOT NULL,
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ;
 
 -- --------------------------------------------------------
 
@@ -154,7 +154,7 @@ CREATE TABLE `thread` (
   `credits` int(11) NOT NULL DEFAULT '0',
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `replyDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -169,7 +169,7 @@ CREATE TABLE `thread_pay_log` (
   `creditsType` tinyint(4) NOT NULL,
   `credits` int(11) NOT NULL,
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -195,7 +195,7 @@ CREATE TABLE `user` (
   `signature` char(128) NOT NULL DEFAULT '',
   `createDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `loginDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -207,7 +207,7 @@ CREATE TABLE `user_group` (
   `gid` int(11) UNSIGNED NOT NULL,
   `name` char(32) NOT NULL,
   `isAdmin` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 转储表的索引
@@ -268,6 +268,7 @@ ALTER TABLE `post`
   ADD KEY `tid` (`tid`),
   ADD KEY `uid` (`uid`),
   ADD KEY `quotepid` (`quotepid`);
+ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`);
 
 --
 -- 表的索引 `thread`
@@ -277,6 +278,7 @@ ALTER TABLE `thread`
   ADD KEY `fid` (`fid`),
   ADD KEY `uid` (`uid`),
   ADD KEY `fid_2` (`fid`,`lastpid`);
+ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`);
 
 --
 -- 表的索引 `thread_pay_log`
@@ -371,56 +373,6 @@ ALTER TABLE `user`
 --
 ALTER TABLE `user_group`
   MODIFY `gid` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- 限制导出的表
---
-
---
--- 限制表 `attach`
---
-ALTER TABLE `attach`
-  ADD CONSTRAINT `DeleteUserAttach` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- 限制表 `attach_pay_log`
---
-ALTER TABLE `attach_pay_log`
-  ADD CONSTRAINT `DeleteAttachPay` FOREIGN KEY (`aid`) REFERENCES `attach` (`aid`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `DeleteUserAttachPay` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- 限制表 `credits_log`
---
-ALTER TABLE `credits_log`
-  ADD CONSTRAINT `DeleteUserCredits` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- 限制表 `oauth`
---
-ALTER TABLE `oauth`
-  ADD CONSTRAINT `DeleteUserOauth` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- 限制表 `post`
---
-ALTER TABLE `post`
-  ADD CONSTRAINT `DeleteThread` FOREIGN KEY (`tid`) REFERENCES `thread` (`tid`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `DeleteUserPost` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- 限制表 `thread`
---
-ALTER TABLE `thread`
-  ADD CONSTRAINT `DeleteUserThread` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `Forum` FOREIGN KEY (`fid`) REFERENCES `forum` (`fid`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- 限制表 `thread_pay_log`
---
-ALTER TABLE `thread_pay_log`
-  ADD CONSTRAINT `DeleteThreadPay` FOREIGN KEY (`tid`) REFERENCES `thread` (`tid`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `DeleteUserPay` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`) ON DELETE CASCADE ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
