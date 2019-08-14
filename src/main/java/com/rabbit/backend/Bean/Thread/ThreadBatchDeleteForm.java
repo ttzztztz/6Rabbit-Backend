@@ -6,7 +6,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
-public class BatchDeleteForm {
+public class ThreadBatchDeleteForm {
     @Size(min = 1, max = 20)
     List<String> tid;
 }

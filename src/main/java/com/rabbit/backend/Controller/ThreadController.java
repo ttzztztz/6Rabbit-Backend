@@ -103,27 +103,6 @@ public class ThreadController {
         return GeneralResponse.generate(200, response);
     }
 
-    @DeleteMapping("/{tid}")
-    @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> delete(@PathVariable("tid") String tid, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        ThreadItem threadItem = threadService.info(tid);
-
-        if (threadItem == null) {
-            return GeneralResponse.generate(404, "Thread doesn't exist.");
-        }
-
-        if (!threadItem.getUser().getUid().equals(uid)
-                && !CheckAuthority.hasAuthority(authentication, "Admin")
-        ) {
-            return GeneralResponse.generate(403, "Permission denied.");
-        }
-        attachService.deleteByTid(tid);
-        threadService.delete(tid);
-        ruleService.applyRule(uid, "DeleteThread");
-        return GeneralResponse.generate(200);
-    }
-
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> create(@Valid @RequestBody ThreadEditorForm form, Errors errors,
@@ -220,10 +199,46 @@ public class ThreadController {
         }
     }
 
+    @DeleteMapping("/{tid}")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> delete(@PathVariable("tid") String tid, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        ThreadItem threadItem = threadService.info(tid);
+
+        if (threadItem == null) {
+            return GeneralResponse.generate(404, "Thread doesn't exist.");
+        }
+
+        if (!threadItem.getUser().getUid().equals(uid)
+                && !CheckAuthority.hasAuthority(authentication, "Admin")
+        ) {
+            return GeneralResponse.generate(403, "Permission denied.");
+        }
+        attachService.deleteByTid(tid);
+        threadService.delete(tid);
+        ruleService.applyRule(threadItem.getUser().getUid(), "DeleteThread");
+        return GeneralResponse.generate(200);
+    }
+
     @DeleteMapping("/batch")
     @PreAuthorize("hasAuthority('Admin')")
-    public Map<String, Object> batchDelete(@Valid @RequestBody BatchDeleteForm form) {
-        threadService.batchDelete(form.getTid());
+    public Map<String, Object> batchDelete(@Valid @RequestBody ThreadBatchDeleteForm form) {
+        for (String tid : form.getTid()) {
+            ThreadItem threadItem = threadService.info(tid);
+
+            attachService.deleteByTid(tid);
+            threadService.delete(tid);
+            ruleService.applyRule(threadItem.getUser().getUid(), "DeleteThread");
+        }
         return GeneralResponse.generate(200);
+    }
+
+    @PostMapping("/search/{page}")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> search(@Valid @RequestBody SearchForm form, @PathVariable("page") Integer page) {
+        SearchResponse searchResponse = new SearchResponse();
+        searchResponse.setList(threadService.search(form.getKeywords(), page));
+        searchResponse.setCount(threadService.searchCount(form.getKeywords()));
+        return GeneralResponse.generate(200, searchResponse);
     }
 }

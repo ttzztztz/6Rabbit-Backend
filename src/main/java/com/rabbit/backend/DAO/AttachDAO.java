@@ -45,10 +45,10 @@ public interface AttachDAO {
     })
     List<Attach> findAllUnused();
 
-    @Select("SELECT COUNT(*) FROM attach WHERE tid = #{tid}")
+    @Select("SELECT COUNT(1) FROM attach WHERE tid = #{tid}")
     Integer threadAttachCount(@Param("tid") String tid);
 
-    @Select("SELECT COUNT(*) FROM attach WHERE uid = #{uid} AND tid IS NULL")
+    @Select("SELECT COUNT(1) FROM attach WHERE uid = #{uid} AND tid IS NULL")
     Integer userUnusedCount(@Param("uid") String uid);
 
     @Delete("DELETE FROM attach WHERE aid = #{aid}")
@@ -71,4 +71,7 @@ public interface AttachDAO {
             @Result(property = "thread", column = "tid", one = @One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
     })
     AttachListItem findAttachPayListItem(@Param("aid") String aid);
+
+    @Delete("DELETE FROM attach_pay_log WHERE aid = #{aid}")
+    void deleteCASCADE(@Param("aid") String aid);
 }

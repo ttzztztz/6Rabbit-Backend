@@ -1,10 +1,7 @@
 package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Forum.Forum;
-import com.rabbit.backend.Bean.Thread.PostEditorForm;
-import com.rabbit.backend.Bean.Thread.ThreadEditorForm;
-import com.rabbit.backend.Bean.Thread.ThreadItem;
-import com.rabbit.backend.Bean.Thread.ThreadListItem;
+import com.rabbit.backend.Bean.Thread.*;
 import com.rabbit.backend.DAO.ForumDAO;
 import com.rabbit.backend.DAO.PostDAO;
 import com.rabbit.backend.DAO.StaticDAO;
@@ -50,13 +47,8 @@ public class ThreadService {
         String fid = threadDAO.fid(tid);
         staticDAO.decrement("forum", "threads", "fid", fid, 1);
         threadDAO.delete(tid);
-    }
-
-    @Async
-    public void batchDelete(List<String> tidList) {
-        for (String tid : tidList) {
-            delete(tid);
-        }
+        threadDAO.deletePayLogCASCADE(tid);
+        threadDAO.deletePostCASCADE(tid);
     }
 
     public ThreadItem info(String tid) {
@@ -121,5 +113,13 @@ public class ThreadService {
 
     public Integer userThreads(String uid) {
         return threadDAO.userThreads(uid);
+    }
+
+    public List<SearchItem> search(String keywords, Integer page) {
+        return threadDAO.search(keywords, (page - 1) * PAGESIZE, page * PAGESIZE);
+    }
+
+    public Integer searchCount(String keywords) {
+        return threadDAO.searchCount(keywords);
     }
 }

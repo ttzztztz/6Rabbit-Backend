@@ -36,6 +36,11 @@ public class PostController {
             return GeneralResponse.generate(403, "Permission denied.");
         }
 
+        Post post = postService.find(pid);
+        if(post.getIsFirst()){
+            return GeneralResponse.generate(404, "Bad request.");
+        }
+
         postService.delete(pid);
         ruleService.applyRule(uid, "DeleteThread");
         return GeneralResponse.generate(200);

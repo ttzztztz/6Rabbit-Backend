@@ -25,19 +25,22 @@ public class AttachService {
     private Boolean deleteByFile(File file, String aid) {
         if (file.exists() && file.delete()) {
             attachDAO.delete(aid);
+            attachDAO.deleteCASCADE(aid);
             return true;
         } else {
             return false;
         }
     }
 
+    @Transactional
     public Boolean deleteByAid(String aid) {
         Attach attach = attachDAO.find(aid);
         File file = new File(attach.getFileName());
         return deleteByFile(file, aid);
     }
 
-    private Boolean deleteByAttach(Attach attach) {
+    @Transactional
+    public Boolean deleteByAttach(Attach attach) {
         File file = new File(attach.getFileName());
         return deleteByFile(file, attach.getAid());
     }

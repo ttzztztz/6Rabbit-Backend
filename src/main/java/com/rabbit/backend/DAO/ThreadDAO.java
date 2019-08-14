@@ -1,5 +1,6 @@
 package com.rabbit.backend.DAO;
 
+import com.rabbit.backend.Bean.Thread.SearchItem;
 import com.rabbit.backend.Bean.Thread.ThreadEditorForm;
 import com.rabbit.backend.Bean.Thread.ThreadItem;
 import com.rabbit.backend.Bean.Thread.ThreadListItem;
@@ -93,4 +94,28 @@ public interface ThreadDAO {
 
     @Select("SELECT fid FROM thread WHERE tid = #{tid}")
     String fid(@Param("tid") String tid);
+
+    @Select("SELECT `temp`.`tid`, `temp`.`pid`, `temp`.`uid`, `user`.`username`, `temp`.`createDate`,`temp`.`message`,`temp`.`isFirst` FROM " +
+            "(SELECT uid, tid, pid, message, createDate, isFirst FROM post WHERE MATCH(`message`) AGAINST(#{keywords} IN NATURAL LANGUAGE MODE) " +
+            "UNION " +
+            "SELECT uid, tid, firstpid AS pid, subject AS message, createDate, 1 AS isFirst FROM thread WHERE MATCH(`subject`) AGAINST(#{keywords} IN NATURAL LANGUAGE MODE)) temp " +
+            "INNER JOIN `user` ON `temp`.`uid`=`user`.`uid` " +
+            "ORDER BY `temp`.`pid` DESC " +
+            "LIMIT ${from}, ${to}")
+    @Results({
+            @Result(property = "thread", column = "tid", one=@One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
+    })
+    List<SearchItem> search(@Param("keywords") String keywords, @Param("from") Integer from, @Param("to") Integer to);
+
+    @Select("SELECT COUNT(1) FROM " +
+            "(SELECT uid, tid, pid, message, createDate, isFirst FROM post WHERE MATCH(`message`) AGAINST(#{keywords} IN NATURAL LANGUAGE MODE) " +
+            "UNION " +
+            "SELECT uid, tid, firstpid AS pid, subject AS message, createDate, 1 AS isFirst FROM thread WHERE MATCH(`subject`) AGAINST(#{keywords} IN NATURAL LANGUAGE MODE)) temp ")
+    Integer searchCount(@Param("keywords") String keywords);
+
+    @Delete("DELETE FROM thread_pay_log WHERE tid = #{tid}")
+    void deletePayLogCASCADE(@Param("tid") String tid);
+
+    @Delete("DELETE FROM post WHERE tid = #{tid}")
+    void deletePostCASCADE(@Param("tid") String tid);
 }
