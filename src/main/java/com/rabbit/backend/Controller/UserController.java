@@ -1,6 +1,7 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Credits.CreditsLogListResponse;
+import com.rabbit.backend.Bean.OAuth.OAuthUserInfo;
 import com.rabbit.backend.Bean.User.*;
 import com.rabbit.backend.Security.PasswordUtils;
 import com.rabbit.backend.Service.*;
@@ -96,7 +97,15 @@ public class UserController {
         mailService.sendMail(form.getEmail(), "感谢您注册酷兔网！", "感谢您注册酷兔网！请您在发表帖子时遵守法律法规，文明上网，理性发言！");
 
         if (form.getBindOAuthCode() != null && form.getBindOAuthPlatform() != null) {
-            oAuthService.bind(form.getBindOAuthPlatform(), form.getBindOAuthCode(), uid);
+            String platform = form.getBindOAuthPlatform();
+            String code = form.getBindOAuthCode();
+
+            OAuthUserInfo oAuthUserInfo = oAuthService.callback(platform, code);
+            if (oAuthService.openidBindOtherUserExist(oAuthUserInfo.getOpenid(), platform)) {
+                return GeneralResponse.generate(400, "Openid Already bind.");
+            }
+
+            oAuthService.bind(platform, code, uid, oAuthUserInfo.getOpenid());
         }
 
         return GeneralResponse.generate(200, uid);

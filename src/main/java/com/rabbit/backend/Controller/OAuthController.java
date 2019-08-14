@@ -35,7 +35,7 @@ public class OAuthController {
     public Map<String, Object> delete(@PathVariable("platform") String platform, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
 
-        if (oAuthService.bindExist(platform, uid)) {
+        if (!oAuthService.userBindOtherPlatformExist(platform, uid)) {
             return GeneralResponse.generate(404, "Not found.");
         }
 
@@ -82,7 +82,17 @@ public class OAuthController {
     public Map<String, Object> bind(@PathVariable("platform") String platform, @PathVariable("code") String code,
                                     Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        oAuthService.bind(platform, code, uid);
+        OAuthUserInfo oAuthUserInfo = oAuthService.callback(platform, code);
+
+        if (oAuthService.userBindOtherPlatformExist(platform, uid)) {
+            return GeneralResponse.generate(400, "User Already bind.");
+        }
+
+        if (oAuthService.openidBindOtherUserExist(oAuthUserInfo.getOpenid(), platform)) {
+            return GeneralResponse.generate(400, "Openid Already bind.");
+        }
+
+        oAuthService.bind(platform, code, uid, oAuthUserInfo.getOpenid());
         return GeneralResponse.generate(200);
     }
 

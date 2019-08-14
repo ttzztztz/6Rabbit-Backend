@@ -92,25 +92,21 @@ public class OAuthService {
         return info;
     }
 
-    public Boolean bindExist(String platform, String uid) {
+    public Boolean userBindOtherPlatformExist(String platform, String uid) {
+        // check if user bind other platforms
         String oid = oAuthDAO.findOidByUidAndPlatform(uid, platform);
         return oid != null && !oid.equals("");
     }
 
-    public void bind(String platform, String code, String uid) {
-        OAuthUserInfo oAuthUserInfo = callback(platform, code);
+    public Boolean openidBindOtherUserExist(String openid, String platform) {
+        // check if openid binded by another user
+        OAuth currentOauth = findByOpenid(openid, platform);
+        return currentOauth != null;
+    }
 
-        OAuth currentOauth = findByOpenid(oAuthUserInfo.getOpenid(), platform);
-        if (currentOauth != null) {
-            throw new NotFoundException(400, "Openid already bind.");
-        }
-
-        if (bindExist(platform, uid)) {
-            throw new NotFoundException(400, "User already bind.");
-        }
-
+    public void bind(String platform, String code, String uid, String openid) {
         OAuth oAuth = new OAuth();
-        oAuth.setOpenid(oAuthUserInfo.getOpenid());
+        oAuth.setOpenid(openid);
         oAuth.setPlatform(platform);
         oAuth.setUid(uid);
         insert(oAuth);
