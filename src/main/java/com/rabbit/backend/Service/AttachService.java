@@ -6,6 +6,7 @@ import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import com.rabbit.backend.Bean.Attach.ThreadAttachForm;
 import com.rabbit.backend.DAO.AttachDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,5 +122,11 @@ public class AttachService {
 
     public Attach find(String aid) {
         return attachDAO.find(aid);
+    }
+
+    @Async
+    @Transactional
+    public void incrementDownloads(String aid){
+        attachDAO.incrementDownloads(aid);
     }
 }

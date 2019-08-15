@@ -16,7 +16,11 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 FROM openjdk:12-alpine
 
 ARG DEPENDENCY=/var/rabbit/target/dependency
+
 RUN mkdir -p /var/rabbit
+RUN mkdir -p /var/rabbit/files/attach
+RUN mkdir -p /var/rabbit/files/avatar
+
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /var/rabbit/lib
 COPY --from=build ${DEPENDENCY}/META-INF /var/rabbit/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /var/rabbit

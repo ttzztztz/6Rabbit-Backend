@@ -67,4 +67,7 @@ public interface AttachDAO {
 
     @Delete("DELETE FROM attach_pay_log WHERE aid = #{aid}")
     void deleteCASCADE(@Param("aid") String aid);
+
+    @Update("UPDATE attach SET downloads = downloads + 1 WHERE aid = #{aid}")
+    void incrementDownloads(@Param("aid") String aid);
 }

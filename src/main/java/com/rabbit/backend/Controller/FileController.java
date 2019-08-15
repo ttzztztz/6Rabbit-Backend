@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -127,10 +129,14 @@ public class FileController {
             response.setStatus(404);
         } else {
             ruleService.applyRule(uid, "DownloadAttach");
-            response.setHeader("Content-Disposition", "attachment;filename=" + attach.getOriginalName());
+
+            String encodedAttachName = URLEncoder.encode(attach.getOriginalName(), StandardCharsets.UTF_8);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + encodedAttachName + "\";" +
+                    "filename*=utf-8''" + encodedAttachName);
             try (InputStream fstream = new FileInputStream(file);
                  OutputStream ostream = response.getOutputStream()) {
                 fileService.downloadFileByStream(fstream, ostream, file.length(), response);
+                attachService.incrementDownloads(aid);
             }
         }
     }
