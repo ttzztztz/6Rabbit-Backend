@@ -81,7 +81,7 @@ public class OAuthService {
         OAuthWebsite oAuthWebsite = applicationContext.getBean("OAuth_" + platform, OAuthWebsite.class);
 
         String access_token = getAccessTokenFromCache(platform, code);
-        if (access_token == null || access_token.equals("")) {
+        if (access_token == null || access_token.isBlank()) {
             access_token = oAuthWebsite.getAccessToken(code);
             setAccessTokenToCache(platform, code, access_token);
         }
@@ -95,7 +95,7 @@ public class OAuthService {
     public Boolean userBindOtherPlatformExist(String platform, String uid) {
         // check if user bind other platforms
         String oid = oAuthDAO.findOidByUidAndPlatform(uid, platform);
-        return oid != null && !oid.equals("");
+        return oid != null && !oid.isBlank();
     }
 
     public Boolean openidBindOtherUserExist(String openid, String platform) {

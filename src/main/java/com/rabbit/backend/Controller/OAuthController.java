@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -70,10 +71,13 @@ public class OAuthController {
             User user = userService.selectUser("uid", oAuth.getUid());
             String avatarPath = fileService.avatarPath(oAuth.getUid());
             String avatarRemoteAddress = oAuthUserInfo.getAvatarURL();
-
-            fileService.downloadRemoteFile(avatarPath, avatarRemoteAddress);
-            oAuthService.deleteTokenFromCache(platform, code);
-            return GeneralResponse.generate(200, userService.loginResponse(user));
+            try {
+                fileService.downloadRemoteFile(avatarPath, avatarRemoteAddress);
+                oAuthService.deleteTokenFromCache(platform, code);
+                return GeneralResponse.generate(200, userService.loginResponse(user));
+            } catch (IOException exception) {
+                return GeneralResponse.generate(500, exception.getMessage());
+            }
         }
     }
 

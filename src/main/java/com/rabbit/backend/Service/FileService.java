@@ -49,23 +49,21 @@ public class FileService {
     }
 
     @Async
-    public void downloadRemoteFile(String filePath, String url) {
+    public void downloadRemoteFile(String filePath, String url) throws IOException {
         File tempFile = new File(filePath + ".tmp");
-        try {
-            URLConnection connection = new URL(url).openConnection();
-            OutputStream ostream = new FileOutputStream(tempFile);
-            InputStream istream = connection.getInputStream();
+        URLConnection connection = new URL(url).openConnection();
+
+        try (OutputStream ostream = new FileOutputStream(tempFile);
+             InputStream istream = connection.getInputStream()) {
+
             IOUtils.copy(istream, ostream);
-            istream.close();
-            ostream.close();
 
             File realFile = new File(filePath);
             if (tempFile.exists() && tempFile.length() <= 512 * 1024) {
-                InputStream ifstream = new FileInputStream(tempFile);
-                OutputStream ofstream = new FileOutputStream(realFile);
-                IOUtils.copy(ifstream, ofstream);
-                ifstream.close();
-                ofstream.close();
+                try (InputStream ifstream = new FileInputStream(tempFile);
+                     OutputStream ofstream = new FileOutputStream(realFile);) {
+                    IOUtils.copy(ifstream, ofstream);
+                }
             }
         } catch (IOException ex) {
             // do nothing ...

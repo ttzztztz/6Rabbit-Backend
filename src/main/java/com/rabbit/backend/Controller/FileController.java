@@ -50,26 +50,21 @@ public class FileController {
             Resource defaultAvatar = new ClassPathResource("static/default.avatar");
             file = defaultAvatar.getFile();
         }
-
-        InputStream fstream = new FileInputStream(file);
-        OutputStream ostream = response.getOutputStream();
-        fileService.downloadFileByStream(fstream, ostream, file.length(), response);
-        fstream.close();
-        ostream.close();
+        try (InputStream fstream = new FileInputStream(file);
+             OutputStream ostream = response.getOutputStream()) {
+            fileService.downloadFileByStream(fstream, ostream, file.length(), response);
+        }
     }
 
     @PostMapping("/avatar")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> uploadAvatar(Part avatar, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        try {
-            File file = new File(fileService.avatarPath(uid));
-            InputStream avatarInputStream = avatar.getInputStream();
-            OutputStream fileOutputStream = new FileOutputStream(file);
-            IOUtils.copy(avatarInputStream, fileOutputStream);
+        File file = new File(fileService.avatarPath(uid));
+        try (InputStream avatarInputStream = avatar.getInputStream();
+             OutputStream fileOutputStream = new FileOutputStream(file)) {
 
-            avatarInputStream.close();
-            fileOutputStream.close();
+            IOUtils.copy(avatarInputStream, fileOutputStream);
             avatar.delete();
             return GeneralResponse.generate(200);
         } catch (IOException e) {
@@ -89,12 +84,11 @@ public class FileController {
         try {
             String path = fileService.attachPath(uid);
             File file = new File(path);
-            InputStream avatarInputStream = attach.getInputStream();
-            OutputStream fileOutputStream = new FileOutputStream(file);
-            IOUtils.copy(avatarInputStream, fileOutputStream);
-            avatarInputStream.close();
-            fileOutputStream.close();
-            attach.delete();
+            try (InputStream avatarInputStream = attach.getInputStream();
+                 OutputStream fileOutputStream = new FileOutputStream(file)) {
+                IOUtils.copy(avatarInputStream, fileOutputStream);
+                attach.delete();
+            }
 
             AttachUpload attachUpload = new AttachUpload();
             attachUpload.setUid(uid);
@@ -134,11 +128,10 @@ public class FileController {
         } else {
             ruleService.applyRule(uid, "DownloadAttach");
             response.setHeader("Content-Disposition", "attachment;filename=" + attach.getOriginalName());
-            InputStream fstream = new FileInputStream(file);
-            OutputStream ostream = response.getOutputStream();
-            fileService.downloadFileByStream(fstream, ostream, file.length(), response);
-            fstream.close();
-            ostream.close();
+            try (InputStream fstream = new FileInputStream(file);
+                 OutputStream ostream = response.getOutputStream()) {
+                fileService.downloadFileByStream(fstream, ostream, file.length(), response);
+            }
         }
     }
 
@@ -171,11 +164,10 @@ public class FileController {
             response.setStatus(404);
         } else {
             response.setHeader("Content-Disposition", "attachment;filename=" + attach.getOriginalName());
-            InputStream fstream = new FileInputStream(file);
-            OutputStream ostream = response.getOutputStream();
-            fileService.downloadFileByStream(fstream, ostream, file.length(), response);
-            fstream.close();
-            ostream.close();
+            try (InputStream fstream = new FileInputStream(file);
+                 OutputStream ostream = response.getOutputStream()) {
+                fileService.downloadFileByStream(fstream, ostream, file.length(), response);
+            }
         }
     }
 }
