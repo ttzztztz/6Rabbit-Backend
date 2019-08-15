@@ -1,8 +1,7 @@
 package com.rabbit.backend.DAO;
 
 import com.rabbit.backend.Bean.Attach.Attach;
-import com.rabbit.backend.Bean.Attach.AttachListItem;
-import com.rabbit.backend.Bean.Attach.AttachUpload;
+import com.rabbit.backend.Bean.Attach.AttachUploadForm;
 import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
@@ -64,13 +63,7 @@ public interface AttachDAO {
 
     @Insert("INSERT INTO attach(uid, fileSize, fileName, originalName) VALUES (#{uid}, #{fileSize}, #{fileName}, #{originalName})")
     @Options(keyColumn = "aid", keyProperty = "aid", useGeneratedKeys = true)
-    void insert(AttachUpload attachUpload);
-
-    @Select("SELECT * FROM attach WHERE aid = #{aid}")
-    @Results({
-            @Result(property = "thread", column = "tid", one = @One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
-    })
-    AttachListItem findAttachPayListItem(@Param("aid") String aid);
+    void insert(AttachUploadForm attachUploadForm);
 
     @Delete("DELETE FROM attach_pay_log WHERE aid = #{aid}")
     void deleteCASCADE(@Param("aid") String aid);

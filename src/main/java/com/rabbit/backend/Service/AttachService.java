@@ -1,7 +1,7 @@
 package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Attach.Attach;
-import com.rabbit.backend.Bean.Attach.AttachUpload;
+import com.rabbit.backend.Bean.Attach.AttachUploadForm;
 import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import com.rabbit.backend.Bean.Attach.ThreadAttachForm;
 import com.rabbit.backend.DAO.AttachDAO;
@@ -90,9 +90,9 @@ public class AttachService {
         return attachDAO.uid(aid);
     }
 
-    public String insert(AttachUpload attachUpload) {
-        attachDAO.insert(attachUpload);
-        return attachUpload.getAid();
+    public String insert(AttachUploadForm attachUploadForm) {
+        attachDAO.insert(attachUploadForm);
+        return attachUploadForm.getAid();
     }
 
     public List<Attach> findUnused(String uid) {

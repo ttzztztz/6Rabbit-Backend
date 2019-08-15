@@ -1,7 +1,7 @@
 package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Attach.Attach;
-import com.rabbit.backend.Bean.Attach.AttachUpload;
+import com.rabbit.backend.Bean.Attach.AttachUploadForm;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Service.AttachService;
 import com.rabbit.backend.Service.FileService;
@@ -90,13 +90,13 @@ public class FileController {
                 attach.delete();
             }
 
-            AttachUpload attachUpload = new AttachUpload();
-            attachUpload.setUid(uid);
-            attachUpload.setFileName(path);
-            attachUpload.setFileSize(((Long) file.length()).intValue());
-            attachUpload.setOriginalName(attach.getSubmittedFileName());
-            String aid = attachService.insert(attachUpload);
-            return GeneralResponse.generate(200, aid);
+            AttachUploadForm attachUploadForm = new AttachUploadForm();
+            attachUploadForm.setUid(uid);
+            attachUploadForm.setFileName(path);
+            attachUploadForm.setFileSize(((Long) file.length()).intValue());
+            attachUploadForm.setOriginalName(attach.getSubmittedFileName());
+            attachService.insert(attachUploadForm);
+            return GeneralResponse.generate(200, attachUploadForm);
         } catch (IOException e) {
             return GeneralResponse.generate(500, e.getMessage());
         }
