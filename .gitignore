@@ -34,3 +34,5 @@ build/
 application-dev.properties
 rabbit.properties
 docker-commands.txt
+/files/attach
+/files/avatar
