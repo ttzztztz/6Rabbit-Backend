@@ -19,4 +19,8 @@ public class ForumService {
     public List<Forum> list() {
         return forumDAO.list();
     }
+
+    public Forum find(String fid) {
+        return forumDAO.find(fid);
+    }
 }

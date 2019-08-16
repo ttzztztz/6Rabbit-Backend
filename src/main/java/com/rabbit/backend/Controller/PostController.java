@@ -53,7 +53,7 @@ public class PostController {
     }
 
     @PutMapping("/{pid}")
-    @PreAuthorize("hasAuthority('User')")
+    @PreAuthorize("hasAuthority('canPost')")
     public Map<String, Object> update(@PathVariable("pid") String pid, @Valid @RequestBody PostEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {

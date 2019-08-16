@@ -11,4 +11,5 @@ public class Forum {
     private String description;
     private Integer threads;
     private String type;
+    private Boolean adminPost;
 }

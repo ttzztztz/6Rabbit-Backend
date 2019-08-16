@@ -23,6 +23,7 @@ import javax.servlet.http.Part;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 
 @RestController
@@ -60,7 +61,12 @@ public class FileController {
 
     @PostMapping("/avatar")
     @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> uploadAvatar(Part avatar, Authentication authentication) {
+    public Map<String, Object> uploadAvatar(Part avatar, Authentication authentication) throws IOException {
+        if (avatar.getSize() > 200 * 1024L) {
+            avatar.delete();
+            return GeneralResponse.generate(404, "Avatar should smaller than 200KB!");
+        }
+
         String uid = (String) authentication.getPrincipal();
         File file = new File(fileService.avatarPath(uid));
         try (InputStream avatarInputStream = avatar.getInputStream();
@@ -145,21 +151,15 @@ public class FileController {
     public void picturePreview(@PathVariable("aid") String aid, HttpServletResponse response)
             throws IOException {
         Attach attach = attachService.find(aid);
-        if (attach == null || attach.getTid() == null) {
+        if (attach == null) {
             response.setStatus(404);
             return;
         }
 
-        String[] fileOriginalNameSplitResult = attach.getOriginalName().split(".");
+        String[] fileOriginalNameSplitResult = attach.getOriginalName().split("\\.");
         String fileOriginalNameSuffix = fileOriginalNameSplitResult[fileOriginalNameSplitResult.length - 1].toLowerCase();
         String[] allowSuffixes = {"bmp", "jpg", "jpeg", "png", "gif"};
-        boolean findResult = false;
-        for (String allowSuffix : allowSuffixes) {
-            if (allowSuffix.equals(fileOriginalNameSuffix)) {
-                findResult = true;
-                break;
-            }
-        }
+        boolean findResult = Arrays.asList(allowSuffixes).contains(fileOriginalNameSuffix);
 
         if (!findResult) {
             response.setStatus(400);

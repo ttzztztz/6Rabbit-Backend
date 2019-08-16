@@ -174,6 +174,10 @@ public class UserController {
             userService.loginLimitIncrement(IP);
             return GeneralResponse.generate(400, "Username or Password invalid.");
         }
+        if (!user.getUsergroup().getCanLogin()) {
+            return GeneralResponse.generate(403, "This account isn't allowed to login.");
+        }
+
         boolean loginResult = PasswordUtils.checkPassword(user.getPassword(), form.getPassword(), user.getSalt());
 
         if (loginResult) {

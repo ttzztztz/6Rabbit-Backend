@@ -4,6 +4,7 @@ import com.rabbit.backend.Service.ForumService;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,5 +23,10 @@ public class ForumController {
     @GetMapping("/list")
     public Map<String, Object> list() {
         return GeneralResponse.generate(200, forumService.list());
+    }
+
+    @GetMapping("/info/{fid}")
+    public Map<String, Object> info(@PathVariable("fid") String fid) {
+        return GeneralResponse.generate(200, forumService.find(fid));
     }
 }

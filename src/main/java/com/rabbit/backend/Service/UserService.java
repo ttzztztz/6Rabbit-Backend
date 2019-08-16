@@ -104,7 +104,7 @@ public class UserService {
     }
 
     public UserLoginResponse loginResponse(User user) {
-        String token = JWTUtils.sign(user.getUid(), user.getUsername(), user.getUsergroup().getIsAdmin());
+        String token = JWTUtils.sign(user.getUid(), user.getUsername(), user.getUsergroup());
 
         UserLoginResponse response = new UserLoginResponse();
         response.setToken(token);

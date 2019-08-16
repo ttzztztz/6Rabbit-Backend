@@ -1,5 +1,6 @@
 package com.rabbit.backend.Controller;
 
+import com.rabbit.backend.Bean.Forum.Forum;
 import com.rabbit.backend.Bean.Thread.*;
 import com.rabbit.backend.Security.CheckAuthority;
 import com.rabbit.backend.Service.*;
@@ -24,10 +25,13 @@ public class ThreadController {
     private RuleService ruleService;
     private PayService payService;
     private FrequentService frequentService;
+    private SEOService seoService;
+    private ForumService forumService;
 
     @Autowired
     public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService,
-                            AttachService attachService, RuleService ruleService, PayService payService, FrequentService frequentService) {
+                            AttachService attachService, RuleService ruleService, PayService payService,
+                            FrequentService frequentService, SEOService seoService, ForumService forumService) {
         this.threadService = threadService;
         this.postService = postService;
         this.notificationService = notificationService;
@@ -35,6 +39,8 @@ public class ThreadController {
         this.ruleService = ruleService;
         this.payService = payService;
         this.frequentService = frequentService;
+        this.seoService = seoService;
+        this.forumService = forumService;
     }
 
     @GetMapping("/list/{fid}/{page}")
@@ -104,7 +110,7 @@ public class ThreadController {
     }
 
     @PostMapping("/create")
-    @PreAuthorize("hasAuthority('User')")
+    @PreAuthorize("hasAuthority('canPost')")
     public Map<String, Object> create(@Valid @RequestBody ThreadEditorForm form, Errors errors,
                                       Authentication authentication) {
         if (errors.hasErrors()) {
@@ -116,15 +122,23 @@ public class ThreadController {
         if (!frequentService.check(key, 30)) {
             return GeneralResponse.generate(400, "Post too frequent, try again after 30 seconds.");
         }
+        Forum forum = forumService.find(form.getFid());
+        if (forum.getAdminPost() && !CheckAuthority.hasAuthority(authentication, "Admin")) {
+            return GeneralResponse.generate(403, "No permission to post in this forum.");
+        }
         String tid = threadService.insert(uid, form);
 
         attachService.batchAttachThread(form.getAttach(), tid, uid);
         ruleService.applyRule(uid, "CreateThread");
+
+        if (CheckAuthority.hasAuthority(authentication, "Admin")) {
+            seoService.pushToBaidu(tid);
+        }
         return GeneralResponse.generate(200, tid);
     }
 
     @PostMapping("/reply/{tid}")
-    @PreAuthorize("hasAuthority('User')")
+    @PreAuthorize("hasAuthority('canPost')")
     public Map<String, Object> create(@PathVariable("tid") String tid, @Valid @RequestBody PostEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
@@ -165,7 +179,7 @@ public class ThreadController {
     }
 
     @PutMapping("/{tid}")
-    @PreAuthorize("hasAuthority('User')")
+    @PreAuthorize("hasAuthority('canPost')")
     public Map<String, Object> update(@PathVariable("tid") String tid, @Valid @RequestBody ThreadEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {

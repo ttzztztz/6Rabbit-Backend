@@ -1,21 +1,36 @@
 package com.rabbit.backend.Security;
 
+import com.rabbit.backend.Bean.Group.Group;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 public class JWTUtils {
-    public static String sign(String uid, String username, Boolean isAdmin) {
+    public static String sign(String uid, String username, Group userGroup) {
+        List<String> permission = new LinkedList<>();
+        if (userGroup.getIsAdmin()) {
+            permission.add("Admin");
+        }
+        permission.add("User");
+        if (userGroup.getCanLogin()) {
+            permission.add("canLogin");
+        }
+        if (userGroup.getCanPost()) {
+            permission.add("canPost");
+        }
+
         return Jwts.builder()
                 .setSubject(uid)
                 .claim("username", username)
-                .claim("permission", isAdmin ? "Admin,User" : "User")
+                .claim("permission", StringUtils.arrayToCommaDelimitedString(permission.toArray()))
                 .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
                 .signWith(SignatureAlgorithm.HS512, System.getenv("SECRET"))
                 .compact();

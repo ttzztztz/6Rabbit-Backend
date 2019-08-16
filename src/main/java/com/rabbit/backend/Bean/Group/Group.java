@@ -9,4 +9,6 @@ public class Group {
     private String gid;
     private String name;
     private Boolean isAdmin;
+    private Boolean canLogin;
+    private Boolean canPost;
 }
