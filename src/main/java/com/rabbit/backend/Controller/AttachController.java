@@ -1,5 +1,7 @@
 package com.rabbit.backend.Controller;
 
+import com.rabbit.backend.Bean.Attach.Attach;
+import com.rabbit.backend.Bean.Attach.AttachInfoResponse;
 import com.rabbit.backend.Security.CheckAuthority;
 import com.rabbit.backend.Service.AttachService;
 import com.rabbit.backend.Service.PayService;
@@ -9,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -54,5 +58,16 @@ public class AttachController {
         } else {
             return GeneralResponse.generate(200);
         }
+    }
+
+    @GetMapping("/info/{aid}")
+    public Map<String, Object> attachDownload(@PathVariable("aid") String aid, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        AttachInfoResponse response = new AttachInfoResponse();
+
+        response.setAttach(attachService.findWithThreadAttach(aid));
+        response.setNeedBuy(payService.userAttachNeedPay(uid, aid));
+
+        return GeneralResponse.generate(200, response);
     }
 }

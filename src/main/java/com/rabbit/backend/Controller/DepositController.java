@@ -40,7 +40,7 @@ public class DepositController {
 
     @PostMapping("/admin")
     @PreAuthorize("hasAuthority('Admin')")
-    public Map<String, Object> adminVerify(@RequestBody @Valid DepositAdminForm form) {
+    public Map<String, Object> adminDecide(@RequestBody @Valid DepositAdminForm form) {
         depositService.setDeposit(form.getCid(), form.getStatus());
         return GeneralResponse.generate(200);
     }

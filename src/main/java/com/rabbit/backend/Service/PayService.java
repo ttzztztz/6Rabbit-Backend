@@ -2,9 +2,11 @@ package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Attach.Attach;
 import com.rabbit.backend.Bean.Attach.AttachListItem;
+import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import com.rabbit.backend.Bean.Credits.AttachPayLog;
 import com.rabbit.backend.Bean.Credits.CreditsPay;
 import com.rabbit.backend.Bean.Credits.ThreadPayLog;
+import com.rabbit.backend.Bean.Thread.ThreadItem;
 import com.rabbit.backend.Bean.Thread.ThreadListItem;
 import com.rabbit.backend.Bean.User.MyUser;
 import com.rabbit.backend.DAO.*;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @Service
 public class PayService {
@@ -36,41 +39,49 @@ public class PayService {
     @Value("${rabbit.pagesize}")
     private Integer PAGESIZE;
 
-    public Boolean userThreadNeedPay(String uid, String tid) {
-        ThreadListItem threadListItem = threadDAO.findThreadListItem(tid);
-        if (threadListItem.getCreditsType() == 0 || threadListItem.getCredits() == 0
-                || threadListItem.getUser().getUid().equals(uid)) {
+    private Boolean needPayDecide(Integer creditsType, Integer credits, String currentUid, String authorUid,
+                                  Supplier<Boolean> predicate) {
+        if (currentUid == null) {
+            return creditsType != 0 && credits != 0;
+        }
+
+        if (creditsType == 0 || credits == 0 || currentUid.equals(authorUid)) {
             return false;
         } else {
-            return threadPayDAO.isPay(tid, uid) != 1;
+            return predicate.get();
         }
+    }
+
+    public Boolean userThreadNeedPay(String uid, ThreadListItem threadListItem) {
+        return needPayDecide(threadListItem.getCreditsType(), threadListItem.getCredits(), uid,
+                threadListItem.getUser().getUid(), () -> {
+                    Integer isPayResult = threadPayDAO.isPay(threadListItem.getTid(), uid);
+                    return isPayResult == null || isPayResult != 1;
+                });
+    }
+
+    public Boolean userThreadNeedPay(String uid, ThreadItem threadItem) {
+        return needPayDecide(threadItem.getCreditsType(), threadItem.getCredits(), uid,
+                threadItem.getUser().getUid(), () -> {
+                    Integer isPayResult = threadPayDAO.isPay(threadItem.getTid(), uid);
+                    return isPayResult == null || isPayResult != 1;
+                });
     }
 
     public Boolean userAttachNeedPay(String uid, String aid) {
         Attach attach = attachDAO.find(aid);
-        if (attach.getCreditsType() == 0 || attach.getCredits() == 0
-                || attach.getUser().getUid().equals(uid)) {
-            return false;
-        } else {
-            return attachPayDAO.isPay(aid, uid) != 1;
-        }
+
+        return needPayDecide(attach.getCreditsType(), attach.getCredits(), uid, attach.getUser().getUid(),
+                () -> {
+                    Integer isPayResult = attachPayDAO.isPay(aid, uid);
+                    return isPayResult == null || isPayResult != 1;
+                });
     }
 
-    public Boolean userAttachDownloadAccess(String uid, Attach attach, String tid) {
-        CreditsPay threadCreditsPay = threadPayDAO.creditsPay(tid);
+    public Boolean userAttachDownloadAccess(String uid, Attach attach, ThreadListItem threadListItem) {
+        String tid = threadListItem.getTid();
 
-        if (threadCreditsPay.getCreditsType() != 0 && threadCreditsPay.getCredits() != 0
-                && userThreadNeedPay(uid, tid)
-        ) {
-            return false;
-        }
-
-        if (attach.getCreditsType() == 0 || attach.getCredits() == 0
-                || attach.getUser().getUid().equals(uid)) {
-            return true;
-        } else {
-            return attachPayDAO.isPay(attach.getAid(), uid) == 1;
-        }
+        return (!userAttachNeedPay(uid, attach.getAid())) && (!userThreadNeedPay(uid, threadListItem));
     }
 
     public List<ThreadListItem> threadPurchasedList(String uid, Integer page) {
@@ -81,17 +92,21 @@ public class PayService {
         return attachPayDAO.findByUid(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
     }
 
-    private void insertPurchaseThread(String uid, String tid) {
+    private void insertPurchaseThread(String uid, String tid, Integer creditsType, Integer credits) {
         ThreadPayLog threadPayLog = new ThreadPayLog();
         threadPayLog.setTid(tid);
         threadPayLog.setUid(uid);
+        threadPayLog.setCreditsType(creditsType);
+        threadPayLog.setCredits(credits);
         threadPayDAO.insert(threadPayLog);
     }
 
-    private void insertPurchaseAttach(String uid, String aid) {
+    private void insertPurchaseAttach(String uid, String aid, Integer creditsType, Integer credits) {
         AttachPayLog attachPayLog = new AttachPayLog();
         attachPayLog.setAid(aid);
         attachPayLog.setUid(uid);
+        attachPayLog.setCreditsType(creditsType);
+        attachPayLog.setCredits(credits);
         attachPayDAO.insert(attachPayLog);
     }
 
@@ -130,12 +145,14 @@ public class PayService {
     }
 
     @Transactional
-    public Boolean purchaseThread(String buyerUid, String sellerUid, String tid) {
+    public Boolean purchaseThread(String buyerUid, String sellerUid, ThreadListItem threadListItem) {
+        String tid = threadListItem.getTid();
         CreditsPay creditsPay = threadPayDAO.creditsPay(tid);
+
         if (!decreasePurchaseCredits(buyerUid, sellerUid, creditsPay)) {
             return false;
         } else {
-            insertPurchaseThread(buyerUid, tid);
+            insertPurchaseThread(buyerUid, tid, threadListItem.getCreditsType(), threadListItem.getCredits());
             return true;
         }
     }
@@ -143,10 +160,12 @@ public class PayService {
     @Transactional
     public Boolean purchaseAttach(String buyerUid, String sellerUid, String aid) {
         CreditsPay creditsPay = attachPayDAO.creditsPay(aid);
+        ThreadAttach attach = attachDAO.findWithThreadAttach(aid);
+
         if (!decreasePurchaseCredits(buyerUid, sellerUid, creditsPay)) {
             return false;
         } else {
-            insertPurchaseAttach(buyerUid, aid);
+            insertPurchaseAttach(buyerUid, aid, attach.getCreditsType(), attach.getCredits());
             return true;
         }
     }

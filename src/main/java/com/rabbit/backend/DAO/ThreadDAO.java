@@ -32,7 +32,7 @@ public interface ThreadDAO {
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
-    ThreadListItem findThreadListItem(@Param("tid") String tid);
+    ThreadListItem findWithThreadListItem(@Param("tid") String tid);
 
     @Select("SELECT * FROM thread WHERE fid = #{fid} ORDER BY lastpid DESC LIMIT ${from},${to}")
     @Results({
@@ -85,7 +85,7 @@ public interface ThreadDAO {
     @Update("UPDATE thread SET subject = #{subject}, fid = #{fid} WHERE tid = #{tid}")
     void update(@Param("tid") String tid, @Param("subject") String subject, @Param("fid") String fid);
 
-    @Insert("INSERT INTO thread(fid, uid, subject) VALUES (#{fid}, #{uid}, #{subject})")
+    @Insert("INSERT INTO thread(fid, uid, subject, creditsType, credits) VALUES (#{fid}, #{uid}, #{subject}, #{creditsType}, #{credits})")
     @Options(keyProperty = "tid", keyColumn = "tid", useGeneratedKeys = true)
     void insert(ThreadEditorForm thread);
 

@@ -11,15 +11,15 @@ import java.util.List;
 @Mapper
 @Repository
 public interface AttachPayDAO {
-    @Select("SELECT * FROM attach_pay_log WHERE bid = #{bid}")
-    AttachPayLog find(@Param("bid") String bid);
+    @Select("SELECT * FROM attach_pay_log WHERE did = #{did}")
+    AttachPayLog find(@Param("did") String did);
 
     @Select("SELECT 1 FROM attach_pay_log WHERE aid = #{aid} AND uid = #{uid}")
     Integer isPay(@Param("aid") String aid, @Param("uid") String uid);
 
     @Insert("INSERT INTO attach_pay_log(uid, aid, creditsType, credits) " +
             "VALUES (#{uid}, #{aid}, #{creditsType}, #{credits})")
-    @Options(keyColumn = "bid", keyProperty = "bid", useGeneratedKeys = true)
+    @Options(keyColumn = "did", keyProperty = "did", useGeneratedKeys = true)
     void insert(AttachPayLog attachPayLog);
 
     @Select("SELECT attach.* FROM attach_pay_log " +

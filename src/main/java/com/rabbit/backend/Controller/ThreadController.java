@@ -1,5 +1,6 @@
 package com.rabbit.backend.Controller;
 
+import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import com.rabbit.backend.Bean.Forum.Forum;
 import com.rabbit.backend.Bean.Thread.*;
 import com.rabbit.backend.Security.CheckAuthority;
@@ -13,6 +14,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -92,17 +95,18 @@ public class ThreadController {
         ThreadInfoResponse response = new ThreadInfoResponse();
         ThreadItem threadItem = threadService.info(tid);
         response.setThread(threadItem);
-        response.setPostList(postService.list(tid, page));
-
         Post firstPost = postService.firstPost(tid);
         response.setFirstPost(firstPost);
-        response.setAttachList(attachService.threadList(tid));
+        List<ThreadAttach> threadAttachList = attachService.threadList(tid);
+        response.setAttachList(threadAttachList);
 
         if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0
-                && (uid == null || payService.userThreadNeedPay(uid, tid))) {
+                && (uid == null || payService.userThreadNeedPay(uid, threadItem))) {
             firstPost.setMessage("");
+            response.setPostList(new LinkedList<>());
             response.setNeedBuy(true);
         } else {
+            response.setPostList(postService.list(tid, page));
             response.setNeedBuy(false);
         }
 
@@ -145,14 +149,14 @@ public class ThreadController {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
         String uid = (String) authentication.getPrincipal();
-        ThreadItem threadItem = threadService.info(tid);
+        ThreadListItem threadItem = threadService.findWithThreadListItem(tid);
         if (threadItem.getIsClosed()
                 && !CheckAuthority.hasAuthority(authentication, "Admin")
         ) {
             return GeneralResponse.generate(400, "Thread already closed.");
         }
 
-        if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0 && payService.userThreadNeedPay(uid, tid)) {
+        if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0 && payService.userThreadNeedPay(uid, threadItem)) {
             return GeneralResponse.generate(403, "Purchase thread first.");
         }
 
@@ -202,8 +206,10 @@ public class ThreadController {
     public Map<String, Object> pay(@PathVariable("tid") String tid, Authentication authentication) {
         String buyerUid = (String) authentication.getPrincipal();
         String sellerUid = threadService.uid(tid);
-        if (payService.userThreadNeedPay(buyerUid, tid)) {
-            if (payService.purchaseThread(buyerUid, sellerUid, tid)) {
+        ThreadListItem thread = threadService.findWithThreadListItem(tid);
+
+        if (payService.userThreadNeedPay(buyerUid, thread)) {
+            if (payService.purchaseThread(buyerUid, sellerUid, thread)) {
                 return GeneralResponse.generate(200);
             } else {
                 return GeneralResponse.generate(400, "Credits Not Enough.");

@@ -104,15 +104,15 @@ public class AttachService {
         attachDAO.updateAttachThread(aid, tid, creditsType, credits);
     }
 
-    private Boolean attachAccess(String aid, String uid) {
+    private Boolean attachAccess(String aid, String tid, String uid) {
         Attach attach = attachDAO.find(aid);
-        return attach.getTid() == null && attach.getUser().getUid().equals(uid);
+        return (attach.getTid() == null || attach.getTid().equals(tid)) && attach.getUser().getUid().equals(uid);
     }
 
     public void batchAttachThread(List<ThreadAttachForm> attachList, String tid, String uid) {
         if (attachList != null && attachList.size() != 0) {
             for (ThreadAttachForm attachForm : attachList) {
-                if (this.attachAccess(attachForm.getAid(), uid)) {
+                if (this.attachAccess(attachForm.getAid(), tid, uid)) {
                     this.attachThread(attachForm.getAid(), tid,
                             attachForm.getCreditsType(), attachForm.getCredits());
                 }
@@ -124,9 +124,13 @@ public class AttachService {
         return attachDAO.find(aid);
     }
 
+    public ThreadAttach findWithThreadAttach(String aid) {
+        return attachDAO.findWithThreadAttach(aid);
+    }
+
     @Async
     @Transactional
-    public void incrementDownloads(String aid){
+    public void incrementDownloads(String aid) {
         attachDAO.incrementDownloads(aid);
     }
 }

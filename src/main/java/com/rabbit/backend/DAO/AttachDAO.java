@@ -23,6 +23,9 @@ public interface AttachDAO {
     })
     Attach find(@Param("aid") String aid);
 
+    @Select("SELECT * FROM attach WHERE aid = #{aid}")
+    ThreadAttach findWithThreadAttach(@Param("aid") String aid);
+
     @Select("SELECT * FROM attach WHERE tid = #{tid}")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))

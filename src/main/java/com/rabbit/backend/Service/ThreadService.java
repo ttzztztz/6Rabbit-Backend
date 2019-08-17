@@ -121,4 +121,8 @@ public class ThreadService {
     public Integer searchCount(String keywords) {
         return threadDAO.searchCount(keywords);
     }
+
+    public ThreadListItem findWithThreadListItem(String tid) {
+        return threadDAO.findWithThreadListItem(tid);
+    }
 }
