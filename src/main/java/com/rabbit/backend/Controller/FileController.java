@@ -3,7 +3,10 @@ package com.rabbit.backend.Controller;
 import com.rabbit.backend.Bean.Attach.Attach;
 import com.rabbit.backend.Bean.Attach.AttachUploadForm;
 import com.rabbit.backend.Security.JWTUtils;
-import com.rabbit.backend.Service.*;
+import com.rabbit.backend.Service.AttachService;
+import com.rabbit.backend.Service.FileService;
+import com.rabbit.backend.Service.PayService;
+import com.rabbit.backend.Service.RuleService;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +33,14 @@ public class FileController {
     private AttachService attachService;
     private PayService payService;
     private RuleService ruleService;
-    private ThreadService threadService;
 
     @Autowired
     public FileController(FileService fileService, AttachService attachService, PayService payService,
-                          RuleService ruleService, ThreadService threadService) {
+                          RuleService ruleService) {
         this.fileService = fileService;
         this.attachService = attachService;
         this.payService = payService;
         this.ruleService = ruleService;
-        this.threadService = threadService;
     }
 
     @Value("${rabbit.limit.MAX_UNUSED_ATTACH_PER_USER}")
@@ -124,7 +125,7 @@ public class FileController {
             response.setStatus(404);
             return;
         }
-        if (uid == null || !payService.userAttachDownloadAccess(uid, attach, threadService.findWithThreadListItem(attach.getTid()))) {
+        if (uid == null || !payService.userAttachDownloadAccess(uid, attach)) {
             response.setStatus(403);
             return;
         }

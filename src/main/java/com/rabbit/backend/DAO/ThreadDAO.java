@@ -113,9 +113,6 @@ public interface ThreadDAO {
             "SELECT uid, tid, firstpid AS pid, subject AS message, createDate, 1 AS isFirst FROM thread WHERE MATCH(`subject`) AGAINST(#{keywords} IN NATURAL LANGUAGE MODE)) temp ")
     Integer searchCount(@Param("keywords") String keywords);
 
-    @Delete("DELETE FROM thread_pay_log WHERE tid = #{tid}")
-    void deletePayLogCASCADE(@Param("tid") String tid);
-
     @Delete("DELETE FROM post WHERE tid = #{tid}")
     void deletePostCASCADE(@Param("tid") String tid);
 }

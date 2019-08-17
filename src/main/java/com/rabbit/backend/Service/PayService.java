@@ -5,11 +5,10 @@ import com.rabbit.backend.Bean.Attach.AttachListItem;
 import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import com.rabbit.backend.Bean.Credits.AttachPayLog;
 import com.rabbit.backend.Bean.Credits.CreditsPay;
-import com.rabbit.backend.Bean.Credits.ThreadPayLog;
-import com.rabbit.backend.Bean.Thread.ThreadItem;
-import com.rabbit.backend.Bean.Thread.ThreadListItem;
 import com.rabbit.backend.Bean.User.MyUser;
-import com.rabbit.backend.DAO.*;
+import com.rabbit.backend.DAO.AttachDAO;
+import com.rabbit.backend.DAO.AttachPayDAO;
+import com.rabbit.backend.DAO.UserDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,17 +20,12 @@ import java.util.function.Supplier;
 @Service
 public class PayService {
     private UserDAO userDAO;
-    private ThreadPayDAO threadPayDAO;
-    private ThreadDAO threadDAO;
     private AttachPayDAO attachPayDAO;
     private AttachDAO attachDAO;
 
     @Autowired
-    public PayService(UserDAO userDAO, ThreadPayDAO threadPayDAO, ThreadDAO threadDAO,
-                      AttachPayDAO attachPayDAO, AttachDAO attachDAO) {
+    public PayService(UserDAO userDAO, AttachPayDAO attachPayDAO, AttachDAO attachDAO) {
         this.userDAO = userDAO;
-        this.threadPayDAO = threadPayDAO;
-        this.threadDAO = threadDAO;
         this.attachPayDAO = attachPayDAO;
         this.attachDAO = attachDAO;
     }
@@ -52,22 +46,6 @@ public class PayService {
         }
     }
 
-    public Boolean userThreadNeedPay(String uid, ThreadListItem threadListItem) {
-        return needPayDecide(threadListItem.getCreditsType(), threadListItem.getCredits(), uid,
-                threadListItem.getUser().getUid(), () -> {
-                    Integer isPayResult = threadPayDAO.isPay(threadListItem.getTid(), uid);
-                    return isPayResult == null || isPayResult != 1;
-                });
-    }
-
-    public Boolean userThreadNeedPay(String uid, ThreadItem threadItem) {
-        return needPayDecide(threadItem.getCreditsType(), threadItem.getCredits(), uid,
-                threadItem.getUser().getUid(), () -> {
-                    Integer isPayResult = threadPayDAO.isPay(threadItem.getTid(), uid);
-                    return isPayResult == null || isPayResult != 1;
-                });
-    }
-
     public Boolean userAttachNeedPay(String uid, String aid) {
         Attach attach = attachDAO.find(aid);
 
@@ -78,27 +56,12 @@ public class PayService {
                 });
     }
 
-    public Boolean userAttachDownloadAccess(String uid, Attach attach, ThreadListItem threadListItem) {
-        String tid = threadListItem.getTid();
-
-        return (!userAttachNeedPay(uid, attach.getAid())) && (!userThreadNeedPay(uid, threadListItem));
-    }
-
-    public List<ThreadListItem> threadPurchasedList(String uid, Integer page) {
-        return threadPayDAO.findByUid(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
+    public Boolean userAttachDownloadAccess(String uid, Attach attach) {
+        return !userAttachNeedPay(uid, attach.getAid());
     }
 
     public List<AttachListItem> attachPurchasedList(String uid, Integer page) {
         return attachPayDAO.findByUid(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
-    }
-
-    private void insertPurchaseThread(String uid, String tid, Integer creditsType, Integer credits) {
-        ThreadPayLog threadPayLog = new ThreadPayLog();
-        threadPayLog.setTid(tid);
-        threadPayLog.setUid(uid);
-        threadPayLog.setCreditsType(creditsType);
-        threadPayLog.setCredits(credits);
-        threadPayDAO.insert(threadPayLog);
     }
 
     private void insertPurchaseAttach(String uid, String aid, Integer creditsType, Integer credits) {
@@ -141,19 +104,6 @@ public class PayService {
                 }
             default:
                 return false;
-        }
-    }
-
-    @Transactional
-    public Boolean purchaseThread(String buyerUid, String sellerUid, ThreadListItem threadListItem) {
-        String tid = threadListItem.getTid();
-        CreditsPay creditsPay = threadPayDAO.creditsPay(tid);
-
-        if (!decreasePurchaseCredits(buyerUid, sellerUid, creditsPay)) {
-            return false;
-        } else {
-            insertPurchaseThread(buyerUid, tid, threadListItem.getCreditsType(), threadListItem.getCredits());
-            return true;
         }
     }
 

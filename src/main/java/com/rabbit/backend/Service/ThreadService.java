@@ -46,7 +46,6 @@ public class ThreadService {
         String fid = threadDAO.fid(tid);
         staticDAO.decrement("forum", "threads", "fid", fid, 1);
         threadDAO.delete(tid);
-        threadDAO.deletePayLogCASCADE(tid);
         threadDAO.deletePostCASCADE(tid);
     }
 

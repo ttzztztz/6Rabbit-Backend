@@ -208,14 +208,6 @@ public class UserController {
 
         return GeneralResponse.generate(200, response);
     }
-
-    @GetMapping("/purchased/threads/{page}")
-    @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> purchasedThread(@PathVariable("page") Integer page, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        return GeneralResponse.generate(200, payService.threadPurchasedList(uid, page));
-    }
-
     @GetMapping("/purchased/attach/{page}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> purchasedAttach(@PathVariable("page") Integer page, Authentication authentication) {

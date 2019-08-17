@@ -2,10 +2,10 @@
 -- version 4.9.0.1
 -- https://www.phpmyadmin.net/
 --
--- 主机： db
--- 生成日期： 2019-08-14 01:32:00
--- 服务器版本： 5.7.26
--- PHP 版本： 7.2.19
+-- Host: db
+-- Generation Time: Aug 17, 2019 at 12:54 PM
+-- Server version: 5.7.26
+-- PHP Version: 7.2.19
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -19,13 +19,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- 数据库： `rabbit`
+-- Database: `rabbit`
 --
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `attach`
+-- Table structure for table `attach`
 --
 
 CREATE TABLE `attach` (
@@ -44,7 +44,7 @@ CREATE TABLE `attach` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `attach_pay_log`
+-- Table structure for table `attach_pay_log`
 --
 
 CREATE TABLE `attach_pay_log` (
@@ -59,7 +59,7 @@ CREATE TABLE `attach_pay_log` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `credits_log`
+-- Table structure for table `credits_log`
 --
 
 CREATE TABLE `credits_log` (
@@ -76,7 +76,7 @@ CREATE TABLE `credits_log` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `forum`
+-- Table structure for table `forum`
 --
 
 CREATE TABLE `forum` (
@@ -84,13 +84,14 @@ CREATE TABLE `forum` (
   `name` char(36) NOT NULL,
   `description` text NOT NULL,
   `threads` int(11) UNSIGNED NOT NULL DEFAULT '0',
-  `type` char(10) NOT NULL DEFAULT 'normal'
+  `type` char(10) NOT NULL DEFAULT 'normal',
+  `adminPost` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `notification`
+-- Table structure for table `notification`
 --
 
 CREATE TABLE `notification` (
@@ -106,7 +107,7 @@ CREATE TABLE `notification` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `oauth`
+-- Table structure for table `oauth`
 --
 
 CREATE TABLE `oauth` (
@@ -119,7 +120,7 @@ CREATE TABLE `oauth` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `post`
+-- Table structure for table `post`
 --
 
 CREATE TABLE `post` (
@@ -135,7 +136,7 @@ CREATE TABLE `post` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `thread`
+-- Table structure for table `thread`
 --
 
 CREATE TABLE `thread` (
@@ -150,8 +151,6 @@ CREATE TABLE `thread` (
   `lastuid` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `firstpid` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `lastpid` int(11) UNSIGNED NOT NULL DEFAULT '0',
-  `creditsType` tinyint(4) NOT NULL DEFAULT '0',
-  `credits` int(11) NOT NULL DEFAULT '0',
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `replyDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -159,22 +158,7 @@ CREATE TABLE `thread` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `thread_pay_log`
---
-
-CREATE TABLE `thread_pay_log` (
-  `bid` int(10) UNSIGNED NOT NULL,
-  `tid` int(10) UNSIGNED NOT NULL,
-  `uid` int(10) UNSIGNED NOT NULL,
-  `creditsType` tinyint(4) NOT NULL,
-  `credits` int(11) NOT NULL,
-  `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- 表的结构 `user`
+-- Table structure for table `user`
 --
 
 CREATE TABLE `user` (
@@ -200,21 +184,24 @@ CREATE TABLE `user` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `user_group`
+-- Table structure for table `user_group`
 --
 
 CREATE TABLE `user_group` (
   `gid` int(11) UNSIGNED NOT NULL,
   `name` char(32) NOT NULL,
-  `isAdmin` tinyint(1) NOT NULL DEFAULT '0'
+  `color` char(16) DEFAULT 'dodgerblue',
+  `isAdmin` tinyint(1) NOT NULL DEFAULT '0',
+  `canLogin` tinyint(1) NOT NULL DEFAULT '1',
+  `canPost` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- 转储表的索引
+-- Indexes for dumped tables
 --
 
 --
--- 表的索引 `attach`
+-- Indexes for table `attach`
 --
 ALTER TABLE `attach`
   ADD PRIMARY KEY (`aid`),
@@ -222,7 +209,7 @@ ALTER TABLE `attach`
   ADD KEY `uid` (`uid`);
 
 --
--- 表的索引 `attach_pay_log`
+-- Indexes for table `attach_pay_log`
 --
 ALTER TABLE `attach_pay_log`
   ADD PRIMARY KEY (`did`),
@@ -231,7 +218,7 @@ ALTER TABLE `attach_pay_log`
   ADD KEY `aid_2` (`aid`,`uid`) USING BTREE;
 
 --
--- 表的索引 `credits_log`
+-- Indexes for table `credits_log`
 --
 ALTER TABLE `credits_log`
   ADD PRIMARY KEY (`cid`),
@@ -239,21 +226,21 @@ ALTER TABLE `credits_log`
   ADD KEY `type` (`type`);
 
 --
--- 表的索引 `forum`
+-- Indexes for table `forum`
 --
 ALTER TABLE `forum`
   ADD PRIMARY KEY (`fid`),
   ADD KEY `name` (`name`);
 
 --
--- 表的索引 `notification`
+-- Indexes for table `notification`
 --
 ALTER TABLE `notification`
   ADD PRIMARY KEY (`nid`),
   ADD KEY `User` (`fromUid`,`toUid`) USING BTREE;
 
 --
--- 表的索引 `oauth`
+-- Indexes for table `oauth`
 --
 ALTER TABLE `oauth`
   ADD PRIMARY KEY (`oid`),
@@ -261,7 +248,7 @@ ALTER TABLE `oauth`
   ADD KEY `uid_2` (`uid`);
 
 --
--- 表的索引 `post`
+-- Indexes for table `post`
 --
 ALTER TABLE `post`
   ADD PRIMARY KEY (`pid`),
@@ -271,26 +258,16 @@ ALTER TABLE `post`
 ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`);
 
 --
--- 表的索引 `thread`
+-- Indexes for table `thread`
 --
 ALTER TABLE `thread`
   ADD PRIMARY KEY (`tid`),
   ADD KEY `fid` (`fid`),
-  ADD KEY `uid` (`uid`),
-  ADD KEY `fid_2` (`fid`,`lastpid`);
+  ADD KEY `uid` (`uid`);
 ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`);
 
 --
--- 表的索引 `thread_pay_log`
---
-ALTER TABLE `thread_pay_log`
-  ADD PRIMARY KEY (`bid`),
-  ADD KEY `tid` (`tid`),
-  ADD KEY `uid` (`uid`),
-  ADD KEY `tid_2` (`tid`,`uid`);
-
---
--- 表的索引 `user`
+-- Indexes for table `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`uid`),
@@ -298,78 +275,72 @@ ALTER TABLE `user`
   ADD KEY `username` (`username`);
 
 --
--- 表的索引 `user_group`
+-- Indexes for table `user_group`
 --
 ALTER TABLE `user_group`
   ADD PRIMARY KEY (`gid`),
   ADD UNIQUE KEY `gid` (`gid`);
 
 --
--- 在导出的表使用AUTO_INCREMENT
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- 使用表AUTO_INCREMENT `attach`
+-- AUTO_INCREMENT for table `attach`
 --
 ALTER TABLE `attach`
   MODIFY `aid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `attach_pay_log`
+-- AUTO_INCREMENT for table `attach_pay_log`
 --
 ALTER TABLE `attach_pay_log`
   MODIFY `did` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `credits_log`
+-- AUTO_INCREMENT for table `credits_log`
 --
 ALTER TABLE `credits_log`
   MODIFY `cid` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `forum`
+-- AUTO_INCREMENT for table `forum`
 --
 ALTER TABLE `forum`
   MODIFY `fid` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `notification`
+-- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
   MODIFY `nid` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `oauth`
+-- AUTO_INCREMENT for table `oauth`
 --
 ALTER TABLE `oauth`
   MODIFY `oid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `post`
+-- AUTO_INCREMENT for table `post`
 --
 ALTER TABLE `post`
   MODIFY `pid` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `thread`
+-- AUTO_INCREMENT for table `thread`
 --
 ALTER TABLE `thread`
   MODIFY `tid` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `thread_pay_log`
---
-ALTER TABLE `thread_pay_log`
-  MODIFY `bid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- 使用表AUTO_INCREMENT `user`
+-- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
   MODIFY `uid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `user_group`
+-- AUTO_INCREMENT for table `user_group`
 --
 ALTER TABLE `user_group`
   MODIFY `gid` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;

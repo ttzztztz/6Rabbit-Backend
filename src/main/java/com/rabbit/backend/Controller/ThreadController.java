@@ -14,7 +14,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -88,27 +87,17 @@ public class ThreadController {
     }
 
     @GetMapping("/{tid}/{page}")
-    public Map<String, Object> info(@PathVariable("tid") String tid, @PathVariable("page") Integer page,
-                                    Authentication authentication) {
-        String uid = authentication == null ? null : (String) authentication.getPrincipal();
-
+    public Map<String, Object> info(@PathVariable("tid") String tid, @PathVariable("page") Integer page) {
         ThreadInfoResponse response = new ThreadInfoResponse();
+
         ThreadItem threadItem = threadService.info(tid);
         response.setThread(threadItem);
         Post firstPost = postService.firstPost(tid);
         response.setFirstPost(firstPost);
         List<ThreadAttach> threadAttachList = attachService.threadList(tid);
         response.setAttachList(threadAttachList);
-
-        if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0
-                && (uid == null || payService.userThreadNeedPay(uid, threadItem))) {
-            firstPost.setMessage("");
-            response.setPostList(new LinkedList<>());
-            response.setNeedBuy(true);
-        } else {
-            response.setPostList(postService.list(tid, page));
-            response.setNeedBuy(false);
-        }
+        List<Post> postList = postService.list(tid, page);
+        response.setPostList(postList);
 
         return GeneralResponse.generate(200, response);
     }
@@ -156,7 +145,7 @@ public class ThreadController {
             return GeneralResponse.generate(400, "Thread already closed.");
         }
 
-        if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0 && payService.userThreadNeedPay(uid, threadItem)) {
+        if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0) {
             return GeneralResponse.generate(403, "Purchase thread first.");
         }
 
@@ -199,24 +188,6 @@ public class ThreadController {
         attachService.batchAttachThread(form.getAttach(), tid, uid);
         threadService.update(tid, form.getFid(), form.getSubject(), form.getMessage());
         return GeneralResponse.generate(200);
-    }
-
-    @GetMapping("/pay/{tid}")
-    @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> pay(@PathVariable("tid") String tid, Authentication authentication) {
-        String buyerUid = (String) authentication.getPrincipal();
-        String sellerUid = threadService.uid(tid);
-        ThreadListItem thread = threadService.findWithThreadListItem(tid);
-
-        if (payService.userThreadNeedPay(buyerUid, thread)) {
-            if (payService.purchaseThread(buyerUid, sellerUid, thread)) {
-                return GeneralResponse.generate(200);
-            } else {
-                return GeneralResponse.generate(400, "Credits Not Enough.");
-            }
-        } else {
-            return GeneralResponse.generate(200);
-        }
     }
 
     @DeleteMapping("/{tid}")

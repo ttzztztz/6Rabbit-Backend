@@ -70,25 +70,19 @@ public interface UserDAO {
     @Select("SELECT DISTINCT `thread`.*, `temp`.`createDate` AS `purchasedDate` FROM " +
             "(SELECT `attach`.`tid`, `attach_pay_log`.`createDate` FROM `attach_pay_log` " +
             "INNER JOIN attach ON `attach_pay_log`.`aid` = `attach`.`aid` " +
-            "WHERE `attach_pay_log`.`uid` = #{uid} " +
-            "UNION " +
-            "SELECT `tid`, `createDate` FROM `thread_pay_log` " +
-            "WHERE `uid` = #{uid}) temp " +
+            "WHERE `attach_pay_log`.`uid` = #{uid}) temp " +
             "INNER JOIN thread ON `temp`.`tid` = `thread`.`tid` " +
             "ORDER BY `temp`.`createDate` DESC " +
-            "LIMIT ${from}, ${to}")
+            "LIMIT ${from},${to}")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<ThreadListItem> purchasedList(@Param("uid") String uid, @Param("from") Integer from, @Param("to") Integer to);
 
-    @Select("SELECT COUNT(DISTINCT `tid`) FROM " +
-            "(SELECT `attach`.`tid` FROM `attach_pay_log` " +
+    @Select("SELECT COUNT(DISTINCT `temp`.`tid`) FROM " +
+            "(SELECT `attach`.`tid`, `attach_pay_log`.`createDate` FROM `attach_pay_log` " +
             "INNER JOIN attach ON `attach_pay_log`.`aid` = `attach`.`aid` " +
-            "WHERE `attach_pay_log`.`uid` = #{uid} " +
-            "UNION " +
-            "SELECT `tid` FROM `thread_pay_log` " +
-            "WHERE `uid` = #{uid}) temp")
+            "WHERE `attach_pay_log`.`uid` = #{uid}) temp")
     Integer purchasedListCount(@Param("uid") String uid);
 }

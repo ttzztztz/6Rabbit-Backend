@@ -28,12 +28,6 @@ public class ThreadEditorForm {
 
     private List<ThreadAttachForm> attach;
 
-    @Range(min = 0, max = 3)
-    private Integer creditsType;
-
-    @Range(min = 0, max = 1000)
-    private Integer credits;
-
     public String getMessage() {
         return SafeHtml.sanitize(this.message);
     }
