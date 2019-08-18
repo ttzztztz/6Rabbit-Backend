@@ -58,7 +58,7 @@ public interface PostDAO {
 
     @Select("SELECT * FROM post WHERE uid = #{uid} ORDER BY pid DESC LIMIT ${from},${to}")
     @Results({
-            @Result(property = "thread", column = "tid", one=@One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
+            @Result(property = "thread", column = "tid", one=@One(select = "com.rabbit.backend.DAO.ThreadDAO.findWithThreadListItem"))
     })
     List<UserPost> listByUser(@Param("uid") String uid, @Param("from") Integer from, @Param("to") Integer to);
 }

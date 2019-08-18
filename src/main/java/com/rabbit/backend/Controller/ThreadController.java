@@ -25,21 +25,19 @@ public class ThreadController {
     private NotificationService notificationService;
     private AttachService attachService;
     private RuleService ruleService;
-    private PayService payService;
     private FrequentService frequentService;
     private SEOService seoService;
     private ForumService forumService;
 
     @Autowired
     public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService,
-                            AttachService attachService, RuleService ruleService, PayService payService,
-                            FrequentService frequentService, SEOService seoService, ForumService forumService) {
+                            AttachService attachService, RuleService ruleService, FrequentService frequentService,
+                            SEOService seoService, ForumService forumService) {
         this.threadService = threadService;
         this.postService = postService;
         this.notificationService = notificationService;
         this.attachService = attachService;
         this.ruleService = ruleService;
-        this.payService = payService;
         this.frequentService = frequentService;
         this.seoService = seoService;
         this.forumService = forumService;
@@ -143,10 +141,6 @@ public class ThreadController {
                 && !CheckAuthority.hasAuthority(authentication, "Admin")
         ) {
             return GeneralResponse.generate(400, "Thread already closed.");
-        }
-
-        if (threadItem.getCreditsType() != 0 && threadItem.getCredits() != 0) {
-            return GeneralResponse.generate(403, "Purchase thread first.");
         }
 
         String quotePid = form.getQuotepid();

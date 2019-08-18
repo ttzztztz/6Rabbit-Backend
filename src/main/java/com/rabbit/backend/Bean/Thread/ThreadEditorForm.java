@@ -3,7 +3,6 @@ package com.rabbit.backend.Bean.Thread;
 import com.rabbit.backend.Bean.Attach.ThreadAttachForm;
 import com.rabbit.backend.Utilities.SafeHtml;
 import lombok.Data;
-import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;

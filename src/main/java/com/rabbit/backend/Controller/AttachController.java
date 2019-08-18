@@ -1,6 +1,5 @@
 package com.rabbit.backend.Controller;
 
-import com.rabbit.backend.Bean.Attach.Attach;
 import com.rabbit.backend.Bean.Attach.AttachInfoResponse;
 import com.rabbit.backend.Security.CheckAuthority;
 import com.rabbit.backend.Service.AttachService;
@@ -11,8 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Map;
 
 @RestController

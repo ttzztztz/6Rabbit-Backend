@@ -64,4 +64,8 @@ public class PostService {
     public List<UserPost> listByUser(String uid, Integer page) {
         return postDAO.listByUser(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
     }
+
+    public String tid(String pid){
+        return postDAO.tid(pid);
+    }
 }

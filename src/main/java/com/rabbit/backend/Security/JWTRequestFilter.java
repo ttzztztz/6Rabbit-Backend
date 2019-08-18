@@ -33,7 +33,6 @@ public class JWTRequestFilter extends OncePerRequestFilter {
             // do nothing...
         }
 
-
         chain.doFilter(request, response);
     }
 }

@@ -103,7 +103,7 @@ public interface ThreadDAO {
             "ORDER BY `temp`.`pid` DESC " +
             "LIMIT ${from}, ${to}")
     @Results({
-            @Result(property = "thread", column = "tid", one=@One(select = "com.rabbit.backend.DAO.ThreadDAO.findThreadListItem"))
+            @Result(property = "thread", column = "tid", one=@One(select = "com.rabbit.backend.DAO.ThreadDAO.findWithThreadListItem"))
     })
     List<SearchItem> search(@Param("keywords") String keywords, @Param("from") Integer from, @Param("to") Integer to);
 

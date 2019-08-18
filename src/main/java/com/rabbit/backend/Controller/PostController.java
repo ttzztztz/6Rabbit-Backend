@@ -37,7 +37,7 @@ public class PostController {
         }
 
         Post post = postService.find(pid);
-        if(post.getIsFirst()){
+        if (post.getIsFirst()) {
             return GeneralResponse.generate(404, "Bad request.");
         }
 
@@ -65,7 +65,8 @@ public class PostController {
             return GeneralResponse.generate(403, "Permission denied.");
         }
 
+        String tid = postService.tid(pid);
         postService.update(pid, form.getMessage());
-        return GeneralResponse.generate(200);
+        return GeneralResponse.generate(200, tid);
     }
 }
