@@ -32,9 +32,9 @@ public class DepositController {
         String key = "pay:deposit:" + uid;
 
         if (!frequentService.check(key, 10 * 60)) {
-            return GeneralResponse.generate(400, "Pay too frequent, try again after 10 minutes.");
+            return GeneralResponse.generate(400, "Pay too frequently, try again after 10 minutes.");
         }
-        String cid = depositService.submitDeposit(form.getCredits(), uid);
+        String cid = depositService.submitDeposit(form, uid);
         return GeneralResponse.generate(200, cid);
     }
 

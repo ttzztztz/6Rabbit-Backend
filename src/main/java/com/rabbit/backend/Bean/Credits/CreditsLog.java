@@ -12,7 +12,7 @@ public class CreditsLog {
     private String cid;
     private OtherUser user;
     private Integer status;
-    private Integer type;
+    private String type;
     private String description;
     private Integer creditsType;
     private Integer credits;

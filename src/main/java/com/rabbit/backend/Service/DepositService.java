@@ -2,6 +2,7 @@ package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Credits.CreditsLog;
 import com.rabbit.backend.Bean.Credits.CreditsLogForm;
+import com.rabbit.backend.Bean.Credits.DepositSubmitForm;
 import com.rabbit.backend.DAO.CreditsLogDAO;
 import com.rabbit.backend.DAO.DepositDAO;
 import com.rabbit.backend.DAO.UserDAO;
@@ -42,13 +43,15 @@ public class DepositService {
         }
     }
 
-    public String submitDeposit(Integer rmbs, String uid) {
+    public String submitDeposit(DepositSubmitForm form, String uid) {
         CreditsLogForm creditsLogForm = new CreditsLogForm();
 
         creditsLogForm.setCreditsType(3);
-        creditsLogForm.setCredits(rmbs);
+        creditsLogForm.setCredits(form.getCredits());
+        creditsLogForm.setDescription(form.getDescription());
         creditsLogForm.setUid(uid);
         creditsLogForm.setStatus("0");
+        creditsLogForm.setType("deposit");
 
         creditsLogDAO.insert(creditsLogForm);
         return creditsLogForm.getCid();

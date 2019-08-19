@@ -5,6 +5,7 @@ import com.rabbit.backend.Bean.User.*;
 import com.rabbit.backend.DAO.UserDAO;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Security.PasswordUtils;
+import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import com.rabbit.backend.Utilities.TimestampUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,13 +105,20 @@ public class UserService {
     }
 
     public UserLoginResponse loginResponse(User user) {
+        if (!user.getUsergroup().getCanLogin()) {
+            throw new NotFoundException(403, "This account isn't allowed to login.");
+        }
+
         String token = JWTUtils.sign(user.getUid(), user.getUsername(), user.getUsergroup());
 
         UserLoginResponse response = new UserLoginResponse();
         response.setToken(token);
         response.setUsername(user.getUsername());
         response.setUid(user.getUid());
-        response.setIsAdmin(user.getUsergroup().getIsAdmin());
+        response.setUsergroup(user.getUsergroup());
+        response.setCredits(user.getCredits());
+        response.setGolds(user.getGolds());
+        response.setRmbs(user.getRmbs());
 
         return response;
     }

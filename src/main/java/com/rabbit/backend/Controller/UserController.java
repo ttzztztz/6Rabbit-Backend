@@ -174,9 +174,6 @@ public class UserController {
             userService.loginLimitIncrement(IP);
             return GeneralResponse.generate(400, "Username or Password invalid.");
         }
-        if (!user.getUsergroup().getCanLogin()) {
-            return GeneralResponse.generate(403, "This account isn't allowed to login.");
-        }
 
         boolean loginResult = PasswordUtils.checkPassword(user.getPassword(), form.getPassword(), user.getSalt());
 
@@ -208,6 +205,7 @@ public class UserController {
 
         return GeneralResponse.generate(200, response);
     }
+
     @GetMapping("/purchased/attach/{page}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> purchasedAttach(@PathVariable("page") Integer page, Authentication authentication) {
