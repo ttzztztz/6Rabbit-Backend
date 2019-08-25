@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 
 @Data
 public class DepositSubmitForm {
-    @Range(min = 100, max = 1000000)
+    @Range(min = 1000, max = 1000000)
     private Integer credits;
 
     @Size(max = 72)
