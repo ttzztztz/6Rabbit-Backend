@@ -3,6 +3,7 @@ package com.rabbit.backend.Controller;
 import com.rabbit.backend.Bean.Thread.Post;
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
 import com.rabbit.backend.Security.CheckAuthority;
+import com.rabbit.backend.Service.CaptchaService;
 import com.rabbit.backend.Service.PostService;
 import com.rabbit.backend.Service.RuleService;
 import com.rabbit.backend.Utilities.Response.FieldErrorResponse;
@@ -21,11 +22,13 @@ import java.util.Map;
 public class PostController {
     private PostService postService;
     private RuleService ruleService;
+    private CaptchaService captchaService;
 
     @Autowired
-    public PostController(PostService postService, RuleService ruleService) {
+    public PostController(PostService postService, RuleService ruleService, CaptchaService captchaService) {
         this.postService = postService;
         this.ruleService = ruleService;
+        this.captchaService = captchaService;
     }
 
     @DeleteMapping("/{pid}")
@@ -59,6 +62,8 @@ public class PostController {
         if (errors.hasErrors()) {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
+
+        captchaService.verifyToken(form.getToken());
 
         if (!postService.uid(pid).equals(authentication.getPrincipal())
                 && !CheckAuthority.hasAuthority(authentication, "Admin")) {

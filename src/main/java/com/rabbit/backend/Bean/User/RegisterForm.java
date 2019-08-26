@@ -19,4 +19,7 @@ public class RegisterForm {
 
     private String bindOAuthCode;
     private String bindOAuthPlatform;
+
+    @NotBlank(message = "Pass captcha first!")
+    private String token;
 }

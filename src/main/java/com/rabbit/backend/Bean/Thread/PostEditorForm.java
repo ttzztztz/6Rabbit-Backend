@@ -18,6 +18,9 @@ public class PostEditorForm {
     @Size(min = 5, message = "Message must have more than 5 characters")
     private String message;
 
+    @NotBlank(message = "Pass captcha first!")
+    private String token;
+
     public String getMessage() {
         return com.rabbit.backend.Utilities.SafeHtml.sanitize(this.message);
     }

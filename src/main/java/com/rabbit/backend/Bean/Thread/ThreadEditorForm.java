@@ -27,6 +27,9 @@ public class ThreadEditorForm {
 
     private List<ThreadAttachForm> attach;
 
+    @NotBlank(message = "Pass captcha first!")
+    private String token;
+
     public String getMessage() {
         return SafeHtml.sanitize(this.message);
     }

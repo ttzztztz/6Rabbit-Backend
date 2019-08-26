@@ -29,10 +29,12 @@ public class UserController {
     private ThreadService threadService;
     private PostService postService;
     private OAuthService oAuthService;
+    private CaptchaService captchaService;
 
     @Autowired
     public UserController(UserService userService, CreditsLogService creditsLogService, PayService payService,
-                          MailService mailService, ThreadService threadService, PostService postService, OAuthService oAuthService) {
+                          MailService mailService, ThreadService threadService, PostService postService,
+                          OAuthService oAuthService, CaptchaService captchaService) {
         this.userService = userService;
         this.creditsLogService = creditsLogService;
         this.payService = payService;
@@ -40,6 +42,7 @@ public class UserController {
         this.threadService = threadService;
         this.postService = postService;
         this.oAuthService = oAuthService;
+        this.captchaService = captchaService;
     }
 
     @GetMapping("/thread/{uid}/{page}")
@@ -76,6 +79,8 @@ public class UserController {
         if (errors.hasErrors()) {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
+
+        captchaService.verifyToken(form.getToken());
 
         String IP = IPUtil.getIPAddress();
         if (!userService.registerLimitCheck(IP)) {
@@ -163,6 +168,8 @@ public class UserController {
         if (errors.hasErrors()) {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
+
+        captchaService.verifyToken(form.getToken());
 
         String IP = IPUtil.getIPAddress();
         if (!userService.loginLimitCheck(IP)) {

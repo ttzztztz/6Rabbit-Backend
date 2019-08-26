@@ -28,11 +28,12 @@ public class ThreadController {
     private FrequentService frequentService;
     private SEOService seoService;
     private ForumService forumService;
+    private CaptchaService captchaService;
 
     @Autowired
     public ThreadController(ThreadService threadService, PostService postService, NotificationService notificationService,
                             AttachService attachService, RuleService ruleService, FrequentService frequentService,
-                            SEOService seoService, ForumService forumService) {
+                            SEOService seoService, ForumService forumService, CaptchaService captchaService) {
         this.threadService = threadService;
         this.postService = postService;
         this.notificationService = notificationService;
@@ -41,6 +42,7 @@ public class ThreadController {
         this.frequentService = frequentService;
         this.seoService = seoService;
         this.forumService = forumService;
+        this.captchaService = captchaService;
     }
 
     @GetMapping("/list/{fid}/{page}")
@@ -108,6 +110,8 @@ public class ThreadController {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
 
+        captchaService.verifyToken(form.getToken());
+
         String uid = (String) authentication.getPrincipal();
         String key = "thread:create:" + uid;
         if (!frequentService.check(key, 30)) {
@@ -135,11 +139,12 @@ public class ThreadController {
         if (errors.hasErrors()) {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
+
+        captchaService.verifyToken(form.getToken());
+
         String uid = (String) authentication.getPrincipal();
         ThreadListItem threadItem = threadService.findWithThreadListItem(tid);
-        if (threadItem.getIsClosed()
-                && !CheckAuthority.hasAuthority(authentication, "Admin")
-        ) {
+        if (threadItem.getIsClosed() && !CheckAuthority.hasAuthority(authentication, "Admin")) {
             return GeneralResponse.generate(400, "Thread already closed.");
         }
 
@@ -172,6 +177,8 @@ public class ThreadController {
         if (errors.hasErrors()) {
             return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
         }
+
+        captchaService.verifyToken(form.getToken());
 
         String uid = (String) authentication.getPrincipal();
         if (!threadService.uid(tid).equals(uid)
