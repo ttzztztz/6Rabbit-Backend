@@ -1,5 +1,6 @@
 package com.rabbit.backend.Utilities;
 
+import com.rabbit.backend.Utilities.Exceptions.CaptchaException;
 import com.rabbit.backend.Utilities.Exceptions.NotEnoughCreditsException;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import com.rabbit.backend.Utilities.Response.GeneralResponse;
@@ -18,28 +19,35 @@ import java.util.Map;
 public class RabbitControllerAdvice {
     @ExceptionHandler(value = NotFoundException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.OK)
     public Map<String, Object> handleNotFoundException(HttpServletRequest request, NotFoundException ex) {
         return GeneralResponse.generate(404, ex.getErrMessage());
     }
 
     @ExceptionHandler(value = NotEnoughCreditsException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.OK)
     public Map<String, Object> handleNotEnoughCreditsException(HttpServletRequest request, NotEnoughCreditsException ex) {
         return GeneralResponse.generate(ex.getCode(), ex.getErrMessage());
     }
 
     @ExceptionHandler(value = ExpiredJwtException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.OK)
     public Map<String, Object> handleExpiredJWTException(HttpServletRequest request, ExpiredJwtException ex) {
         return GeneralResponse.generate(400, "JWT Expired.");
     }
 
+    @ExceptionHandler(value = CaptchaException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> handleCaptchaException(HttpServletRequest request, CaptchaException ex) {
+        return GeneralResponse.generate(403, ex.getErrMessage());
+    }
+
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.OK)
     public Map<String, Object> handleException(HttpServletRequest request, Exception ex) {
         return GeneralResponse.generate(500, ex.getMessage());
     }

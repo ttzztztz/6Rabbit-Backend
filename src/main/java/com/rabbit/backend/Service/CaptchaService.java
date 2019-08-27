@@ -4,11 +4,13 @@ import com.rabbit.backend.Bean.Verify.VerifyResponse;
 import com.rabbit.backend.Utilities.Exceptions.CaptchaException;
 import com.rabbit.backend.Utilities.IPUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class CaptchaService {
@@ -21,17 +23,24 @@ public class CaptchaService {
     public void verifyToken(String token) {
         RestTemplate restTemplate = new RestTemplate();
 
-        Map<String, String> requestMap = new HashMap<>();
-        requestMap.put("id", VID);
-        requestMap.put("secretkey", SECRET);
-        requestMap.put("scene", "");
-        requestMap.put("token", token);
-        requestMap.put("ip", IPUtil.getIPAddress());
+        MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
+        requestMap.add("id", VID);
+        requestMap.add("secretkey", SECRET);
+        requestMap.add("scene", "");
+        requestMap.add("token", token);
+        requestMap.add("ip", IPUtil.getIPAddress());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        HttpEntity<MultiValueMap<String, String>> formEntity = new HttpEntity<>(requestMap, headers);
+
         VerifyResponse verifyResponse = restTemplate.postForObject("https://api.vaptcha.com/v2/validate",
-                requestMap, VerifyResponse.class);
+                formEntity, VerifyResponse.class);
 
         if (verifyResponse == null || verifyResponse.getSuccess() != 1) {
-            throw new CaptchaException(403, "Captcha invalid!");
+            String errorMessage = verifyResponse == null ? "Invalid code" : verifyResponse.getMsg();
+
+            throw new CaptchaException(403, errorMessage == null ? "Invalid code" : errorMessage);
         }
     }
 }

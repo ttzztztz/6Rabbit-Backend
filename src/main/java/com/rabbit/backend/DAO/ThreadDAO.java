@@ -85,7 +85,7 @@ public interface ThreadDAO {
     @Update("UPDATE thread SET subject = #{subject}, fid = #{fid} WHERE tid = #{tid}")
     void update(@Param("tid") String tid, @Param("subject") String subject, @Param("fid") String fid);
 
-    @Insert("INSERT INTO thread(fid, uid, subject, creditsType, credits) VALUES (#{fid}, #{uid}, #{subject}, #{creditsType}, #{credits})")
+    @Insert("INSERT INTO thread(fid, uid, subject) VALUES (#{fid}, #{uid}, #{subject})")
     @Options(keyProperty = "tid", keyColumn = "tid", useGeneratedKeys = true)
     void insert(ThreadEditorForm thread);
 
