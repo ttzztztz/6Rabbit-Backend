@@ -17,13 +17,13 @@ public interface UserDAO {
     })
     User find(@Param("key") String key, @Param("value") String value);
 
-    @Select("SELECT username, uid, gid FROM user WHERE ${key} = #{value} LIMIT 1")
+    @Select("SELECT username, uid, gid, signature FROM user WHERE ${key} = #{value} LIMIT 1")
     @Results({
             @Result(property = "usergroup", column = "gid", one = @One(select = "com.rabbit.backend.DAO.GroupDAO.findByGid"))
     })
     OtherUser findOther(@Param("key") String key, @Param("value") String value);
 
-    @Select("SELECT username, uid, gid FROM user WHERE uid = #{uid} LIMIT 1")
+    @Select("SELECT username, uid, gid, signature FROM user WHERE uid = #{uid} LIMIT 1")
     @Results({
             @Result(property = "usergroup", column = "gid", one = @One(select = "com.rabbit.backend.DAO.GroupDAO.findByGid"))
     })

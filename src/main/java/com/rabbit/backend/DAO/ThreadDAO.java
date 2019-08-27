@@ -1,9 +1,6 @@
 package com.rabbit.backend.DAO;
 
-import com.rabbit.backend.Bean.Thread.SearchItem;
-import com.rabbit.backend.Bean.Thread.ThreadEditorForm;
-import com.rabbit.backend.Bean.Thread.ThreadItem;
-import com.rabbit.backend.Bean.Thread.ThreadListItem;
+import com.rabbit.backend.Bean.Thread.*;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -47,6 +44,13 @@ public interface ThreadDAO {
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<ThreadListItem> listWithoutTop(@Param("fid") String fid, @Param("from") Integer from, @Param("to") Integer to);
+
+    @Select("SELECT * FROM thread WHERE fid = #{fid} ORDER BY lastpid DESC LIMIT ${from},${to}")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
+    })
+    List<ThreadListImageItem> listImageItem(@Param("fid") String fid, @Param("from") Integer from, @Param("to") Integer to);
 
     @Select("SELECT * FROM thread WHERE uid = #{uid} ORDER BY tid DESC LIMIT ${from},${to}")
     @Results({
@@ -103,7 +107,7 @@ public interface ThreadDAO {
             "ORDER BY `temp`.`pid` DESC " +
             "LIMIT ${from}, ${to}")
     @Results({
-            @Result(property = "thread", column = "tid", one=@One(select = "com.rabbit.backend.DAO.ThreadDAO.findWithThreadListItem"))
+            @Result(property = "thread", column = "tid", one = @One(select = "com.rabbit.backend.DAO.ThreadDAO.findWithThreadListItem"))
     })
     List<SearchItem> search(@Param("keywords") String keywords, @Param("from") Integer from, @Param("to") Integer to);
 
@@ -115,4 +119,9 @@ public interface ThreadDAO {
 
     @Delete("DELETE FROM post WHERE tid = #{tid}")
     void deletePostCASCADE(@Param("tid") String tid);
+
+    @Select("SELECT `thread`.`tid`, `post`.`message`, `thread`.`firstpid` FROM `thread` " +
+            "INNER JOIN `post` ON `thread`.`firstpid`=`post`.`pid` " +
+            "WHERE `thread`.`tid` = #{tid}")
+    ThreadMessageItem getMessage(@Param("tid") String tid);
 }

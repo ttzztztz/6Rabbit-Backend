@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ThreadListResponse {
+public class ThreadListResponse<T extends ThreadListItem> {
     private Forum forum;
-    private List<ThreadListItem> list;
+    private List<T> list;
 }

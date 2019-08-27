@@ -47,10 +47,23 @@ public class ThreadController {
 
     @GetMapping("/list/{fid}/{page}")
     public Map<String, Object> list(@PathVariable("fid") String fid, @PathVariable("page") Integer page) {
-        ThreadListResponse threadListResponse = new ThreadListResponse();
-        threadListResponse.setForum(threadService.forum(fid));
-        threadListResponse.setList(threadService.list(fid, page));
-        return GeneralResponse.generate(200, threadListResponse);
+        Forum forum = threadService.forum(fid);
+
+        if (forum.getType().equals("image")) {
+            ThreadListResponse<ThreadListImageItem> threadListResponse = new ThreadListResponse<>();
+
+            threadListResponse.setForum(forum);
+            threadListResponse.setList(threadService.imageList(fid, page));
+
+            return GeneralResponse.generate(200, threadListResponse);
+        } else {
+            ThreadListResponse<ThreadListItem> threadListResponse = new ThreadListResponse<>();
+
+            threadListResponse.setForum(forum);
+            threadListResponse.setList(threadService.list(fid, page));
+
+            return GeneralResponse.generate(200, threadListResponse);
+        }
     }
 
     @PostMapping("/diamond")

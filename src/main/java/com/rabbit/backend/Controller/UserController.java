@@ -183,7 +183,6 @@ public class UserController {
         }
 
         boolean loginResult = PasswordUtils.checkPassword(user.getPassword(), form.getPassword(), user.getSalt());
-
         if (loginResult) {
             return GeneralResponse.generate(200, userService.loginResponse(user));
         } else {

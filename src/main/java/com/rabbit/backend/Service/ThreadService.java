@@ -9,12 +9,16 @@ import com.rabbit.backend.DAO.ThreadDAO;
 import com.rabbit.backend.Utilities.Exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ThreadService {
@@ -22,16 +26,19 @@ public class ThreadService {
     private ThreadDAO threadDAO;
     private StaticDAO staticDAO;
     private ForumDAO forumDAO;
+    private StringRedisTemplate stringRedisTemplate;
 
     @Value("${rabbit.pagesize}")
     private Integer PAGESIZE;
 
     @Autowired
-    public ThreadService(PostDAO postDAO, ThreadDAO threadDAO, StaticDAO staticDAO, ForumDAO forumDAO) {
+    public ThreadService(PostDAO postDAO, ThreadDAO threadDAO, StaticDAO staticDAO, ForumDAO forumDAO,
+                         StringRedisTemplate stringRedisTemplate) {
         this.postDAO = postDAO;
         this.threadDAO = threadDAO;
         this.staticDAO = staticDAO;
         this.forumDAO = forumDAO;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @Transactional
@@ -98,6 +105,33 @@ public class ThreadService {
         }
 
         list.addAll(threadDAO.listWithoutTop(fid, (page - 1) * PAGESIZE, page * PAGESIZE));
+        return list;
+    }
+
+    public List<ThreadListImageItem> imageList(String fid, Integer page) {
+        final Pattern pattern = Pattern.compile("<img(?= )[^>]* src=(['\"])(.*?)\\1[^>]*>");
+        List<ThreadListImageItem> list = threadDAO.listImageItem(fid, (page - 1) * PAGESIZE, page * PAGESIZE);
+
+        for (ThreadListImageItem item : list) {
+            String tid = item.getTid();
+            String key = "thread:image:" + tid;
+            String cachedImage = stringRedisTemplate.boundValueOps(key).get();
+            if (cachedImage == null) {
+                ThreadMessageItem threadMessageItem = threadDAO.getMessage(tid);
+                Matcher matcher = pattern.matcher(threadMessageItem.getMessage());
+                String result = "";
+                if (matcher.find()) {
+                    result = matcher.group(2);
+                }
+
+                item.setImage(result);
+                stringRedisTemplate.boundValueOps(key).set(result, 60 * 60 * 1000, TimeUnit.MILLISECONDS);
+                // cache 1h
+            } else {
+                item.setImage(cachedImage);
+            }
+        }
+
         return list;
     }
 
