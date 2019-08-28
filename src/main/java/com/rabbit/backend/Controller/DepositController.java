@@ -40,14 +40,14 @@ public class DepositController {
 
     @PostMapping("/admin")
     @PreAuthorize("hasAuthority('Admin')")
-    public Map<String, Object> adminDecide(@RequestBody @Valid DepositAdminForm form) {
+    public Map<String, Object> adminOperation(@RequestBody @Valid DepositAdminForm form) {
         depositService.setDeposit(form.getCid(), form.getStatus());
         return GeneralResponse.generate(200);
     }
 
-    @GetMapping("/admin/{page}")
+    @GetMapping("/admin")
     @PreAuthorize("hasAuthority('Admin')")
-    public Map<String, Object> adminList(@PathVariable("page") Integer page) {
-        return GeneralResponse.generate(200, depositService.creditsLogList(page));
+    public Map<String, Object> adminList() {
+        return GeneralResponse.generate(200, depositService.creditsLogList(1));
     }
 }
