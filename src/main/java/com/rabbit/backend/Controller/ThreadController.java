@@ -53,7 +53,7 @@ public class ThreadController {
             ThreadListResponse<ThreadListImageItem> threadListResponse = new ThreadListResponse<>();
 
             threadListResponse.setForum(forum);
-            threadListResponse.setList(threadService.imageList(fid, page));
+            threadListResponse.setList(threadService.listImage(fid, page));
 
             return GeneralResponse.generate(200, threadListResponse);
         } else {
@@ -64,6 +64,16 @@ public class ThreadController {
 
             return GeneralResponse.generate(200, threadListResponse);
         }
+    }
+
+    @GetMapping("/list/new/{page}")
+    public Map<String, Object> listNew(@PathVariable("page") Integer page) {
+        ThreadListNewResponse<ThreadListItem> threadListNewResponse = new ThreadListNewResponse<>();
+
+        threadListNewResponse.setTotal(threadService.listNewCount());
+        threadListNewResponse.setList(threadService.listNew(page));
+
+        return GeneralResponse.generate(200, threadListNewResponse);
     }
 
     @PostMapping("/diamond")

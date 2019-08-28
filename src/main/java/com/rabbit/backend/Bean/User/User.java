@@ -2,11 +2,9 @@ package com.rabbit.backend.Bean.User;
 
 import com.rabbit.backend.Bean.Group.Group;
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component
 @Data
 public class User {
     private String uid;

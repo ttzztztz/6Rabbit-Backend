@@ -2,11 +2,9 @@ package com.rabbit.backend.Bean.Attach;
 
 import com.rabbit.backend.Bean.User.OtherUser;
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component
 @Data
 public class Attach {
     private String aid;

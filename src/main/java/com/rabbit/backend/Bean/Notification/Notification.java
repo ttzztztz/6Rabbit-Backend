@@ -3,11 +3,9 @@ package com.rabbit.backend.Bean.Notification;
 import com.rabbit.backend.Bean.User.OtherUser;
 import com.rabbit.backend.Utilities.SafeHtml;
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@Component
 @Data
 public class Notification {
     private String nid;

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Aug 17, 2019 at 12:54 PM
+-- Generation Time: Aug 28, 2019 at 12:45 AM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.19
 
@@ -255,7 +255,7 @@ ALTER TABLE `post`
   ADD KEY `tid` (`tid`),
   ADD KEY `uid` (`uid`),
   ADD KEY `quotepid` (`quotepid`);
-ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`);
+ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`) WITH PARSER ngram;
 
 --
 -- Indexes for table `thread`
@@ -264,7 +264,7 @@ ALTER TABLE `thread`
   ADD PRIMARY KEY (`tid`),
   ADD KEY `fid` (`fid`),
   ADD KEY `uid` (`uid`);
-ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`);
+ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`) WITH PARSER ngram;
 
 --
 -- Indexes for table `user`

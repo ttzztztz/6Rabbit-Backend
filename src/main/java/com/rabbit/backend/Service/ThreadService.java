@@ -108,7 +108,21 @@ public class ThreadService {
         return list;
     }
 
-    public List<ThreadListImageItem> imageList(String fid, Integer page) {
+    public List<ThreadListItem> listNew(Integer page) {
+        List<ThreadListItem> list = new ArrayList<>();
+        if (page == 1) {
+            list.addAll(threadDAO.globalTopThread());
+        }
+
+        list.addAll(threadDAO.listNewWithoutTop((page - 1) * PAGESIZE, page * PAGESIZE));
+        return list;
+    }
+
+    public Integer listNewCount() {
+        return threadDAO.listNewCount();
+    }
+
+    public List<ThreadListImageItem> listImage(String fid, Integer page) {
         final Pattern pattern = Pattern.compile("<img(?= )[^>]* src=(['\"])(.*?)\\1[^>]*>");
         List<ThreadListImageItem> list = threadDAO.listImageItem(fid, (page - 1) * PAGESIZE, page * PAGESIZE);
 
