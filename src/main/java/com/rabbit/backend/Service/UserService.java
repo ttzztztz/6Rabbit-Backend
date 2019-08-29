@@ -1,7 +1,9 @@
 package com.rabbit.backend.Service;
 
+import com.rabbit.backend.Bean.Group.Group;
 import com.rabbit.backend.Bean.Thread.ThreadListItem;
 import com.rabbit.backend.Bean.User.*;
+import com.rabbit.backend.DAO.GroupDAO;
 import com.rabbit.backend.DAO.UserDAO;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Security.PasswordUtils;
@@ -18,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService {
-    private UserDAO DAO;
+    private UserDAO userDAO;
+    private GroupDAO groupDAO;
     private StringRedisTemplate stringRedisTemplate;
 
     @Value("${rabbit.limit.login}")
@@ -31,25 +34,26 @@ public class UserService {
     private Integer PAGESIZE;
 
     @Autowired
-    public UserService(UserDAO userDAO, StringRedisTemplate stringRedisTemplate) {
-        this.DAO = userDAO;
+    public UserService(UserDAO userDAO, GroupDAO groupDAO, StringRedisTemplate stringRedisTemplate) {
+        this.userDAO = userDAO;
+        this.groupDAO = groupDAO;
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
     public User selectUser(String key, String value) {
-        return DAO.find(key, value);
+        return userDAO.find(key, value);
     }
 
     public MyUser selectMyUser(String key, String value) {
-        return DAO.findMy(key, value);
+        return userDAO.findMy(key, value);
     }
 
     public OtherUser selectOtherUserByUid(String uid) {
-        return DAO.findOther("uid", uid);
+        return userDAO.findOther("uid", uid);
     }
 
     public Boolean exist(String key, String value) {
-        Integer val = DAO.exist(key, value);
+        Integer val = userDAO.exist(key, value);
         return val != null;
     }
 
@@ -60,19 +64,19 @@ public class UserService {
         newUser.setPassword(PasswordUtils.generatePassword(password, salt));
         newUser.setSalt(salt);
         newUser.setEmail(email);
-        DAO.insert(newUser);
+        userDAO.insert(newUser);
 
         return newUser.getUid();
     }
 
     public void updatePassword(String uid, String password) {
         String salt = PasswordUtils.generateSalt();
-        DAO.updatePassword(uid, PasswordUtils.generatePassword(password, salt), salt);
+        userDAO.updatePassword(uid, PasswordUtils.generatePassword(password, salt), salt);
     }
 
     @Transactional
     public void updateProfile(String uid, UpdateProfileForm form) {
-        DAO.updateFields(uid, form);
+        userDAO.updateFields(uid, form);
     }
 
     private boolean limitCheck(String rule, String IP, int limit) {
@@ -124,10 +128,22 @@ public class UserService {
     }
 
     public List<ThreadListItem> purchasedList(String uid, Integer page) {
-        return DAO.purchasedList(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
+        return userDAO.purchasedList(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
     }
 
     public Integer purchasedListCount(String uid) {
-        return DAO.purchasedListCount(uid);
+        return userDAO.purchasedListCount(uid);
+    }
+
+    public void updateGroup(String uid, String gid) {
+        userDAO.updateGroup(uid, gid);
+    }
+
+    public List<Group> groupList() {
+        return groupDAO.list();
+    }
+
+    public void updateCredits(String uid, Integer credits, Integer golds, Integer rmbs) {
+        userDAO.updateCredits(uid, credits, golds, rmbs);
     }
 }

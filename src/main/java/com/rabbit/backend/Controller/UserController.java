@@ -24,7 +24,6 @@ import java.util.Map;
 public class UserController {
     private UserService userService;
     private CreditsLogService creditsLogService;
-    private PayService payService;
     private MailService mailService;
     private ThreadService threadService;
     private PostService postService;
@@ -32,12 +31,11 @@ public class UserController {
     private CaptchaService captchaService;
 
     @Autowired
-    public UserController(UserService userService, CreditsLogService creditsLogService, PayService payService,
+    public UserController(UserService userService, CreditsLogService creditsLogService,
                           MailService mailService, ThreadService threadService, PostService postService,
                           OAuthService oAuthService, CaptchaService captchaService) {
         this.userService = userService;
         this.creditsLogService = creditsLogService;
-        this.payService = payService;
         this.mailService = mailService;
         this.threadService = threadService;
         this.postService = postService;
@@ -163,6 +161,30 @@ public class UserController {
         return GeneralResponse.generate(200, user);
     }
 
+    @PostMapping("/info/{uid}")
+    @PreAuthorize("hasAuthority('Admin')")
+    public Map<String, Object> otherUserProfile(@PathVariable("uid") String uid) {
+        MyUser user = userService.selectMyUser("uid", uid);
+
+        return GeneralResponse.generate(200, user);
+    }
+
+    @PutMapping("/info/{uid}")
+    @PreAuthorize("hasAuthority('Admin')")
+    public Map<String, Object> updateOtherUserProfile(@PathVariable("uid") String uid,
+                                                      @Valid @RequestBody AdminUpdateProfileForm form, Errors errors) {
+        if (errors.hasErrors()) {
+            return GeneralResponse.generate(500, FieldErrorResponse.generator(errors));
+        }
+
+        userService.updateProfile(uid, form);
+        if (form.getNewPassword() != null && !form.getNewPassword().isBlank()) {
+            userService.updatePassword(uid, form.getNewPassword());
+        }
+        userService.updateCredits(uid, form.getCredits(), form.getGolds(), form.getRmbs());
+        return GeneralResponse.generate(200);
+    }
+
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody LoginForm form, Errors errors) {
         if (errors.hasErrors()) {
@@ -212,13 +234,6 @@ public class UserController {
         return GeneralResponse.generate(200, response);
     }
 
-    @GetMapping("/purchased/attach/{page}")
-    @PreAuthorize("hasAuthority('User')")
-    public Map<String, Object> purchasedAttach(@PathVariable("page") Integer page, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        return GeneralResponse.generate(200, payService.attachPurchasedList(uid, page));
-    }
-
     @GetMapping("/purchased/aggregate/{page}")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> purchasedAggregateList(@PathVariable("page") Integer page, Authentication authentication) {
@@ -229,5 +244,21 @@ public class UserController {
         userPurchasedListResponse.setCount(userService.purchasedListCount(uid));
 
         return GeneralResponse.generate(200, userPurchasedListResponse);
+    }
+
+    @PostMapping("/admin/group")
+    @PreAuthorize("hasAuthority('Admin')")
+    public Map<String, Object> adminGroup(@Valid @RequestBody AdminGroupForm form) {
+        if (form.getUid().equals("1")) {
+            return GeneralResponse.generate(403, "Cannot set super admin's user group!");
+        }
+
+        userService.updateGroup(form.getUid(), form.getGid());
+        return GeneralResponse.generate(200);
+    }
+
+    @GetMapping("/group/list")
+    public Map<String, Object> groupList() {
+        return GeneralResponse.generate(200, userService.groupList());
     }
 }

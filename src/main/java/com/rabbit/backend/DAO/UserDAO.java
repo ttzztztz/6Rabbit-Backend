@@ -85,4 +85,11 @@ public interface UserDAO {
             "INNER JOIN attach ON `attach_pay_log`.`aid` = `attach`.`aid` " +
             "WHERE `attach_pay_log`.`uid` = #{uid}) temp")
     Integer purchasedListCount(@Param("uid") String uid);
+
+    @Update("UPDATE user SET gid = #{gid} WHERE uid = #{uid}")
+    void updateGroup(@Param("uid") String uid, @Param("gid") String gid);
+
+    @Update("UPDATE user SET credits = #{credits}, golds = #{golds}, rmbs = #{rmbs} WHERE uid = #{uid}")
+    void updateCredits(@Param("uid") String uid, @Param("credits") Integer credits, @Param("golds") Integer golds,
+                       @Param("rmbs") Integer rmbs);
 }

@@ -9,6 +9,6 @@ import javax.validation.constraints.Size;
 public class SearchForm {
 
     @NotNull
-    @Size(max = 32)
+    @Size(min = 3, max = 32)
     private String keywords;
 }

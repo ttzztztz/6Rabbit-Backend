@@ -80,6 +80,23 @@ public class FileController {
         }
     }
 
+    @DeleteMapping("/avatar/{uid}")
+    @PreAuthorize("hasAuthority('Admin')")
+    public Map<String, Object> deleteAvatar(@PathVariable("uid") String uid) {
+        File file = new File(fileService.avatarPath(uid));
+        boolean result = true;
+
+        if (file.exists()) {
+            result = file.delete();
+        }
+
+        if (result) {
+            return GeneralResponse.generate(200);
+        } else {
+            return GeneralResponse.generate(500);
+        }
+    }
+
     @PostMapping("/upload")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> upload(Part attach, Authentication authentication) {
