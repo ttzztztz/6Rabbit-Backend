@@ -34,7 +34,7 @@ public interface PostDAO {
     Post firstPost(@Param("tid") String tid);
 
     @Select("SELECT pid FROM post WHERE tid = #{tid} AND isFirst = 1 LIMIT 1")
-    String firstPid(@Param("tid") String tid);
+    String firstpid(@Param("tid") String tid);
 
     @Update("UPDATE post SET message = #{message} WHERE pid = #{pid}")
     void update(@Param("pid") String pid, @Param("message") String message);
@@ -58,7 +58,7 @@ public interface PostDAO {
 
     @Select("SELECT * FROM post WHERE uid = #{uid} ORDER BY pid DESC LIMIT ${from},${to}")
     @Results({
-            @Result(property = "thread", column = "tid", one=@One(select = "com.rabbit.backend.DAO.ThreadDAO.findWithThreadListItem"))
+            @Result(property = "thread", column = "tid", one = @One(select = "com.rabbit.backend.DAO.ThreadDAO.findWithThreadListItem"))
     })
     List<UserPost> listByUser(@Param("uid") String uid, @Param("from") Integer from, @Param("to") Integer to);
 }

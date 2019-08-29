@@ -3,6 +3,7 @@ package com.rabbit.backend.Controller;
 import com.rabbit.backend.Bean.Thread.Post;
 import com.rabbit.backend.Bean.Thread.PostEditorForm;
 import com.rabbit.backend.Security.CheckAuthority;
+import com.rabbit.backend.Service.AttachService;
 import com.rabbit.backend.Service.CaptchaService;
 import com.rabbit.backend.Service.PostService;
 import com.rabbit.backend.Service.RuleService;
@@ -23,12 +24,15 @@ public class PostController {
     private PostService postService;
     private RuleService ruleService;
     private CaptchaService captchaService;
+    private AttachService attachService;
 
     @Autowired
-    public PostController(PostService postService, RuleService ruleService, CaptchaService captchaService) {
+    public PostController(PostService postService, RuleService ruleService, CaptchaService captchaService,
+                          AttachService attachService) {
         this.postService = postService;
         this.ruleService = ruleService;
         this.captchaService = captchaService;
+        this.attachService = attachService;
     }
 
     @DeleteMapping("/{pid}")
@@ -52,6 +56,7 @@ public class PostController {
     @GetMapping("/{pid}")
     public Map<String, Object> getInfo(@PathVariable("pid") String pid) {
         Post post = postService.find(pid);
+        post.setAttachList(attachService.listWithoutUser(pid));
         return GeneralResponse.generate(200, post);
     }
 
@@ -71,7 +76,12 @@ public class PostController {
         }
 
         String tid = postService.tid(pid);
+        String uid = (String) authentication.getPrincipal();
         postService.update(pid, form.getMessage());
+
+        if (form.getAttach() != null && form.getAttach().size() > 0) {
+            attachService.batchAttachThread(form.getAttach(), tid, pid, uid);
+        }
         return GeneralResponse.generate(200, tid);
     }
 }

@@ -9,6 +9,7 @@ import java.util.Date;
 public class Attach {
     private String aid;
     private String tid;
+    private String pid;
     private OtherUser user;
     private Integer fileSize;
     private Integer downloads;

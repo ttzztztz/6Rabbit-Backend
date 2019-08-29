@@ -58,7 +58,7 @@ public class AttachController {
     }
 
     @GetMapping("/info/{aid}")
-    public Map<String, Object> attachDownload(@PathVariable("aid") String aid, Authentication authentication) {
+    public Map<String, Object> attachInfo(@PathVariable("aid") String aid, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         AttachInfoResponse response = new AttachInfoResponse();
 

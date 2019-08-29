@@ -32,8 +32,17 @@ public interface AttachDAO {
     })
     List<Attach> findByTid(@Param("tid") String tid);
 
+    @Select("SELECT * FROM attach WHERE pid = #{pid}")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
+    })
+    List<Attach> findByPid(@Param("pid") String pid);
+
+    @Select("SELECT * FROM attach WHERE pid = #{pid}")
+    List<ThreadAttach> findByPidWithoutUser(@Param("pid") String pid);
+
     @Select("SELECT * FROM attach WHERE tid = #{tid}")
-    List<ThreadAttach> findByTidInThreadlist(@Param("tid") String tid);
+    List<ThreadAttach> findByTidWithoutUser(@Param("tid") String tid);
 
     @Select("SELECT * FROM attach WHERE uid = #{uid} AND tid IS NULL")
     @Results({
@@ -59,9 +68,9 @@ public interface AttachDAO {
     @Delete("DELETE FROM attach WHERE tid = #{tid}")
     void deleteByTid(@Param("tid") String tid);
 
-    @Update("UPDATE attach SET tid = #{tid}, creditsType = #{creditsType}, credits = #{credits} " +
+    @Update("UPDATE attach SET tid = #{tid}, creditsType = #{creditsType}, credits = #{credits}, pid = #{pid} " +
             "WHERE aid = #{aid}")
-    void updateAttachThread(@Param("aid") String aid, @Param("tid") String tid,
+    void updateAttachThread(@Param("aid") String aid, @Param("tid") String tid, @Param("pid") String pid,
                             @Param("creditsType") Integer creditsType, @Param("credits") Integer credits);
 
     @Insert("INSERT INTO attach(uid, fileSize, fileName, originalName) VALUES (#{uid}, #{fileSize}, #{fileName}, #{originalName})")

@@ -1,9 +1,11 @@
 package com.rabbit.backend.Bean.Thread;
 
+import com.rabbit.backend.Bean.Attach.ThreadAttachForm;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
 public class PostEditorForm {
@@ -20,6 +22,8 @@ public class PostEditorForm {
 
     @NotBlank(message = "Pass captcha first!")
     private String token;
+
+    private List<ThreadAttachForm> attach;
 
     public String getMessage() {
         return com.rabbit.backend.Utilities.SafeHtml.sanitize(this.message);

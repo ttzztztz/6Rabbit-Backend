@@ -50,8 +50,8 @@ public class AttachService {
         return attachDAO.findByTid(tid);
     }
 
-    public List<ThreadAttach> threadList(String tid) {
-        return attachDAO.findByTidInThreadlist(tid);
+    public List<ThreadAttach> listWithoutUser(String pid) {
+        return attachDAO.findByPidWithoutUser(pid);
     }
 
     @Transactional
@@ -75,8 +75,8 @@ public class AttachService {
         }
     }
 
-    public void updateAttachThread(String aid, String tid, Integer creditsType, Integer credits) {
-        attachDAO.updateAttachThread(aid, tid, creditsType, credits);
+    public void updateAttachThread(String aid, String tid, String pid, Integer creditsType, Integer credits) {
+        attachDAO.updateAttachThread(aid, tid, pid, creditsType, credits);
     }
 
     public Integer threadAttachCount(String tid) {
@@ -100,20 +100,20 @@ public class AttachService {
         return attachDAO.findUnused(uid);
     }
 
-    private void attachThread(String aid, String tid, Integer creditsType, Integer credits) {
-        attachDAO.updateAttachThread(aid, tid, creditsType, credits);
+    private void attachThread(String aid, String tid, String pid, Integer creditsType, Integer credits) {
+        attachDAO.updateAttachThread(aid, tid, pid, creditsType, credits);
     }
 
-    private Boolean attachAccess(String aid, String tid, String uid) {
+    private Boolean attachAccess(String aid, String pid, String uid) {
         Attach attach = attachDAO.find(aid);
-        return (attach.getTid() == null || attach.getTid().equals(tid)) && attach.getUser().getUid().equals(uid);
+        return (attach.getTid() == null || attach.getPid().equals(pid)) && attach.getUser().getUid().equals(uid);
     }
 
-    public void batchAttachThread(List<ThreadAttachForm> attachList, String tid, String uid) {
+    public void batchAttachThread(List<ThreadAttachForm> attachList, String tid, String pid, String uid) {
         if (attachList != null && attachList.size() != 0) {
             for (ThreadAttachForm attachForm : attachList) {
-                if (this.attachAccess(attachForm.getAid(), tid, uid)) {
-                    this.attachThread(attachForm.getAid(), tid,
+                if (this.attachAccess(attachForm.getAid(), pid, uid)) {
+                    this.attachThread(attachForm.getAid(), tid, pid,
                             attachForm.getCreditsType(), attachForm.getCredits());
                 }
             }

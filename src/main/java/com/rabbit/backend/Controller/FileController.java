@@ -121,6 +121,7 @@ public class FileController {
             attachUploadForm.setFileSize(((Long) file.length()).intValue());
             attachUploadForm.setOriginalName(attach.getSubmittedFileName());
             attachService.insert(attachUploadForm);
+
             return GeneralResponse.generate(200, attachUploadForm);
         } catch (IOException e) {
             return GeneralResponse.generate(500, e.getMessage());

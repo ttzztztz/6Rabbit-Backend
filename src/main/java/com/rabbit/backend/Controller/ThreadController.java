@@ -117,9 +117,12 @@ public class ThreadController {
         response.setThread(threadItem);
         Post firstPost = postService.firstPost(tid);
         response.setFirstPost(firstPost);
-        List<ThreadAttach> threadAttachList = attachService.threadList(tid);
+        List<ThreadAttach> threadAttachList = attachService.listWithoutUser(threadItem.getFirstpid());
         response.setAttachList(threadAttachList);
         List<Post> postList = postService.list(tid, page);
+        for (Post post : postList) {
+            post.setAttachList(attachService.listWithoutUser(post.getPid()));
+        }
         response.setPostList(postList);
 
         return GeneralResponse.generate(200, response);
@@ -144,9 +147,12 @@ public class ThreadController {
         if (forum.getAdminPost() && !CheckAuthority.hasAuthority(authentication, "Admin")) {
             return GeneralResponse.generate(403, "No permission to post in this forum.");
         }
-        String tid = threadService.insert(uid, form);
+        threadService.insert(uid, form);
 
-        attachService.batchAttachThread(form.getAttach(), tid, uid);
+        String tid = form.getTid();
+        String firstPid = form.getFirstpid();
+
+        attachService.batchAttachThread(form.getAttach(), tid, firstPid, uid);
         ruleService.applyRule(uid, "CreateThread");
 
         if (CheckAuthority.hasAuthority(authentication, "Admin")) {
@@ -185,6 +191,11 @@ public class ThreadController {
         }
 
         threadService.reply(tid, form, uid);
+        String pid = form.getPid();
+        if (form.getAttach() != null && form.getAttach().size() > 0) {
+            attachService.batchAttachThread(form.getAttach(), tid, pid, uid);
+        }
+
         if (!uid.equals(threadItem.getUser().getUid())) {
             notificationService.push(uid, threadItem.getUser().getUid(),
                     "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/info/" + tid + "/1");
@@ -209,8 +220,10 @@ public class ThreadController {
             return GeneralResponse.generate(403, "Permission denied.");
         }
 
-        attachService.batchAttachThread(form.getAttach(), tid, uid);
-        threadService.update(tid, form.getFid(), form.getSubject(), form.getMessage());
+        String firstpid = threadService.firstpid(tid);
+
+        attachService.batchAttachThread(form.getAttach(), tid, firstpid, uid);
+        threadService.update(tid, firstpid, form.getFid(), form.getSubject(), form.getMessage());
         return GeneralResponse.generate(200);
     }
 

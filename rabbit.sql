@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Aug 28, 2019 at 12:45 AM
+-- Generation Time: Aug 29, 2019 at 08:53 AM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.19
 
@@ -31,6 +31,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `attach` (
   `aid` int(10) UNSIGNED NOT NULL,
   `tid` int(10) UNSIGNED DEFAULT NULL,
+  `pid` int(10) UNSIGNED DEFAULT NULL,
   `uid` int(10) UNSIGNED NOT NULL,
   `fileSize` int(10) UNSIGNED NOT NULL,
   `downloads` int(10) UNSIGNED NOT NULL DEFAULT '0',
@@ -170,7 +171,7 @@ CREATE TABLE `user` (
   `golds` int(11) NOT NULL DEFAULT '0',
   `rmbs` int(11) NOT NULL DEFAULT '0',
   `password` char(64) NOT NULL,
-  `salt` char(64) NOT NULL,
+  `salt` char(18) NOT NULL,
   `gender` int(1) NOT NULL DEFAULT '2',
   `email` char(64) NOT NULL,
   `mobile` char(32) NOT NULL DEFAULT '',
@@ -205,8 +206,8 @@ CREATE TABLE `user_group` (
 --
 ALTER TABLE `attach`
   ADD PRIMARY KEY (`aid`),
-  ADD KEY `tid` (`tid`),
-  ADD KEY `uid` (`uid`);
+  ADD KEY `uid` (`uid`),
+  ADD KEY `pid` (`pid`);
 
 --
 -- Indexes for table `attach_pay_log`
@@ -255,7 +256,7 @@ ALTER TABLE `post`
   ADD KEY `tid` (`tid`),
   ADD KEY `uid` (`uid`),
   ADD KEY `quotepid` (`quotepid`);
-ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`) WITH PARSER ngram;
+ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`);
 
 --
 -- Indexes for table `thread`
@@ -264,7 +265,7 @@ ALTER TABLE `thread`
   ADD PRIMARY KEY (`tid`),
   ADD KEY `fid` (`fid`),
   ADD KEY `uid` (`uid`);
-ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`) WITH PARSER ngram;
+ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`);
 
 --
 -- Indexes for table `user`

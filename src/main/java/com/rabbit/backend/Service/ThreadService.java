@@ -76,25 +76,27 @@ public class ThreadService {
     }
 
     @Transactional
-    public void update(String tid, String newFid, String newSubject, String newContent) {
-        String firstPid = postDAO.firstPid(tid);
+    public void update(String tid, String firstpid, String newFid, String newSubject, String newContent) {
         threadDAO.update(tid, newSubject, newFid);
-        postDAO.update(firstPid, newContent);
+        postDAO.update(firstpid, newContent);
     }
 
     @Transactional
-    public String insert(String uid, ThreadEditorForm form) {
+    public void insert(String uid, ThreadEditorForm form) {
         form.setUid(uid);
         threadDAO.insert(form);
         String tid = form.getTid();
         postDAO.insertWithThreadEditorForm(form);
         threadDAO.updateFirstPid(tid, form.getFirstpid(), uid);
         staticDAO.increment("forum", "threads", "fid", form.getFid(), 1);
-        return tid;
     }
 
     public Forum forum(String fid) {
         return forumDAO.find(fid);
+    }
+
+    public String firstpid(String tid) {
+        return postDAO.firstpid(tid);
     }
 
     public List<ThreadListItem> list(String fid, Integer page) {
