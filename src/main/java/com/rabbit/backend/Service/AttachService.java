@@ -67,6 +67,18 @@ public class AttachService {
     }
 
     @Transactional
+    public Boolean deleteByPid(String pid) {
+        List<Attach> attachList = attachDAO.findByPid(pid);
+        int failedCount = 0;
+        for (Attach attach : attachList) {
+            if (!deleteByAttach(attach)) {
+                failedCount++;
+            }
+        }
+        return failedCount == 0;
+    }
+
+    @Transactional
     @Scheduled(cron = "0 0 0 * * ?")
     public void deleteAllUnused() {
         List<Attach> attachList = attachDAO.findAllUnused();

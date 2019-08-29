@@ -14,13 +14,17 @@ import java.util.List;
 public interface PostDAO {
     @Select("SELECT * FROM post WHERE pid = #{pid}")
     @Results({
+            @Result(id = true, property = "pid", column = "pid"),
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "attachList", column = "pid", many = @Many(select = "com.rabbit.backend.DAO.AttachDAO.findByPidWithoutUser"))
     })
     Post find(@Param("pid") String pid);
 
     @Select("SELECT * FROM post WHERE tid = #{tid} AND isFirst = 0 ORDER BY pid LIMIT ${from},${to}")
     @Results({
+            @Result(id = true, property = "pid", column = "pid"),
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+            @Result(property = "attachList", column = "pid", many = @Many(select = "com.rabbit.backend.DAO.AttachDAO.findByPidWithoutUser"))
     })
     List<Post> list(@Param("tid") String tid, @Param("from") Integer from, @Param("to") Integer to);
 

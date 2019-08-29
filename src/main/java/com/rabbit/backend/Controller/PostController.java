@@ -50,13 +50,14 @@ public class PostController {
 
         postService.delete(pid);
         ruleService.applyRule(uid, "DeleteThread");
+        attachService.deleteByPid(pid);
         return GeneralResponse.generate(200);
     }
 
     @GetMapping("/{pid}")
     public Map<String, Object> getInfo(@PathVariable("pid") String pid) {
         Post post = postService.find(pid);
-        post.setAttachList(attachService.listWithoutUser(pid));
+
         return GeneralResponse.generate(200, post);
     }
 

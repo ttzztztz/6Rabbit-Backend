@@ -120,9 +120,6 @@ public class ThreadController {
         List<ThreadAttach> threadAttachList = attachService.listWithoutUser(threadItem.getFirstpid());
         response.setAttachList(threadAttachList);
         List<Post> postList = postService.list(tid, page);
-        for (Post post : postList) {
-            post.setAttachList(attachService.listWithoutUser(post.getPid()));
-        }
         response.setPostList(postList);
 
         return GeneralResponse.generate(200, response);
