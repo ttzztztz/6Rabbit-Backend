@@ -195,7 +195,7 @@ public class ThreadController {
 
         if (!uid.equals(threadItem.getUser().getUid())) {
             notificationService.push(uid, threadItem.getUser().getUid(),
-                    "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/info/" + tid + "/1");
+                    "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/" + tid + "/1");
         }
         ruleService.applyRule(uid, "CreatePost");
         return GeneralResponse.generate(200);
