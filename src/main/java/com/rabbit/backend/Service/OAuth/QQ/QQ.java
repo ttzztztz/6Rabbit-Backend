@@ -66,10 +66,11 @@ public class QQ extends OAuthWebsite {
         MultiValueMap params = new LinkedMultiValueMap();
         HttpEntity<MultiValueMap> requestEntity = new HttpEntity<>(params, new HttpHeaders());
 
-        String accessTokenResponse = restTemplate.postForObject(TOKEN_URL + "?" +
-                "client_id=" + APP_ID +
+        String accessTokenResponse = restTemplate.postForObject(TOKEN_URL + "?grant_type=authorization_code" +
+                "&client_id=" + APP_ID +
                 "&client_secret=" + APP_SECRET +
-                "&code=" + code, requestEntity, String.class);
+                "&code=" + code +
+                "&redirect_uri=" + APP_REDIRECT, requestEntity, String.class);
 
         if (accessTokenResponse == null || !accessTokenResponse.contains("access_token")) {
             throw new NotFoundException(400, "Invalid code.");
@@ -109,7 +110,7 @@ public class QQ extends OAuthWebsite {
             UserInfoResponse userInfoResponse = restTemplate.getForObject(USER_INFO_URL + "?" +
                     "access_token=" + access_token +
                     "&openid=" + openid +
-                    "&&oauth_consumer_key=" + APP_ID, UserInfoResponse.class);
+                    "&oauth_consumer_key=" + APP_ID, UserInfoResponse.class);
 
             if (userInfoResponse == null) {
                 return null;

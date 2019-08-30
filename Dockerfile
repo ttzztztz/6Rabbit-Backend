@@ -24,4 +24,6 @@ RUN mkdir -p /var/rabbit/files/avatar
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /var/rabbit/lib
 COPY --from=build ${DEPENDENCY}/META-INF /var/rabbit/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /var/rabbit
+
+WORKDIR /var/rabbit
 ENTRYPOINT ["java","-cp","/var/rabbit:/var/rabbit/lib/*","com.rabbit.backend.BackendApplication"]
