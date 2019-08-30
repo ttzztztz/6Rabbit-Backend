@@ -28,7 +28,7 @@ public class FileService {
 
         Random random = new Random();
         int randomNumber = random.nextInt(10000);
-        String path = basePath + "attach/" + dateFormat.format(date);
+        String path = dateFormat.format(date);
         String fileName = uid + "_" + System.currentTimeMillis() + "_" + randomNumber + ".file";
         File file = new File(path);
         if (!file.exists()) {
@@ -37,6 +37,10 @@ public class FileService {
             }
         }
         return path + "/" + fileName;
+    }
+
+    public String getRealPath(String fileName) {
+        return basePath + "attach/" + fileName;
     }
 
     public void downloadFileByStream(InputStream fstream, OutputStream ostream,
