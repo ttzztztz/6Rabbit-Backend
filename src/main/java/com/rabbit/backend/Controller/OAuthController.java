@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -54,7 +57,7 @@ public class OAuthController {
     @GetMapping("/{platform}")
     public void getLoginURL(@PathVariable("platform") String platform, HttpServletResponse response) {
         response.setStatus(301);
-        response.setHeader("Refresh", "0;URL=" + oAuthService.getURL(platform));
+        response.setHeader("Location", oAuthService.getURL(platform));
     }
 
     @GetMapping("/login/{platform}/{code}")
