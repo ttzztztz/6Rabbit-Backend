@@ -7,8 +7,6 @@ import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -16,6 +14,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -63,14 +62,11 @@ public class QQ extends OAuthWebsite {
 
     public String getAccessToken(String code) {
         RestTemplate restTemplate = new RestTemplate();
-        MultiValueMap params = new LinkedMultiValueMap();
-        HttpEntity<MultiValueMap> requestEntity = new HttpEntity<>(params, new HttpHeaders());
-
-        String accessTokenResponse = restTemplate.postForObject(TOKEN_URL + "?grant_type=authorization_code" +
+        String accessTokenResponse = restTemplate.getForObject(TOKEN_URL + "?grant_type=authorization_code" +
                 "&client_id=" + APP_ID +
                 "&client_secret=" + APP_SECRET +
                 "&code=" + code +
-                "&redirect_uri=" + APP_REDIRECT, requestEntity, String.class);
+                "&redirect_uri=" + APP_REDIRECT, String.class);
 
         if (accessTokenResponse == null || !accessTokenResponse.contains("access_token")) {
             throw new NotFoundException(400, "Invalid code.");
@@ -89,10 +85,7 @@ public class QQ extends OAuthWebsite {
             return null;
         }
 
-        String structuredResponse = openIdResponse
-                .substring(openIdResponse.indexOf("(") + 1)
-                .substring(0, openIdResponse.indexOf(")"));
-
+        String structuredResponse = openIdResponse.substring(openIdResponse.indexOf("(") + 1, openIdResponse.indexOf(")"));
         JSONParser jsonParser = new JSONParser(structuredResponse);
         return (String) jsonParser.parseObject().get("openid");
     }
@@ -107,21 +100,26 @@ public class QQ extends OAuthWebsite {
             String openid = getOpenId(access_token);
 
             RestTemplate restTemplate = new RestTemplate();
-            UserInfoResponse userInfoResponse = restTemplate.getForObject(USER_INFO_URL + "?" +
+            String userInfoResponseRaw = restTemplate.getForObject(USER_INFO_URL + "?" +
                     "access_token=" + access_token +
                     "&openid=" + openid +
-                    "&oauth_consumer_key=" + APP_ID, UserInfoResponse.class);
+                    "&oauth_consumer_key=" + APP_ID, String.class);
 
+            if (userInfoResponseRaw == null) {
+                return null;
+            }
+            JSONParser jsonParser = new JSONParser(userInfoResponseRaw);
+            LinkedHashMap<String, Object> userInfoResponse = jsonParser.parseObject();
             if (userInfoResponse == null) {
                 return null;
             }
 
-            result.setAvatarURL(userInfoResponse.getFigureurl_qq_1() != null
-                    ? userInfoResponse.getFigureurl_qq_1()
-                    : userInfoResponse.getFigureurl_qq_2());
+            result.setAvatarURL(userInfoResponse.get("figureurl_qq_1") != null
+                    ? (String) userInfoResponse.get("figureurl_qq_1")
+                    : (String) userInfoResponse.get("figureurl_qq_2"));
 
             result.setOpenid(openid);
-            result.setUsername(userInfoResponse.getNickname());
+            result.setUsername((String) userInfoResponse.get("nickname"));
         } catch (ParseException ex) {
             return null;
         }
