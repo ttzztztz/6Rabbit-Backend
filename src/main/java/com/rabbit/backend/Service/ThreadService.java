@@ -91,6 +91,14 @@ public class ThreadService {
         staticDAO.increment("forum", "threads", "fid", form.getFid(), 1);
     }
 
+    public void incrementForumStatic(String fid, Integer value) {
+        staticDAO.increment("forum", "threads", "fid", fid, value);
+    }
+
+    public String fid(String tid) {
+        return threadDAO.fid(tid);
+    }
+
     public Forum forum(String fid) {
         return forumDAO.find(fid);
     }

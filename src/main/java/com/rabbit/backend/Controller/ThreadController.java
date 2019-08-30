@@ -141,6 +141,10 @@ public class ThreadController {
             return GeneralResponse.generate(400, "Post too frequent, try again after 30 seconds.");
         }
         Forum forum = forumService.find(form.getFid());
+        if (forum == null) {
+            return GeneralResponse.generate(403, "Forum doesn't exist.");
+        }
+
         if (forum.getAdminPost() && !CheckAuthority.hasAuthority(authentication, "Admin")) {
             return GeneralResponse.generate(403, "No permission to post in this forum.");
         }
@@ -212,12 +216,21 @@ public class ThreadController {
         captchaService.verifyToken(form.getToken());
 
         String uid = (String) authentication.getPrincipal();
-        if (!threadService.uid(tid).equals(uid)
-                && !CheckAuthority.hasAuthority(authentication, "Admin")) {
+        if (!threadService.uid(tid).equals(uid) && !CheckAuthority.hasAuthority(authentication, "Admin")) {
             return GeneralResponse.generate(403, "Permission denied.");
         }
 
         String firstpid = threadService.firstpid(tid);
+        Forum forum = forumService.find(form.getFid());
+        if (forum == null) {
+            return GeneralResponse.generate(403, "Forum doesn't exist.");
+        }
+
+        String oldFid = threadService.fid(tid);
+        if (!oldFid.equals(form.getFid())) {
+            threadService.incrementForumStatic(oldFid, -1);
+            threadService.incrementForumStatic(form.getFid(), 1);
+        }
 
         attachService.batchAttachThread(form.getAttach(), tid, firstpid, uid);
         threadService.update(tid, firstpid, form.getFid(), form.getSubject(), form.getMessage());

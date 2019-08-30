@@ -148,7 +148,7 @@ public class FileController {
             return;
         }
 
-        File file = new File(fileService.getRealPath(attach.getFileName()));
+        File file = new File(attachService.getRealPath(attach.getFileName()));
         if (!file.exists()) {
             response.setStatus(404);
         } else {
@@ -183,7 +183,7 @@ public class FileController {
             response.setStatus(400);
             return;
         }
-        File file = new File(attach.getFileName());
+        File file = new File(attachService.getRealPath(attach.getFileName()));
         if (!file.exists()) {
             response.setStatus(404);
         } else {

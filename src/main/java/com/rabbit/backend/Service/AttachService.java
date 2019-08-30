@@ -6,6 +6,7 @@ import com.rabbit.backend.Bean.Attach.ThreadAttach;
 import com.rabbit.backend.Bean.Attach.ThreadAttachForm;
 import com.rabbit.backend.DAO.AttachDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -16,11 +17,18 @@ import java.util.List;
 
 @Service
 public class AttachService {
+    @Value("${rabbit.path}")
+    private String basePath;
+
     private AttachDAO attachDAO;
 
     @Autowired
     public AttachService(AttachDAO attachDAO) {
         this.attachDAO = attachDAO;
+    }
+
+    public String getRealPath(String fileName) {
+        return basePath + "attach/" + fileName;
     }
 
     private Boolean deleteByFile(File file, String aid) {
@@ -36,13 +44,13 @@ public class AttachService {
     @Transactional
     public Boolean deleteByAid(String aid) {
         Attach attach = attachDAO.find(aid);
-        File file = new File(attach.getFileName());
+        File file = new File(getRealPath(attach.getFileName()));
         return deleteByFile(file, aid);
     }
 
     @Transactional
     public Boolean deleteByAttach(Attach attach) {
-        File file = new File(attach.getFileName());
+        File file = new File(getRealPath(attach.getFileName()));
         return deleteByFile(file, attach.getAid());
     }
 

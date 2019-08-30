@@ -39,10 +39,6 @@ public class FileService {
         return path + "/" + fileName;
     }
 
-    public String getRealPath(String fileName) {
-        return basePath + "attach/" + fileName;
-    }
-
     public void downloadFileByStream(InputStream fstream, OutputStream ostream,
                                      Long contentLength, HttpServletResponse response) throws IOException {
         response.setContentLengthLong(contentLength);
