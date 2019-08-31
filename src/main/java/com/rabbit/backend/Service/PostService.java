@@ -1,6 +1,7 @@
 package com.rabbit.backend.Service;
 
 import com.rabbit.backend.Bean.Thread.Post;
+import com.rabbit.backend.Bean.Thread.QuotePost;
 import com.rabbit.backend.Bean.Thread.UserPost;
 import com.rabbit.backend.DAO.PostDAO;
 import com.rabbit.backend.DAO.StaticDAO;
@@ -65,7 +66,11 @@ public class PostService {
         return postDAO.listByUser(uid, (page - 1) * PAGESIZE, page * PAGESIZE);
     }
 
-    public String tid(String pid){
+    public String tid(String pid) {
         return postDAO.tid(pid);
+    }
+
+    public QuotePost findQuotePost(String quotepid) {
+        return postDAO.findQuotePost(quotepid);
     }
 }

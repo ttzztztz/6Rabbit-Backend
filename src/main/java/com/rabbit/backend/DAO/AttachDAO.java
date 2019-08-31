@@ -77,6 +77,10 @@ public interface AttachDAO {
     @Options(keyColumn = "aid", keyProperty = "aid", useGeneratedKeys = true)
     void insert(AttachUploadForm attachUploadForm);
 
+    @Insert("UPDATE attach SET fileSize = #{fileSize}, fileName = #{fileName}, originalName = #{originalName} " +
+            "WHERE aid = #{aid}")
+    void updateAttach(AttachUploadForm attachUploadForm);
+
     @Delete("DELETE FROM attach_pay_log WHERE aid = #{aid}")
     void deleteCASCADE(@Param("aid") String aid);
 

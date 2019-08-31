@@ -116,6 +116,10 @@ public class AttachService {
         return attachUploadForm.getAid();
     }
 
+    public void updateAttach(AttachUploadForm attachUploadForm) {
+        attachDAO.updateAttach(attachUploadForm);
+    }
+
     public List<Attach> findUnused(String uid) {
         return attachDAO.findUnused(uid);
     }

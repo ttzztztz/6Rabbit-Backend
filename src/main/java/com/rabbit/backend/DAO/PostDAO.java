@@ -1,9 +1,6 @@
 package com.rabbit.backend.DAO;
 
-import com.rabbit.backend.Bean.Thread.Post;
-import com.rabbit.backend.Bean.Thread.PostEditorForm;
-import com.rabbit.backend.Bean.Thread.ThreadEditorForm;
-import com.rabbit.backend.Bean.Thread.UserPost;
+import com.rabbit.backend.Bean.Thread.*;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -16,15 +13,21 @@ public interface PostDAO {
     @Results({
             @Result(id = true, property = "pid", column = "pid"),
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
-            @Result(property = "attachList", column = "pid", many = @Many(select = "com.rabbit.backend.DAO.AttachDAO.findByPidWithoutUser"))
+            @Result(property = "attachList", column = "pid", many = @Many(select = "com.rabbit.backend.DAO.AttachDAO.findByPidWithoutUser")),
     })
     Post find(@Param("pid") String pid);
+
+    @Select("SELECT pid, uid, message, createDate FROM post WHERE pid = #{pid}")
+    @Results({
+            @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
+    })
+    QuotePost findQuotePost(@Param("pid") String pid);
 
     @Select("SELECT * FROM post WHERE tid = #{tid} AND isFirst = 0 ORDER BY pid LIMIT ${from},${to}")
     @Results({
             @Result(id = true, property = "pid", column = "pid"),
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
-            @Result(property = "attachList", column = "pid", many = @Many(select = "com.rabbit.backend.DAO.AttachDAO.findByPidWithoutUser"))
+            @Result(property = "attachList", column = "pid", many = @Many(select = "com.rabbit.backend.DAO.AttachDAO.findByPidWithoutUser")),
     })
     List<Post> list(@Param("tid") String tid, @Param("from") Integer from, @Param("to") Integer to);
 

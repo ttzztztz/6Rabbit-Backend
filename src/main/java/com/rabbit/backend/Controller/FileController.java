@@ -2,6 +2,7 @@ package com.rabbit.backend.Controller;
 
 import com.rabbit.backend.Bean.Attach.Attach;
 import com.rabbit.backend.Bean.Attach.AttachUploadForm;
+import com.rabbit.backend.Security.CheckAuthority;
 import com.rabbit.backend.Security.JWTUtils;
 import com.rabbit.backend.Service.AttachService;
 import com.rabbit.backend.Service.FileService;
@@ -97,6 +98,45 @@ public class FileController {
         }
     }
 
+    @PostMapping("/update/{aid}")
+    @PreAuthorize("hasAuthority('User')")
+    public Map<String, Object> update(Part attach, @PathVariable("aid") String aid, Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+
+        String attachUid = attachService.uid(aid);
+        if (!attachUid.equals(uid) && !CheckAuthority.hasAuthority(authentication, "Admin")) {
+            return GeneralResponse.generate(403, "Permission denied.");
+        }
+
+        try {
+            String path = fileService.attachPath(uid);
+            File file = new File(path);
+            try (InputStream avatarInputStream = attach.getInputStream();
+                 OutputStream fileOutputStream = new FileOutputStream(file)) {
+                IOUtils.copy(avatarInputStream, fileOutputStream);
+                attach.delete();
+            }
+
+            Attach oldAttach = attachService.find(aid);
+            String oldPath = attachService.getRealPath(oldAttach.getOriginalName());
+            File oldFile = new File(oldPath);
+            if (oldFile.exists()) {
+                oldFile.delete();
+            }
+
+            AttachUploadForm attachUploadForm = new AttachUploadForm();
+            attachUploadForm.setAid(aid);
+            attachUploadForm.setFileName(fileService.getSQLPath(path));
+            attachUploadForm.setFileSize(((Long) file.length()).intValue());
+            attachUploadForm.setOriginalName(attach.getSubmittedFileName());
+            attachService.updateAttach(attachUploadForm);
+
+            return GeneralResponse.generate(200, attachUploadForm);
+        } catch (IOException e) {
+            return GeneralResponse.generate(500, e.getMessage());
+        }
+    }
+
     @PostMapping("/upload")
     @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> upload(Part attach, Authentication authentication) {
@@ -117,7 +157,7 @@ public class FileController {
 
             AttachUploadForm attachUploadForm = new AttachUploadForm();
             attachUploadForm.setUid(uid);
-            attachUploadForm.setFileName(path);
+            attachUploadForm.setFileName(fileService.getSQLPath(path));
             attachUploadForm.setFileSize(((Long) file.length()).intValue());
             attachUploadForm.setOriginalName(attach.getSubmittedFileName());
             attachService.insert(attachUploadForm);

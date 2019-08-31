@@ -22,13 +22,18 @@ public class FileService {
         return basePath + "avatar/" + uid + ".avatar";
     }
 
+    public String getSQLPath(String path) {
+        final String prefix = basePath + "attach/";
+        return path.substring(prefix.length());
+    }
+
     public String attachPath(String uid) throws IOException {
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
         Random random = new Random();
         int randomNumber = random.nextInt(10000);
-        String path = dateFormat.format(date);
+        String path = basePath + "attach/" + dateFormat.format(date);
         String fileName = uid + "_" + System.currentTimeMillis() + "_" + randomNumber + ".file";
         File file = new File(path);
         if (!file.exists()) {

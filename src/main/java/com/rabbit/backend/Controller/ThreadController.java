@@ -120,6 +120,12 @@ public class ThreadController {
         List<ThreadAttach> threadAttachList = attachService.listWithoutUser(threadItem.getFirstpid());
         response.setAttachList(threadAttachList);
         List<Post> postList = postService.list(tid, page);
+        for (Post item : postList) {
+            String quotepid = item.getQuotepid();
+            if (!quotepid.equals("0")) {
+                item.setQuote(postService.findQuotePost(quotepid));
+            }
+        }
         response.setPostList(postList);
 
         return GeneralResponse.generate(200, response);
@@ -181,7 +187,7 @@ public class ThreadController {
         String quotePid = form.getQuotepid();
         if (!quotePid.equals("0")) {
             Post quotePost = postService.find(quotePid);
-            if (quotePost == null || !quotePost.getTid().equals(form.getTid())) {
+            if (quotePost == null || !quotePost.getTid().equals(tid)) {
                 return GeneralResponse.generate(404, "Invalid quote.");
             }
         }

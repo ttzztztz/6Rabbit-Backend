@@ -13,6 +13,7 @@ public class Post {
     private String pid;
     private OtherUser user;
     private String tid;
+    private String quotepid;
     private QuotePost quote;
     private Boolean isFirst;
     private String message;
