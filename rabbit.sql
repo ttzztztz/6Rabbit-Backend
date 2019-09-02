@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Aug 29, 2019 at 08:53 AM
+-- Generation Time: Sep 02, 2019 at 01:09 AM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.19
 
@@ -66,7 +66,7 @@ CREATE TABLE `attach_pay_log` (
 CREATE TABLE `credits_log` (
   `cid` int(11) UNSIGNED NOT NULL,
   `uid` int(11) UNSIGNED NOT NULL,
-  `status` tinyint(4) UNSIGNED NOT NULL,
+  `status` tinyint(4) NOT NULL,
   `type` char(12) NOT NULL,
   `description` text NOT NULL,
   `creditsType` tinyint(4) NOT NULL,
@@ -154,7 +154,7 @@ CREATE TABLE `thread` (
   `lastpid` int(11) UNSIGNED NOT NULL DEFAULT '0',
   `createDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `replyDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ;
 
 -- --------------------------------------------------------
 
@@ -215,7 +215,6 @@ ALTER TABLE `attach`
 ALTER TABLE `attach_pay_log`
   ADD PRIMARY KEY (`did`),
   ADD KEY `uid` (`uid`),
-  ADD KEY `aid` (`aid`) USING BTREE,
   ADD KEY `aid_2` (`aid`,`uid`) USING BTREE;
 
 --
@@ -256,7 +255,7 @@ ALTER TABLE `post`
   ADD KEY `tid` (`tid`),
   ADD KEY `uid` (`uid`),
   ADD KEY `quotepid` (`quotepid`);
-ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`) WITH PARSER ngram;
+ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`);
 
 --
 -- Indexes for table `thread`
@@ -265,7 +264,7 @@ ALTER TABLE `thread`
   ADD PRIMARY KEY (`tid`),
   ADD KEY `fid` (`fid`),
   ADD KEY `uid` (`uid`);
-ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`) WITH PARSER ngram;
+ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`);
 
 --
 -- Indexes for table `user`
