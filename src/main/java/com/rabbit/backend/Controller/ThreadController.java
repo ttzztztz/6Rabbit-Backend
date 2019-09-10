@@ -184,17 +184,22 @@ public class ThreadController {
             return GeneralResponse.generate(400, "Thread already closed.");
         }
 
+        String key = "thread:reply:" + uid;
+        if (!frequentService.check(key, 5)) {
+            return GeneralResponse.generate(400, "Reply too frequent, try again after 5 seconds.");
+        }
+
         String quotePid = form.getQuotepid();
         if (!quotePid.equals("0")) {
             Post quotePost = postService.find(quotePid);
             if (quotePost == null || !quotePost.getTid().equals(tid)) {
                 return GeneralResponse.generate(404, "Invalid quote.");
             }
-        }
 
-        String key = "thread:reply:" + uid;
-        if (!frequentService.check(key, 5)) {
-            return GeneralResponse.generate(400, "Reply too frequent, try again after 5 seconds.");
+            if (!uid.equals(quotePost.getUser().getUid())) {
+                notificationService.push(uid, quotePost.getUser().getUid(),
+                        "有人引用了您在帖子《" + threadItem.getSubject() + "》中的回复！", "/thread/" + tid + "/1");
+            }
         }
 
         threadService.reply(tid, form, uid);
@@ -207,6 +212,7 @@ public class ThreadController {
             notificationService.push(uid, threadItem.getUser().getUid(),
                     "有人回复了您的帖子《" + threadItem.getSubject() + "》！", "/thread/" + tid + "/1");
         }
+
         ruleService.applyRule(uid, "CreatePost");
         return GeneralResponse.generate(200);
     }
