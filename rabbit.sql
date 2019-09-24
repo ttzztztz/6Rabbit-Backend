@@ -255,7 +255,7 @@ ALTER TABLE `post`
   ADD KEY `tid` (`tid`),
   ADD KEY `uid` (`uid`),
   ADD KEY `quotepid` (`quotepid`);
-ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`);
+ALTER TABLE `post` ADD FULLTEXT KEY `message` (`message`) WITH PARSER ngram;
 
 --
 -- Indexes for table `thread`
@@ -264,7 +264,7 @@ ALTER TABLE `thread`
   ADD PRIMARY KEY (`tid`),
   ADD KEY `fid` (`fid`),
   ADD KEY `uid` (`uid`);
-ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`);
+ALTER TABLE `thread` ADD FULLTEXT KEY `subject` (`subject`) WITH PARSER ngram;
 
 --
 -- Indexes for table `user`
