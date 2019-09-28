@@ -43,6 +43,9 @@ public class DepositService {
             if (creditsLog.getStatus() != 1 && status == 1) {
                 userDAO.increaseCredits(creditsLog.getUser().getUid(),
                         creditsUtil.getCreditsNameByType(creditsLog.getCreditsType()), creditsLog.getCredits());
+
+                userDAO.increaseCredits(creditsLog.getUser().getUid(),
+                        creditsUtil.getCreditsNameByType(2), 5);
             }
             depositDAO.setDeposit(cid, status);
         }

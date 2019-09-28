@@ -1,5 +1,5 @@
 # Step 1
-FROM openjdk:12-alpine AS build
+FROM openjdk:13-alpine AS build
 
 RUN mkdir -p /var/rabbit
 WORKDIR /var/rabbit
@@ -13,7 +13,7 @@ RUN chmod 777 ./mvnw && ./mvnw install -DskipTests
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 # Step 2
-FROM openjdk:12-alpine
+FROM openjdk:13-alpine
 
 ARG DEPENDENCY=/var/rabbit/target/dependency
 
