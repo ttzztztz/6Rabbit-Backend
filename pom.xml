@@ -22,19 +22,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.1.8.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <version>2.1.8.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
-            <version>2.1.8.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -51,7 +48,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
-            <version>2.1.8.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -63,14 +59,12 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.17</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <version>2.1.8.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -94,7 +88,6 @@
                     <artifactId>lettuce-core</artifactId>
                 </exclusion>
             </exclusions>
-            <version>2.1.8.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -105,7 +98,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
-            <version>2.1.8.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -121,7 +113,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.1.8.RELEASE</version>
             </plugin>
         </plugins>
     </build>
