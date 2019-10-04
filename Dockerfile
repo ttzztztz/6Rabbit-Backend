@@ -26,5 +26,4 @@ COPY --from=build ${DEPENDENCY}/META-INF /var/rabbit/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /var/rabbit
 
 WORKDIR /var/rabbit
-# ENTRYPOINT ["java","-cp","-server","/var/rabbit:/var/rabbit/lib/*","com.rabbit.backend.BackendApplication"]
-ENTRYPOINT ["java","-Xlog:gc*","-verbose:gc","-server","-Xloggc:./gclogs","-cp","/var/rabbit:/var/rabbit/lib/*","com.rabbit.backend.BackendApplication"]
+ENTRYPOINT ["java","-server","-cp","/var/rabbit:/var/rabbit/lib/*","com.rabbit.backend.BackendApplication"]
