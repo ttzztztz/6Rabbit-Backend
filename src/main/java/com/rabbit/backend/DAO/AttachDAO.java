@@ -77,7 +77,7 @@ public interface AttachDAO {
     @Options(keyColumn = "aid", keyProperty = "aid", useGeneratedKeys = true)
     void insert(AttachUploadForm attachUploadForm);
 
-    @Insert("UPDATE attach SET fileSize = #{fileSize}, fileName = #{fileName}, originalName = #{originalName} " +
+    @Update("UPDATE attach SET fileSize = #{fileSize}, fileName = #{fileName}, originalName = #{originalName} " +
             "WHERE aid = #{aid}")
     void updateAttach(AttachUploadForm attachUploadForm);
 

@@ -25,6 +25,7 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 
 @RestController
@@ -129,6 +130,7 @@ public class FileController {
             attachUploadForm.setFileName(fileService.getSQLPath(path));
             attachUploadForm.setFileSize(((Long) file.length()).intValue());
             attachUploadForm.setOriginalName(attach.getSubmittedFileName());
+            attachUploadForm.setCreateDate(new Date());
             attachService.updateAttach(attachUploadForm);
 
             return GeneralResponse.generate(200, attachUploadForm);
@@ -160,6 +162,7 @@ public class FileController {
             attachUploadForm.setFileName(fileService.getSQLPath(path));
             attachUploadForm.setFileSize(((Long) file.length()).intValue());
             attachUploadForm.setOriginalName(attach.getSubmittedFileName());
+            attachUploadForm.setCreateDate(new Date());
             attachService.insert(attachUploadForm);
 
             return GeneralResponse.generate(200, attachUploadForm);
