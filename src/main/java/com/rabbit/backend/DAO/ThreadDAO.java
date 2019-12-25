@@ -38,14 +38,14 @@ public interface ThreadDAO {
     })
     List<ThreadListItem> listWithTop(@Param("fid") String fid, @Param("from") Integer from, @Param("to") Integer to);
 
-    @Select("SELECT * FROM thread WHERE isTop = 0 ORDER BY lastpid DESC LIMIT ${from},${to}")
+    @Select("SELECT * FROM thread WHERE isTop = 0 AND fid IN (1, 2, 3) ORDER BY lastpid DESC LIMIT ${from},${to}")
     @Results({
             @Result(property = "user", column = "uid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid")),
             @Result(property = "lastUser", column = "lastuid", one = @One(select = "com.rabbit.backend.DAO.UserDAO.findOtherByUid"))
     })
     List<ThreadListItem> listNewWithoutTop(@Param("from") Integer from, @Param("to") Integer to);
 
-    @Select("SELECT COUNT(1) FROM thread")
+    @Select("SELECT COUNT(1) FROM thread WHERE isTop = 0 AND fid IN (1, 2, 3)")
     Integer listNewCount();
 
     @Select("SELECT * FROM thread WHERE fid = #{fid} AND isTop = 0 ORDER BY lastpid DESC LIMIT ${from},${to}")
