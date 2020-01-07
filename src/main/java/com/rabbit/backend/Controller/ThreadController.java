@@ -132,7 +132,7 @@ public class ThreadController {
     }
 
     @PostMapping("/create")
-    @PreAuthorize("hasAuthority('canPost')")
+    @PreAuthorize("hasAuthority('isAdmin')")
     public Map<String, Object> create(@Valid @RequestBody ThreadEditorForm form, Errors errors,
                                       Authentication authentication) {
         if (errors.hasErrors()) {
@@ -169,7 +169,7 @@ public class ThreadController {
     }
 
     @PostMapping("/reply/{tid}")
-    @PreAuthorize("hasAuthority('canPost')")
+    @PreAuthorize("hasAuthority('isAdmin')")
     public Map<String, Object> create(@PathVariable("tid") String tid, @Valid @RequestBody PostEditorForm form,
                                       Errors errors, Authentication authentication) {
         if (errors.hasErrors()) {
