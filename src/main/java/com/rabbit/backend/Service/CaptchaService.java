@@ -34,7 +34,7 @@ public class CaptchaService {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, String>> formEntity = new HttpEntity<>(requestMap, headers);
 
-        VerifyResponse verifyResponse = restTemplate.postForObject("https://api.vaptcha.com/v2/validate",
+        VerifyResponse verifyResponse = restTemplate.postForObject("http://0.vaptcha.com/verify",
                 formEntity, VerifyResponse.class);
 
         if (verifyResponse == null || verifyResponse.getSuccess() != 1) {
